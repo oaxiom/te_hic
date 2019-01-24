@@ -67,35 +67,42 @@ class quantify:
         **Purpose**
             Measure the types of TE frequencies, between pairs of TE -> TE and TE -> -
         '''
+        
         res_te_te = {}
         res_te_nn = {}
-
-        for idx, r in enumerate(self.reads):
+        done = 0
+        for r in self.reads:
             if 'TE' in r[4] and 'TE' in r[8]:
                 # possible to have more than one TE:
-                tel = [i.strip() for i in r[4].split(',')]
-                ter = [i.strip() for i in r[8].split(',')]
+                tel = [i.strip() for i in r[3].split(',')]
+                ter = [i.strip() for i in r[7].split(',')]
                 combs = product(tel, ter)
+                combs = [tuple(sorted(i)) for i in combs] # sort to make it unidirectional                
 
                 combs = set(combs)
-                
+                for c in combs:
+                    if c not in res_te_te:
+                        res_te_te[c] = 0
+                    res_te_te[c] += 1
+
             elif 'TE' in r[4] or 'TE' in r[8]:
                 pass
 
-            if i > 10:
-                break
+            #if done > 10:
+            #    break
 
-            if done % 1000 == 0:
+            done += 1
+            if done % 100000 == 0:
                 print('Processed: {:,}'.format(done)) 
-                break
+            #    break
 
-        oh_te_te = open('%s_te-nn_anchor_frequencies.tsv' % self.project_name)
+        oh_te_te = open('%s_te-te_anchor_frequencies.tsv' % self.project_name, 'w')
         oh_te_te.write('%s\n' % '\t'.join(['TE1', 'TE2', 'count']))
         for k in sorted(list(res_te_te)):
             oh_te_te.write('%s\t%s\t%s\n' % (k[0], k[1], res_te_te[k]))
         oh_te_te.close()
 
-        oh_te_nn = open('%s_te-te_anchor_frequencies.tsv' % self.project_name)
+        oh_te_nn = open('%s_te-nn_anchor_frequencies.tsv' % self.project_name, 'w')
         oh_te_nn.close()
 
 
