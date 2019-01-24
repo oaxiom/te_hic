@@ -43,8 +43,6 @@ class measureTE:
         done = 0
         bucket_size = glbase3.config.bucket_size
 
-        print(self.genome.buckets.keys())
-
         output = []
 
         oh = open(filename, 'r')
@@ -102,9 +100,23 @@ class measureTE:
                         read2_feat.append(r['name'])
                         read2_type.append(r['type'])
 
-            output.append('\t'.join(line[0:3] + [', '.join(read1_feat), ', '.join(read1_type)] + line[4:] + [', '.join(read2_feat), ', '.join(read2_type)]))
+            if read1_feat:
+                read1_feat = ', '.join(read1_feat)
+                read1_type = ', '.join(read1_type)
+            else:
+                read1_feat = 'None'
+                read1_type = 'None'
 
-            print(output[-1])
+            if read2_feat:
+                read2_feat = ', '.join(read2_feat)
+                read2_type = ', '.join(read2_type)
+            else:
+                read2_feat = 'None'
+                read2_type = 'None'
+
+            output.append('\t'.join(line[0:3] + [read1_feat, read1_type] + line[4:] + [read2_feat, read2_type]))
+
+            #print(output[-1])
             
             done += 1
             
