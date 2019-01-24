@@ -30,6 +30,8 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
     assert bam1_filename, 'You must provide a valid filename in bam1_filename'
     assert bam2_filename, 'You must provide a valid filename in bam2_filename'
 
+    print('Started %s and %s' % (bam1_filename, bam2_filename))
+
     bf1 = pysam.AlignmentFile(bam1_filename, 'rb')
     bf2 = pysam.AlignmentFile(bam2_filename, 'rb')
     pairs = []
@@ -72,7 +74,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
 
         pairs.append((read1.reference_name, read1.reference_start, read1.reference_end, read2.reference_name, read2.reference_start, read2.reference_end))  
     
-        #done += 1
+        done += 1
         #if done > 200000:
         #    break
 
