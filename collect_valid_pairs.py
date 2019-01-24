@@ -8,7 +8,7 @@ Pair up all valid reads from a pair of bams
 import sys, os
 import pysam
 
-valid_chroms = set(['X', 'Y'] + ['%s' % i for i in range(1, 30)]) # cut scaffolds
+valid_chroms = set(['chrX', 'chrY'] + ['chr%s' % i for i in range(1, 30)]) # cut scaffolds
 
 def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
     '''
@@ -55,11 +55,6 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
             print('ERORR: Mismatched read names (%s != %s), make sure the BAMs contain unaligned and are sorted by name' % (read1.query_name, read2.query_name))
             sys.quit()
 
-        if read1.reference_name not in valid_chroms:
-            continue
-        if read2.reference_name not in valid_chroms:
-            continue
-
         # First, check both reads are aligned
         if read1.is_unmapped and read2.is_unmapped:
             stats_unaligned += 1
@@ -68,7 +63,13 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
             stats_1aligned += 1
             continue
         stats_aligned += 1
-        
+
+        # Now trim if not a valid chrom (so the above stats are correct)
+        if read1.reference_name not in valid_chroms:
+            continue
+        if read2.reference_name not in valid_chroms:
+            continue
+ 
         # criteria1: Must be on same chrom
         #if read1.reference_name != read2.reference_name:
         #    reject_diff_chrom += 1

@@ -77,7 +77,32 @@ class measureTE:
                         read1_feat.append(r['name'])
                         read1_type.append(r['type'])             
 
-            output.append('\t'.join(line[0:3] + [', '.join(read1_feat), ', '.join(read1_type)] + line[4:]))# + [', '.join(read2_feat), ', '.join(read2_type)]))
+            # work out which of the buckets is required:
+            loc = glbase3.location(chr=line[3], left=line[4], right=line[5])
+            left_buck = int((loc["left"]-1)/bucket_size) * bucket_size
+            right_buck = int((loc["right"])/bucket_size) * bucket_size
+            buckets_reqd = list(range(left_buck, right_buck+bucket_size, bucket_size))
+            result = []
+            # get the ids reqd.
+            loc_ids = set()
+            if buckets_reqd:
+                for buck in buckets_reqd:
+                    if buck in self.genome.buckets[loc["chr"]]:
+                        loc_ids.update(self.genome.buckets[loc["chr"]][buck]) # set = unique ids
+
+                for index in loc_ids:
+                    #print loc.qcollide(self.linearData[index]["loc"]), loc, self.linearData[index]["loc"]
+                    if loc.qcollide(self.genome.linearData[index]["loc"]):
+                        result.append(self.genome.linearData[index])
+
+                read2_feat = []
+                read2_type = []
+                if result:
+                    for r in result:
+                        read2_feat.append(r['name'])
+                        read2_type.append(r['type'])
+
+            output.append('\t'.join(line[0:3] + [', '.join(read1_feat), ', '.join(read1_type)] + line[4:] + [', '.join(read2_feat), ', '.join(read2_type)]))
 
             print(output[-1])
             
