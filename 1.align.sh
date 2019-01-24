@@ -20,7 +20,7 @@ do
             mkdir run/$sample_name
         fi
  
-        qsub -N tehic.$name -v fq=$fq,out=run/$sample_name/$name align.pbs
+        qsub -N tehic.$name -v cwd=$PWD,fq=$fq,out=run/$sample_name/$name align.pbs
         
     done
 done

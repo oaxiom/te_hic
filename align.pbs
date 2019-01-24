@@ -3,11 +3,11 @@
 #PBS -o ${out}.results.txt
 #PBS -q batch
 #PBS -V 
-cd $PBS_O_WORKDIR
+cd ${cwd}
 
 opts='-p 32 --mm' # --very-sensitive' # 
 # You must output the unaligned!
 
 # You cannot do any filtering here!
-bowtie2 $opts -x $BOWTIE2_INDEXES/mm10 -U ${fq} | samtools view -b | samtools sort -n >${out}.bam
+echo bowtie2 $opts -x $BOWTIE2_INDEXES/mm10 -U ${fq} | samtools view -b | samtools sort -n >${out}.bam
 
