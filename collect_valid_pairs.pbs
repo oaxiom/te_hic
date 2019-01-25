@@ -6,14 +6,14 @@
 cd ${cwd}
 
 echo ${cwd}
-for bam in $out/*_1.bam
+for bam in $out/*._1.bam
 do
     p1=`basename $bam`
-    p2=`echo $p1 | sed 's#_1.bam#_2.bam#g'`
-    bedpeout=`echo $p1 | sed 's#_1.bam##g'`
+    p2=`echo $p1 | sed 's#._1.bam#._2.bam#g'` # Thanks to name mangling, garunteed to be ._1 and ._2
+    bedpeout=`echo $p1 | sed 's#._1.bam##g'`
 
-    echo collect_valid_pairs.py $out/$p1 $out/$p2 $bedpe.bedpe $bedpeout.out
+    echo collect_valid_pairs.py $out/$p1 $out/$p2 $bedpeout.bedpe $bedpeout.out
 done
 
-echo cat $out/*.bedpe lt $sample/../$sam_name.bedpe
-echo tail -n +1 $out/*.bedpe $out/../$sam_name.summary.bedpe
+echo cat $out/*.bedpe > $out/../$sam_name.bedpe
+echo tail -n +1 $out/*.out >$out/../$sam_name.summary.out
