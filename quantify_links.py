@@ -74,8 +74,8 @@ class quantify:
         for r in self.reads:
             if 'TE' in r[4] and 'TE' in r[8]:
                 # possible to have more than one TE:
-                tel = [i.strip() for i in r[3].split(',')]
-                ter = [i.strip() for i in r[7].split(',')]
+                tel = [i.strip() for i in r[3].split(',') if ':' in i] # can also hoover up some genes, so use ':' to discriminate TEs
+                ter = [i.strip() for i in r[7].split(',') if ':' in i]
                 combs = product(tel, ter)
                 combs = [tuple(sorted(i)) for i in combs] # sort to make it unidirectional                
 
@@ -86,7 +86,16 @@ class quantify:
                     res_te_te[c] += 1
 
             elif 'TE' in r[4] or 'TE' in r[8]:
-                pass
+                if 'TE' in r[4]:
+                    TE = r[4]
+                elif 'TE' in r[8]:
+                    TE = r[8]
+                for t in TE:
+                    if ':' not in t:
+                        continue
+                    if t not in res_te_nn:
+                        res_te_nn[t] = 0
+                    res_te_nn[t] += 1
 
             #if done > 10:
             #    break
@@ -103,6 +112,9 @@ class quantify:
         oh_te_te.close()
 
         oh_te_nn = open('%s_te-nn_anchor_frequencies.tsv' % self.project_name, 'w')
+        oh_te_nn.write('%s\n' % '\t'.join(['TE1', 'count']))
+        for k in sorted(list(res_te_nn)):
+            oh_te_nn.write('%s\t%s\t%s\n' % (k[0], k[1], res_te_nn[k]))
         oh_te_nn.close()
 
 
