@@ -62,6 +62,12 @@ class quantify:
         print('  -  <-> - : {:,} ({:.2%})'.format(te['-  <-> -'], te['-  <-> -']/total))
         print()
 
+        oh = open('%s_crude_measures.txt' % self.project_name, 'w')
+        oh.writeline('TE <-> TE : {:,} ({:.5%})'.format(te['TE <-> TE'], te['TE <-> TE']/total))
+        oh.writeline('TE <-> -- : {:,} ({:.5%})'.format(te['TE <-> -'], te['TE <-> -']/total))
+        oh.writeline('-- <-> -- : {:,} ({:.5%})'.format(te['-  <-> -'], te['-  <-> -']/total))
+        oh.close()
+
     def measure_te_freqs(self):
         '''
         **Purpose**
@@ -97,13 +103,10 @@ class quantify:
                         res_te_nn[t] = 0
                     res_te_nn[t] += 1
 
-            #if done > 10:
-            #    break
-
             done += 1
             if done % 100000 == 0:
                 print('Processed: {:,}'.format(done)) 
-            #    break
+                break
 
         oh_te_te = open('%s_te-te_anchor_frequencies.tsv' % self.project_name, 'w')
         oh_te_te.write('%s\n' % '\t'.join(['TE1', 'TE2', 'count']))
