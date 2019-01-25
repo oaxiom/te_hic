@@ -134,14 +134,28 @@ class measureTE:
 
 
 if __name__ == '__main__':    
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         print('\nNot enough arguments')
-        print('assign_to_te.py in.bedpe out.tsv')
+        print('assign_to_te.py species in.bedpe out.tsv')
+        print('  Valid Species codes are:')
+        print('    hg38 - human')
+        print('    mm10 - mouse')
         print()
         sys.exit()
+    
+    species = sys.argv[1]
+    if species not in ('mm10', 'hg38'):
+        print('Species "%s" not found' % species)
+        print('Valid Species codes are:')
+        print('    hg38 - human')
+        print('    mm10 - mouse')
+        print()
+        sys.exit()
+    
+    script_path = os.path.dirname(os.path.realpath(__file__))
 
     mte = measureTE(sys.argv[0])
-    mte.bind_genome('mm10_glb_gencode_tes.glb')
-    mte.load_bedpe(sys.argv[1], sys.argv[2])
+    mte.bind_genome(os.path.join(script_path, 'genome/%s_glb_gencode_tes.glb' % species))
+    mte.load_bedpe(sys.argv[2], sys.argv[3])
 
         
