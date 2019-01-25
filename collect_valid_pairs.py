@@ -56,11 +56,6 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
             print('ERORR: Mismatched read names (%s != %s), make sure the BAMs contain unaligned and are sorted by name' % (read1.query_name, read2.query_name))
             sys.quit()
 
-        # Check both reads have reasonable quality
-        if read1.mapping_quality < 10 and read2.mapping_quality < 10:
-            stats_lowq += 1
-            continue
-
         # check both reads are aligned
         if read1.is_unmapped and read2.is_unmapped:
             stats_unaligned += 1
@@ -69,6 +64,11 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
             stats_1aligned += 1
             continue
         stats_aligned += 1
+
+        # Check both reads have reasonable quality
+        if read1.mapping_quality < 10 and read2.mapping_quality < 10:
+            stats_lowq += 1
+            continue
 
         # Now trim if not a valid chrom (so the above stats are correct)
         if read1.reference_name not in valid_chroms:
@@ -101,7 +101,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
     print('\ncollect_valid_pairs() stats:')
     print('  Aligned:')
     print('    Reads processed : {:,}'.format(stats_total_reads))
-    print('    Low quailty     : {:,} ({:.2%})'.format(stats_lowq, stats_lowq/stats_total_reads))
+    print('    Low quality     : {:,} ({:.2%})'.format(stats_lowq, stats_lowq/stats_total_reads))
     print('    Correctly paired: {:,} ({:.2%})'.format(stats_aligned, stats_aligned/stats_total_reads))
     print('    One pair aligned: {:,} ({:.2%})'.format(stats_1aligned, stats_1aligned/stats_total_reads))
     print('    No pairs aligned: {:,} ({:.2%})'.format(stats_unaligned, stats_unaligned/stats_total_reads))

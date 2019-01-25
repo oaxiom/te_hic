@@ -1,0 +1,50 @@
+
+
+# get the genome and qstat q from the terminal
+
+if [ $# -lt 2 ] || [ $# -gt 2 ]; then
+    echo "te_hic.1.align: not enough arguments"
+    echo
+    echo "te_hic.1.align <qstat -q name> <species code>"
+    echo
+    echo "Valid species:"
+    echo "  hg38"
+    echo "  mm10"
+    exit 2
+fi
+
+qstatq=$1
+species=$2
+te_dir=`dirname $0` 
+
+if [ ! -d run ]
+then
+    mkdir run
+fi
+
+# supports SE p33, p64, PE p33
+for sample in samples/*
+do
+    sample_name=`basename $sample`
+
+    for fq in $sample/*.fastq.gz
+    do  
+        name=`basename $fq | sed 's#.fastq.gz##g' | sed 's#.fq.gz##g' `
+        if [ ! -d run/$sample_name ]
+        then
+            mkdir run/$sample_name
+        else
+            rm -r run/$sample_name
+            mkdir run/$sample_name
+        fi
+
+        # Do somw name mangling to make sure the end is always in the form _1.bam
+        #
+        name=`echo $name | sed 's#.R1$#._1#g' | sed 's#.R2$#._2#g'`
+        name=`echo $name | sed 's#.R1$#._1#g' | sed 's#.R2$#._2#g'`
+
+        qsub -q $qstatq -N tehic1.$name -v species=$species,cwd=$PWD,fq=$fq,out=run/$sample_name/$name $te_dir/align.pbs
+        
+    done
+done
+

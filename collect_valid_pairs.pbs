@@ -1,0 +1,19 @@
+#PBS -l nodes=1:ppn=1
+#PBS -j oe
+#PBS -o ${out}.results.txt
+#PBS -V 
+#PBS -l mem=16g
+cd ${cwd}
+
+echo ${cwd}
+for bam in $out/*_1.bam
+do
+    p1=`basename $bam`
+    p2=`echo $p1 | sed 's#_1.bam#_2.bam#g'`
+    bedpeout=`echo $p1 | sed 's#_1.bam##g'`
+
+    echo collect_valid_pairs.py $out/$p1 $out/$p2 $bedpe.bedpe $bedpeout.out
+done
+
+echo cat $out/*.bedpe lt $sample/../$sam_name.bedpe
+echo tail -n +1 $out/*.bedpe $out/../$sam_name.summary.bedpe
