@@ -23,7 +23,11 @@ class quantify:
         '''
         load the output from assign_to_te.py
         '''
+        self.filename = filename
 
+        return
+        # Below is deprecated. It's fast, but when the reads gets above ~100 million it tends to kill
+        # the computer even with >64G RAM
         self.reads = []
         oh = open(filename, 'r')
         for line in oh:
@@ -46,8 +50,11 @@ class quantify:
             'TE <-> -': 0,
             '-  <-> -': 0}
 
+        print("Crude measures...")
         total = 0
-        for r in self.reads:
+        oh = open(self.filename, 'r')
+        for line in oh:
+            r = line.strip().split('\t')
             if 'TE' in r[4] and 'TE' in r[8]:
                 te['TE <-> TE'] += 1
             elif 'TE' in r[4] or 'TE' in r[8]:
@@ -55,6 +62,10 @@ class quantify:
             else:
                 te['-  <-> -'] += 1
             total += 1
+            if total % 1000000 == 0:
+                print('Processed: {:,}'.format(total))
+                break
+        oh.close()
 
         print('\nmeasure_te_anchors():')
         print('  TE <-> TE : {:,} ({:.2%})'.format(te['TE <-> TE'], te['TE <-> TE']/total))
@@ -63,9 +74,9 @@ class quantify:
         print()
 
         oh = open('%s_crude_measures.txt' % self.project_name, 'w')
-        oh.writeline('TE <-> TE : {:,} ({:.5%})'.format(te['TE <-> TE'], te['TE <-> TE']/total))
-        oh.writeline('TE <-> -- : {:,} ({:.5%})'.format(te['TE <-> -'], te['TE <-> -']/total))
-        oh.writeline('-- <-> -- : {:,} ({:.5%})'.format(te['-  <-> -'], te['-  <-> -']/total))
+        oh.write('TE <-> TE : {:,} ({:.5%})\n'.format(te['TE <-> TE'], te['TE <-> TE']/total))
+        oh.write('TE <-> -- : {:,} ({:.5%})\n'.format(te['TE <-> -'], te['TE <-> -']/total))
+        oh.write('-- <-> -- : {:,} ({:.5%})\n'.format(te['-  <-> -'], te['-  <-> -']/total))
         oh.close()
 
     def measure_te_freqs(self):
@@ -77,7 +88,9 @@ class quantify:
         res_te_te = {}
         res_te_nn = {}
         done = 0
-        for r in self.reads:
+        oh = open(self.filename, 'r')
+        for r in oh:
+            r = line.strip().split('\t')
             if 'TE' in r[4] and 'TE' in r[8]:
                 # possible to have more than one TE:
                 tel = [i.strip() for i in r[3].split(',') if ':' in i] # can also hoover up some genes, so use ':' to discriminate TEs
@@ -104,9 +117,10 @@ class quantify:
                     res_te_nn[t] += 1
 
             done += 1
-            if done % 100000 == 0:
+            if done % 1000000 == 0:
                 print('Processed: {:,}'.format(done)) 
                 break
+        oh.close()
 
         oh_te_te = open('%s_te-te_anchor_frequencies.tsv' % self.project_name, 'w')
         oh_te_te.write('%s\n' % '\t'.join(['TE1', 'TE2', 'count']))
