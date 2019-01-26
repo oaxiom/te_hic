@@ -1,6 +1,6 @@
 #PBS -l nodes=1:ppn=1
 #PBS -j oe
-#PBS -o ${out}.results.txt
+#PBS -o ${out}.step2.results.txt
 #PBS -V 
 #PBS -l mem=16g
 cd ${cwd}
