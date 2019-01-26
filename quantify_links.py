@@ -64,13 +64,13 @@ class quantify:
             total += 1
             if total % 1000000 == 0:
                 print('Processed: {:,}'.format(total))
-                break
+                #break
         oh.close()
 
         print('\nmeasure_te_anchors():')
         print('  TE <-> TE : {:,} ({:.2%})'.format(te['TE <-> TE'], te['TE <-> TE']/total))
-        print('  TE <-> - : {:,} ({:.2%})'.format(te['TE <-> -'], te['TE <-> -']/total))
-        print('  -  <-> - : {:,} ({:.2%})'.format(te['-  <-> -'], te['-  <-> -']/total))
+        print('  TE <-> -- : {:,} ({:.2%})'.format(te['TE <-> -'], te['TE <-> -']/total))
+        print('  -- <-> -- : {:,} ({:.2%})'.format(te['-  <-> -'], te['-  <-> -']/total))
         print()
 
         oh = open('%s_crude_measures.txt' % self.project_name, 'w')
@@ -84,12 +84,12 @@ class quantify:
         **Purpose**
             Measure the types of TE frequencies, between pairs of TE -> TE and TE -> -
         '''
-        
+        print('Pair-wise measures')
         res_te_te = {}
         res_te_nn = {}
         done = 0
         oh = open(self.filename, 'r')
-        for r in oh:
+        for line in oh:
             r = line.strip().split('\t')
             if 'TE' in r[4] and 'TE' in r[8]:
                 # possible to have more than one TE:
@@ -106,9 +106,9 @@ class quantify:
 
             elif 'TE' in r[4] or 'TE' in r[8]:
                 if 'TE' in r[4]:
-                    TE = r[4]
+                    TE = [i.strip() for i in r[3].split(',') if ':' in i]
                 elif 'TE' in r[8]:
-                    TE = r[8]
+                    TE = [i.strip() for i in r[7].split(',') if ':' in i]
                 for t in TE:
                     if ':' not in t:
                         continue
@@ -119,7 +119,7 @@ class quantify:
             done += 1
             if done % 1000000 == 0:
                 print('Processed: {:,}'.format(done)) 
-                break
+                #break
         oh.close()
 
         oh_te_te = open('%s_te-te_anchor_frequencies.tsv' % self.project_name, 'w')
@@ -131,7 +131,7 @@ class quantify:
         oh_te_nn = open('%s_te-nn_anchor_frequencies.tsv' % self.project_name, 'w')
         oh_te_nn.write('%s\n' % '\t'.join(['TE1', 'count']))
         for k in sorted(list(res_te_nn)):
-            oh_te_nn.write('%s\t%s\t%s\n' % (k[0], k[1], res_te_nn[k]))
+            oh_te_nn.write('%s\t%s\n' % (k, res_te_nn[k]))
         oh_te_nn.close()
 
 
