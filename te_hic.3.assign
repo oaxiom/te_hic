@@ -1,3 +1,26 @@
 
-# should merge by sample at this point
+
+
+if [ $# -lt 2 ] || [ $# -gt 2 ]; then
+    echo "te_hic.3.assign: not enough arguments"
+    echo
+    echo "te_hic.3.assign <qstat -q name> <species>"
+    echo
+    echo "Valid species:"
+    echo "  hg38"
+    echo "  mm10"
+    exit 2
+fi
+
+qstatq=$1
+species=$2
+te_dir=`dirname $0`
+
+for sample in run/*.bedpe
+do
+    sample_name=`basename $sample | sed 's#.bedpe##g'`
+    # spawn 1 job per sample; merge the reps inside the collect_valid_pairs.pbs
+    qsub -q $qstatq -N tehic3.$sample_name -v cwd=$PWD,species=$species,out=run/$sample_name,bedpe=$sample $te_dir/assign_to_te.pbs
+done
+
 

@@ -13,7 +13,6 @@ fi
 qstatq=$1
 te_dir=`dirname $0` 
 
-# supports SE p33, p64, PE p33
 for sample in samples/*
 do
     sample_name=`basename $sample`
