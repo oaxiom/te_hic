@@ -25,14 +25,14 @@ for te in genome:
 newl = []
 for k in tes:
     newe = {'name': k,
-        'count': tes[k],
-        'perc': tes[k] / mm10_genome_size * 100.0}
+        'genome_count': tes[k],
+        'genome_percent': tes[k] / mm10_genome_size * 100.0}
     newl.append(newe)
 
 gl = genelist()
 gl.load_list(newl)
 gl.sort('name')
-gl.saveTSV('mm10_te_genome_freqs.tsv', key_order=['name', 'count', 'perc'])
+gl.saveTSV('mm10_te_genome_freqs.tsv', key_order=['name', 'genome_count', 'genome_percent'])
 gl.save('mm10_te_genome_freqs.glb')
 
 

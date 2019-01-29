@@ -19,6 +19,10 @@ class quantify:
     def __init__(self, project_name):
         self.project_name = project_name
 
+    def bind_genome(self, genelist_glb_filename):
+        self.genome = glbase3.glload(genelist_glb_filename)
+        print('Loaded %s' % genelist_glb_filename)
+
     def load_tsv(self, filename):
         '''
         load the output from assign_to_te.py
@@ -67,7 +71,7 @@ class quantify:
             total += 1
             if total % 1000000 == 0:
                 print('Processed: {:,}'.format(total))
-                #break
+                break
 
             # MEasure TEs in detail
             if 'TE' in r[4] and 'TE' in r[8]:
@@ -115,22 +119,58 @@ class quantify:
             oh_te_te.write('%s\t%s\t%s\t%.6f\n' % (k[0], k[1], res_te_te[k], res_te_te[k]/total*100.0))
         oh_te_te.close()
 
-        oh_te_nn = open('%s_te-nn_anchor_frequencies.tsv' % self.project_name, 'w')
-        oh_te_nn.write('%s\n' % '\t'.join(['TE1', 'count', '%']))
-        for k in sorted(list(res_te_nn)):
-            oh_te_nn.write('%s\t%s\t%.6f\n' % (k, res_te_nn[k], res_te_nn[k]/total))
-        oh_te_nn.close()
+        # How are you supposed to work this out?
+        #te_te = genelist()
+        #te_te.load_list([{'name': str(k), 'count': res_te_nn[k]} for k in res_te_nn])
+        #te_te.map((genelist=self.genome, key='name')
+        #for te_pair in te_te:
+        #    
+        #te_te._optimiseData()
+        #te_te.sort('name')
+        #te_te.saveTSV('%s_te-te_anchor_frequencies.tsv' % self.project_name)    
+
+        te_nn = genelist()
+        te_nn.load_list([{'name': k, 'count': res_te_nn[k]} for k in res_te_nn])
+        te_nn.map(genelist=self.genome, key='name')
+        for te in te_nn:
+            te['percent'] = (res_te_nn[k]/total) * 100.0
+            te['RPM'] = (res_te_nn[k]/total) * 1e6
+            te['RPM per kbp of TE'] = te['RPM'] / te['genome_count'] * 1e3
+            te['enrichment'] = 
+        te_nn._optimiseData() 
+        te_nn.sort('name')
+        te_nn.saveTSV('%s_te-nn_anchor_frequencies.tsv' % self.project_name)
+        
+
+        #oh_te_nn = open('%s_te-nn_anchor_frequencies.tsv' % self.project_name, 'w')
+        #oh_te_nn.write('%s\n' % '\t'.join(['TE1', 'count', '%']))
+        #for k in sorted(list(res_te_nn)):
+        #    oh_te_nn.write('%s\t%s\t%.6f\n' % (k, res_te_nn[k], res_te_nn[k]/total))
+        #oh_te_nn.close()
 
         return
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
         print('\nNot enough arguments')
-        print('quantify_links.py in.tsv project_name')
+        print('quantify_links.py in.tsv species project_name')
+        print('  Valid Species codes are:')
+        print('    hg38 - human')
+        print('    mm10 - mouse')
         print()
         sys.exit()
     
-    q = quantify(sys.argv[2])
+    species = sys.argv[2]
+    if species not in ('mm10', 'hg38'):
+        print('Species "%s" not found' % species)
+        print('Valid Species codes are:')
+        print('    hg38 - human')
+        print('    mm10 - mouse')
+        print()
+        sys.exit()
+
+    q = quantify(sys.argv[3])
+    q..bind_genome(os.path.join(script_path, 'genome/%s_te_genome_freqs.glb' % species))
     q.load_tsv(sys.argv[1])
     q.measure_te_anchors()
 

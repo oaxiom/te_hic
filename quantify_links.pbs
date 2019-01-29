@@ -5,5 +5,5 @@
 #PBS -l mem=16g
 cd ${cwd}
 
-quantify_links.py $te $out.te
+quantify_links.py $te $species $out.te
 
