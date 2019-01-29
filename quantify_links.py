@@ -139,7 +139,7 @@ class quantify:
             #te['enrichment'] = 
         te_nn._optimiseData() 
         te_nn.sort('name')
-        te_nn.saveTSV('%s_te-nn_anchor_frequencies.tsv' % self.project_name)
+        te_nn.saveTSV('%s_te-nn_anchor_frequencies.tsv' % self.project_name, key_order=['name', 'count', 'genome_count', 'percent', 'genome_percent', 'RPM'])
         
         #oh_te_nn = open('%s_te-nn_anchor_frequencies.tsv' % self.project_name, 'w')
         #oh_te_nn.write('%s\n' % '\t'.join(['TE1', 'count', '%']))
