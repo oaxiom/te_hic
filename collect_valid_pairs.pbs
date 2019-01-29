@@ -5,11 +5,11 @@
 #PBS -l mem=16g
 cd ${cwd}
 
-for bam in $out/*._1.bam
+for bam in $out/*_1.bam
 do
     p1=`basename $bam`
-    p2=`echo $p1 | sed 's#._1.bam#._2.bam#g'` # Thanks to name mangling, garunteed to be ._1 and ._2
-    bedpeout=`echo $p1 | sed 's#._1.bam##g'`
+    p2=`echo $p1 | sed 's#_1.bam#_2.bam#g'` # Thanks to name mangling, garunteed to be _1 and _2
+    bedpeout=`echo $p1 | sed 's#_1.bam##g'`
 
     collect_valid_pairs.py $out/$p1 $out/$p2 $out/$bedpeout.bedpe >$out/$bedpeout.out
 done
