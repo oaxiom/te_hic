@@ -116,7 +116,7 @@ class quantify:
         oh_te_te = open('%s_te-te_anchor_frequencies.tsv' % self.project_name, 'w')
         oh_te_te.write('%s\n' % '\t'.join(['TE1', 'TE2', 'count', '%']))
         for k in sorted(list(res_te_te)):
-            oh_te_te.write('%s\t%s\t%s\t%.6f\n' % (k[0], k[1], res_te_te[k], res_te_te[k]/total*100.0))
+            oh_te_te.write('%s\t%s\t%s\t%s\n' % (k[0], k[1], res_te_te[k], res_te_te[k]/total*100.0))
         oh_te_te.close()
 
         # How are you supposed to work this out?
