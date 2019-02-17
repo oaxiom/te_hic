@@ -37,6 +37,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
     bf1 = pysam.AlignmentFile(bam1_filename, 'rb')
     bf2 = pysam.AlignmentFile(bam2_filename, 'rb')
     pairs = set([])
+    pairs_add = pairs.add # speedup to skip binding
 
     # We assume the bam files are sorted by name and unaligned were also output
     stats_total_reads = 0
@@ -86,7 +87,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
             reject_too_close += 1
             continue
 
-        pairs.add((read1.reference_name, read1.reference_start, read1.reference_end, read2.reference_name, read2.reference_start, read2.reference_end))  
+        pairs_add((read1.reference_name, read1.reference_start, read1.reference_end, read2.reference_name, read2.reference_start, read2.reference_end))  
         done += 1 # subtract this number to get the number of duplicates removed
         #if done > 200000:
         #    break
