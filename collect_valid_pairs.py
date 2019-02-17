@@ -36,7 +36,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
 
     bf1 = pysam.AlignmentFile(bam1_filename, 'rb')
     bf2 = pysam.AlignmentFile(bam2_filename, 'rb')
-    pairs = []
+    pairs = set([])
 
     # We assume the bam files are sorted by name and unaligned were also output
     stats_total_reads = 0
@@ -53,7 +53,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
         stats_total_reads += 1
         # read name sanity check:
         if read1.query_name != read2.query_name:
-            print('ERORR: Mismatched read names (%s != %s), make sure the BAMs contain unaligned and are sorted by name' % (read1.query_name, read2.query_name))
+            print('ERROR: Mismatched read names (%s != %s), make sure the BAMs contain unaligned and are sorted by name' % (read1.query_name, read2.query_name))
             sys.quit()
 
         # check both reads are aligned
@@ -86,14 +86,13 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
             reject_too_close += 1
             continue
 
-        pairs.append((read1.reference_name, read1.reference_start, read1.reference_end, read2.reference_name, read2.reference_start, read2.reference_end))  
-    
-        done += 1
+        pairs.add((read1.reference_name, read1.reference_start, read1.reference_end, read2.reference_name, read2.reference_start, read2.reference_end))  
+        done += 1 # subtract this number to get the number of duplicates removed
         #if done > 200000:
         #    break
 
-        if done % 1000000 == 0:
-            print('Processed: {:,}'.format(done))
+        if stats_total_reads % 1000000 == 0:
+            print('Processed: {:,}'.format(stats_total_reads))
             
     bf1.close()
     bf2.close()
@@ -108,6 +107,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
     print('  Criteria rejected:')
     #print('    Different chrom : {:,} ({:.2%})'.format(reject_diff_chrom, reject_diff_chrom/stats_total_reads))
     print('    Too close       : {:,} ({:.2%})'.format(reject_too_close, reject_too_close/stats_total_reads))
+    print('    Duplicates      : {:,} ({:.2%})'.format(done-len(pairs), (done-len(pairs))/done))
     print('  Final:')
     print('    Kept reads      : {:,} ({:.2%})'.format(len(pairs), len(pairs)/stats_total_reads))
     return pairs
@@ -139,15 +139,14 @@ def save_valid_pairs(pairs, output):
     for p in pairs:
         oh.write('%s\n' % '\t'.join([p[0], str(p[1]), str(p[2]), p[3], str(p[4]), str(p[5])]))
     oh.close()
-    print('\nsave_valid_pairs():')
-    print('  Finally, saved : {:,} pairs'.format(len(pairs)))
+    print('    Saved           : {:,} pairs'.format(len(pairs)))
 
 if __name__ == '__main__':
     work_path = sys.argv[0]
 
     if len(sys.argv) != 4:
         print('\nNot enough arguments!')
-        print('2.pair.py bam1 bam2 output.bedpe')
+        print('collect_valid_pairs.py bam1 bam2 output.bedpe')
         print('Also note the bam files MUST be sorted by name, or this will result in a mess')
         print()
         sys.exit()
@@ -157,7 +156,7 @@ if __name__ == '__main__':
     output = sys.argv[3]
 
     pairs = collect_valid_pairs(bam1_filename, bam2_filename)
-    pairs = remove_duplicates(pairs)
+    #pairs = remove_duplicates(pairs)
     save_valid_pairs(pairs, output)
 
 
