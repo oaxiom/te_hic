@@ -116,8 +116,15 @@ def remove_duplicates(pairs):
     '''
     **Purpose**
         Remove exact duplicates, as likely PCR errors
+    
+        The naive algoritm (set(pairs))
+        fails with out of memory if you are ~180M items...
     '''
-    newp = set(pairs)
+    newp = set()
+    for p in pairs:
+        if p not in newp:
+            newp.add(p)
+
     print('\nremove_duplicates() stats:')
     print('  Duplicates        : {:,} ({:.2%})'.format(len(pairs)-len(newp), (len(pairs)-len(newp))/len(pairs)))
     return list(newp)
