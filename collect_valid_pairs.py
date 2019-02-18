@@ -14,7 +14,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
     '''
     **Purpose**
         Collect valid pairs for some set of criteria
-        
+
     **Arguments**
         bam1_filename, bam1_filename (Required)
             bam filenames to open
@@ -24,8 +24,8 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
                 minimum distance for a valid pair
 
             inter_chrom (default=True)
-                Only collect inter-chromosomes                
-    
+                Only collect inter-chromosomes
+
     **Returns**
         A list of valid fastq pairs
     '''
@@ -46,7 +46,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
     stats_1aligned = 0
     stats_unaligned = 0
     stats_output = 0
-    reject_diff_chrom = 0 
+    reject_diff_chrom = 0
     reject_too_close = 0
 
     done = 0
@@ -54,7 +54,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
         stats_total_reads += 1
         # read name sanity check:
         if read1.query_name != read2.query_name:
-            print('ERROR: Mismatched read names (%s != %s), make sure the BAMs contain unaligned and are sorted by name' % (read1.query_name, read2.query_name))
+            print('ERROR: Mismatched read names (%s != %s), make sure the BAMs contain unaligned reads and are sorted by name' % (read1.query_name, read2.query_name))
             sys.quit()
 
         # check both reads are aligned
@@ -76,25 +76,21 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
             continue
         if read2.reference_name not in valid_chroms:
             continue
- 
-        # criteria1: Must be on same chrom
-        #if read1.reference_name != read2.reference_name:
-        #    reject_diff_chrom += 1
-        #    continue
-        # criteria2: Check the distance between the two reads
+
+        # criteria1: Check the distance between the two reads
         dist = max([abs(read1.reference_start - read2.reference_end), abs(read1.reference_end - read2.reference_start)])
         if dist < min_dist:
             reject_too_close += 1
             continue
 
-        pairs_add((read1.reference_name, read1.reference_start, read1.reference_end, read2.reference_name, read2.reference_start, read2.reference_end))  
+        pairs_add((read1.reference_name, read1.reference_start, read1.reference_end, read2.reference_name, read2.reference_start, read2.reference_end))
         done += 1 # subtract this number to get the number of duplicates removed
         #if done > 200000:
         #    break
 
         if stats_total_reads % 1000000 == 0:
             print('Processed: {:,}'.format(stats_total_reads))
-            
+
     bf1.close()
     bf2.close()
 
@@ -106,18 +102,17 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
     print('    One pair aligned: {:,} ({:.2%})'.format(stats_1aligned, stats_1aligned/stats_total_reads))
     print('    No pairs aligned: {:,} ({:.2%})'.format(stats_unaligned, stats_unaligned/stats_total_reads))
     print('  Criteria rejected:')
-    #print('    Different chrom : {:,} ({:.2%})'.format(reject_diff_chrom, reject_diff_chrom/stats_total_reads))
     print('    Too close       : {:,} ({:.2%})'.format(reject_too_close, reject_too_close/stats_total_reads))
     print('    Duplicates      : {:,} ({:.2%})'.format(done-len(pairs), (done-len(pairs))/done))
     print('  Final:')
     print('    Kept reads      : {:,} ({:.2%})'.format(len(pairs), len(pairs)/stats_total_reads))
     return pairs
-   
+
 def remove_duplicates(pairs):
     '''
     **Purpose**
         Remove exact duplicates, as likely PCR errors
-    
+
         The naive algoritm (set(pairs))
         fails with out of memory if you are ~180M items...
     '''
@@ -132,8 +127,8 @@ def remove_duplicates(pairs):
 
 def save_valid_pairs(pairs, output):
     '''
-    **Purpose** 
-        Save the valid pairs to output   
+    **Purpose**
+        Save the valid pairs to output
     '''
     oh = open(output, 'w')
     #oh.write('%s\n' % '\t'.join(['chrom1', 'start', 'end', 'chr2', 'start', 'end']))

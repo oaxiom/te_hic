@@ -56,28 +56,32 @@ class quantify:
         res_te_te = {}
         res_te_nn = {}
 
+        # The format of the TE file is:
+        # read1.chrom read1.left read1.right read1.labels read1.type read2.chrom read2.left read2.right read2.labels read2.type
+
         print("Measures anchors...")
         total = 0
         oh = open(self.filename, 'r')
         for line in oh:
             r = line.strip().split('\t')
             # measure TE anchors
-            if 'TE' in r[4] and 'TE' in r[8]:
+            if 'TE' in r[4] and 'TE' in r[9]:
                 te['TE <-> TE'] += 1
-            elif 'TE' in r[4] or 'TE' in r[8]:
+            elif 'TE' in r[4] or 'TE' in r[9]:
                 te['TE <-> -'] += 1
             else:
                 te['-  <-> -'] += 1
             total += 1
+
             if total % 1000000 == 0:
                 print('Processed: {:,}'.format(total))
                 #break
 
             # MEasure TEs in detail
-            if 'TE' in r[4] and 'TE' in r[8]:
+            if 'TE' in r[4] and 'TE' in r[9]:
                 # possible to have more than one TE:
                 tel = [i.strip() for i in r[3].split(',') if ':' in i] # can also hoover up some genes, so use ':' to discriminate TEs
-                ter = [i.strip() for i in r[7].split(',') if ':' in i]
+                ter = [i.strip() for i in r[8].split(',') if ':' in i]
                 combs = product(tel, ter)
                 combs = [tuple(sorted(i)) for i in combs] # sort to make it unidirectional
 
@@ -87,11 +91,11 @@ class quantify:
                         res_te_te[c] = 0
                     res_te_te[c] += 1
 
-            elif 'TE' in r[4] or 'TE' in r[8]:
+            elif 'TE' in r[4] or 'TE' in r[9]:
                 if 'TE' in r[4]:
                     TE = [i.strip() for i in r[3].split(',') if ':' in i]
-                elif 'TE' in r[8]:
-                    TE = [i.strip() for i in r[7].split(',') if ':' in i]
+                elif 'TE' in r[9]:
+                    TE = [i.strip() for i in r[8].split(',') if ':' in i]
                 for t in TE:
                     if ':' not in t:
                         continue
