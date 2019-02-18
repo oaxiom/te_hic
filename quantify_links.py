@@ -153,9 +153,7 @@ if __name__ == '__main__':
     if len(sys.argv) != 4:
         print('\nNot enough arguments')
         print('quantify_links.py in.tsv species project_name')
-        print('  Valid Species codes are:')
-        print('    hg38 - human')
-        print('    mm10 - mouse')
+        common.print_species()
         print()
         sys.exit()
 
