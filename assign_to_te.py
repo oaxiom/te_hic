@@ -10,6 +10,7 @@ Basically, does one or more end overlap with a TE?
 
 import sys, os
 import glbase3 # glbase3 namespace mangling!
+import common
 
 class measureTE:
     def __init__(self, base_path):
@@ -46,15 +47,15 @@ class measureTE:
         output = []
 
         oh = open(filename, 'r')
-        for idx, line in enumerate(oh): 
+        for idx, line in enumerate(oh):
             line = line.strip().split('\t')
-           
+
             # reach into the genelist guts...
             # work out which of the buckets is required:
             loc = glbase3.location(chr=line[0], left=line[1], right=line[2])
             left_buck = int((loc["left"]-1)/bucket_size) * bucket_size
             right_buck = int((loc["right"])/bucket_size) * bucket_size
-            buckets_reqd = list(range(left_buck, right_buck+bucket_size, bucket_size)) 
+            buckets_reqd = list(range(left_buck, right_buck+bucket_size, bucket_size))
             result = []
             # get the ids reqd.
             loc_ids = set()
@@ -67,13 +68,13 @@ class measureTE:
                     #print loc.qcollide(self.linearData[index]["loc"]), loc, self.linearData[index]["loc"]
                     if loc.qcollide(self.genome.linearData[index]["loc"]):
                         result.append(self.genome.linearData[index])
-            
+
                 read1_feat = []
                 read1_type = []
                 if result:
                     for r in result:
                         read1_feat.append(r['name'])
-                        read1_type.append(r['type'])             
+                        read1_type.append(r['type'])
 
             # work out which of the buckets is required:
             loc = glbase3.location(chr=line[3], left=line[4], right=line[5])
@@ -117,23 +118,23 @@ class measureTE:
             output.append('\t'.join(line[0:3] + [read1_feat, read1_type] + line[4:] + [read2_feat, read2_type]))
 
             #print(output[-1])
-            
+
             done += 1
-            
+
             if done % 100000 == 0:
-                print('Processed: {:,}'.format(done)) 
+                print('Processed: {:,}'.format(done))
             #    break
 
         print('Processed {:,} reads'.format(done))
         oh.close()
-        
+
         out = open(out_filename, 'w')
         for o in output:
-            out.write('%s\n' % o) 
+            out.write('%s\n' % o)
         out.close()
 
 
-if __name__ == '__main__':    
+if __name__ == '__main__':
     if len(sys.argv) != 4:
         print('\nNot enough arguments')
         print('assign_to_te.py species in.bedpe out.tsv')
@@ -142,20 +143,15 @@ if __name__ == '__main__':
         print('    mm10 - mouse')
         print()
         sys.exit()
-    
+
     species = sys.argv[1]
-    if species not in ('mm10', 'hg38'):
-        print('Species "%s" not found' % species)
-        print('Valid Species codes are:')
-        print('    hg38 - human')
-        print('    mm10 - mouse')
-        print()
+    if not common.check_species(species):
         sys.exit()
-    
+
     script_path = os.path.dirname(os.path.realpath(__file__))
 
     mte = measureTE(sys.argv[0])
     mte.bind_genome(os.path.join(script_path, 'genome/%s_glb_gencode_tes.glb' % species))
     mte.load_bedpe(sys.argv[2], sys.argv[3])
 
-        
+

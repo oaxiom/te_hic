@@ -2,7 +2,7 @@
 '''
 
 This one takes the output from assign_to_te.py
-and meausres things likt 
+and meausres things likt
 TE -> TE
 TE -> -
 - -> -
@@ -42,7 +42,7 @@ class quantify:
     def measure_te_anchors(self):
         '''
         **Purpose**
-            Make a crude measure of the 
+            Make a crude measure of the
             TE <-> TE
             TE <-> -
             -  <-> -
@@ -79,7 +79,7 @@ class quantify:
                 tel = [i.strip() for i in r[3].split(',') if ':' in i] # can also hoover up some genes, so use ':' to discriminate TEs
                 ter = [i.strip() for i in r[7].split(',') if ':' in i]
                 combs = product(tel, ter)
-                combs = [tuple(sorted(i)) for i in combs] # sort to make it unidirectional                
+                combs = [tuple(sorted(i)) for i in combs] # sort to make it unidirectional
 
                 combs = set(combs)
                 for c in combs:
@@ -124,10 +124,10 @@ class quantify:
         #te_te.load_list([{'name': str(k), 'count': res_te_nn[k]} for k in res_te_nn])
         #te_te.map((genelist=self.genome, key='name')
         #for te_pair in te_te:
-        #    
+        #
         #te_te._optimiseData()
         #te_te.sort('name')
-        #te_te.saveTSV('%s_te-te_anchor_frequencies.tsv' % self.project_name)    
+        #te_te.saveTSV('%s_te-te_anchor_frequencies.tsv' % self.project_name)
 
         te_nn = glbase3.genelist()
         te_nn.load_list([{'name': k, 'count': res_te_nn[k]} for k in res_te_nn])
@@ -136,11 +136,11 @@ class quantify:
             te['percent'] = (res_te_nn[te['name']]/total) * 100.0
             te['RPM'] = (res_te_nn[te['name']]/total) * 1e6
             te['RPM per kbp of TE'] = te['RPM'] / te['genome_count'] * 1e3
-            #te['enrichment'] = 
-        te_nn._optimiseData() 
+            #te['enrichment'] =
+        te_nn._optimiseData()
         te_nn.sort('name')
         te_nn.saveTSV('%s_te-nn_anchor_frequencies.tsv' % self.project_name, key_order=['name', 'count', 'genome_count', 'percent', 'genome_percent', 'RPM'])
-        
+
         #oh_te_nn = open('%s_te-nn_anchor_frequencies.tsv' % self.project_name, 'w')
         #oh_te_nn.write('%s\n' % '\t'.join(['TE1', 'count', '%']))
         #for k in sorted(list(res_te_nn)):
@@ -158,14 +158,9 @@ if __name__ == '__main__':
         print('    mm10 - mouse')
         print()
         sys.exit()
-    
+
     species = sys.argv[2]
-    if species not in ('mm10', 'hg38'):
-        print('Species "%s" not found' % species)
-        print('Valid Species codes are:')
-        print('    hg38 - human')
-        print('    mm10 - mouse')
-        print()
+    if not common.check_species(species):
         sys.exit()
 
     script_path = os.path.dirname(os.path.realpath(__file__))
