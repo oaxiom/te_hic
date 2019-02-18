@@ -115,7 +115,7 @@ class measureTE:
                 read2_feat = 'None'
                 read2_type = 'None'
 
-            output.append('\t'.join(line[0:3] + [read1_feat, read1_type] + line[4:] + [read2_feat, read2_type]))
+            output.append('\t'.join(line[0:3] + [read1_feat, read1_type] + line[3:] + [read2_feat, read2_type]))
 
             #print(output[-1])
 
