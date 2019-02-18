@@ -102,15 +102,15 @@ class measureTE:
                         read2_type.append(r['type'])
 
             if read1_feat:
-                read1_feat = ', '.join(read1_feat)
-                read1_type = ', '.join(read1_type)
+                read1_feat = ', '.join(set(read1_feat))
+                read1_type = ', '.join(set(read1_type))
             else:
                 read1_feat = 'None'
                 read1_type = 'None'
 
             if read2_feat:
-                read2_feat = ', '.join(read2_feat)
-                read2_type = ', '.join(read2_type)
+                read2_feat = ', '.join(set(read2_feat))
+                read2_type = ', '.join(set(read2_type))
             else:
                 read2_feat = 'None'
                 read2_type = 'None'
