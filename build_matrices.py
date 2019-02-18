@@ -124,7 +124,7 @@ class build_matrices:
                 r = (localbinid * self.res) + self.res
                 oh.write('%s\t%s\t%s\t%s\n' % (chrom, l, r, binid+1)) # The +1 is to mimic HiCpro, remember to also +1 below!!
         oh.close()
-        print('Saved BED bins "%s"' % filename)
+        print('Saved BED bins: "%s"' % filename)
 
         # Save the matrices:
         # matrices are sparse:
@@ -132,9 +132,9 @@ class build_matrices:
         filename = os.path.join(out_path, self.sample_name, str(self.res), '%s_%s.tete.raw.matrix' % (self.sample_name, self.res))
         oh = open(filename, 'w')
         for bins in sorted(self.tete):
-            pass
+            oh.write('%s\t%s\t%s\n' % (bins[0], bins[1], self.tete[bins]))
         oh.close()
-        print('Save TE <=> TE matrix "%s"' % filename)
+        print('Save TE <=> TE matrix: "%s"' % filename)
 
 
 if __name__ == '__main__':
