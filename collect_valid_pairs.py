@@ -23,9 +23,6 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
             min_dist (default=5000)
                 minimum distance for a valid pair
 
-            inter_chrom (default=True)
-                Only collect inter-chromosomes
-
     **Returns**
         A list of valid fastq pairs
     '''
