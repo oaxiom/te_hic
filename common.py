@@ -1,4 +1,6 @@
 
+import sys
+
 def print_species():
     print('  Valid Species codes are:')
     print('    hg38 - human')
