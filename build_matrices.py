@@ -121,9 +121,7 @@ class build_matrices:
             Save the matrices into out_path/sample/resolution/
         '''
         if not os.path.isdir(out_path):
-            os.mkdir(out_path)
-        else:
-            pass # don't delete otherwise this will be unfirendly to others working here
+            os.mkdir(out_path) # don't delete otherwise this will be unfirendly to others working here
 
         if not os.path.isdir(os.path.join(out_path, self.sample_name)):
             os.mkdir(os.path.join(out_path, self.sample_name))
