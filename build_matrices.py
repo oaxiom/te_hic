@@ -86,7 +86,7 @@ class build_matrices:
             bin_pair = tuple(sorted([read1_bin, read2_bin]))
 
             # All:
-            if bin_pair not in self.tete:
+            if bin_pair not in self.all:
                 self.all[bin_pair] = 0
             self.all[bin_pair] += 1
 
