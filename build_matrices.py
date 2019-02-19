@@ -146,28 +146,28 @@ class build_matrices:
         filename = os.path.join(out_path, self.sample_name, str(self.res), '%s_%s.all.raw.matrix' % (self.sample_name, self.res))
         oh = open(filename, 'w')
         for bins in sorted(self.all):
-            oh.write('%s\t%s\t%s\n' % (bins[0]+1, bins[1]+1, self.all[bins]))
+            oh.write('%s\t%s\t%s\n' % (bins[0]+1, bins[1]+1, self.all[bins])) # The +1 is to mimic HiCpro!
         oh.close()
         print('Saved All matrix: "%s"' % filename)
 
         filename = os.path.join(out_path, self.sample_name, str(self.res), '%s_%s.tete.raw.matrix' % (self.sample_name, self.res))
         oh = open(filename, 'w')
         for bins in sorted(self.tete):
-            oh.write('%s\t%s\t%s\n' % (bins[0]+1, bins[1]+1, self.tete[bins]))
+            oh.write('%s\t%s\t%s\n' % (bins[0]+1, bins[1]+1, self.tete[bins]))# The +1 is to mimic HiCpro!
         oh.close()
         print('Saved TE <=> TE matrix: "%s"' % filename)
 
         filename = os.path.join(out_path, self.sample_name, str(self.res), '%s_%s.tenn.raw.matrix' % (self.sample_name, self.res))
         oh = open(filename, 'w')
         for bins in sorted(self.tenn):
-            oh.write('%s\t%s\t%s\n' % (bins[0]+1, bins[1]+1, self.tenn[bins]))
+            oh.write('%s\t%s\t%s\n' % (bins[0]+1, bins[1]+1, self.tenn[bins])) # The +1 is to mimic HiCpro!
         oh.close()
         print('Saved TE <=> non-TE matrix: "%s"' % filename)
 
         filename = os.path.join(out_path, self.sample_name, str(self.res), '%s_%s.nnnn.raw.matrix' % (self.sample_name, self.res))
         oh = open(filename, 'w')
         for bins in sorted(self.nnnn):
-            oh.write('%s\t%s\t%s\n' % (bins[0]+1, bins[1]+1, self.nnnn[bins]))
+            oh.write('%s\t%s\t%s\n' % (bins[0]+1, bins[1]+1, self.nnnn[bins])) # The +1 is to mimic HiCpro!
         oh.close()
         print('Saved non-TE <=> non-TE matrix: "%s"' % filename)
 
