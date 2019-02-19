@@ -24,7 +24,7 @@ class build_matrices:
         Load the species and set up the bins
         '''
         # get the samplename:
-        self.sample_name = infilename.replace('.te.annot.tsv', '').replace('.tsv', '') # second is in case the user is messing with the pattern
+        self.sample_name = os.path.split(infilename)[1].replace('.te.annot.tsv', '').replace('.tsv', '') # second is in case the user is messing with the pattern
 
         self.res = resolution
 
