@@ -121,11 +121,11 @@ class measureTE:
 
             done += 1
 
-            if done % 100000 == 0:
+            if done % 1000000 == 0:
                 print('Processed: {:,}'.format(done))
-            #    break
+                #break
 
-        print('Processed {:,} reads'.format(done))
+        print('Processed {:,} reads'.format(len(output)))
         oh.close()
 
         out = open(out_filename, 'w')
