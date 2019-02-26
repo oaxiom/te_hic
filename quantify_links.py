@@ -14,6 +14,7 @@ and collects a variety of info about the sort of linkes observed.
 import sys, os
 from itertools import product
 import glbase3
+import common
 
 class quantify:
     def __init__(self, project_name):

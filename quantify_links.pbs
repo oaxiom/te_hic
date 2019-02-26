@@ -3,7 +3,8 @@
 #PBS -o ${out}.step4.results.txt
 #PBS -V 
 #PBS -l mem=16g
-cd ${cwd}
+#cd ${cwd}
+cd $PBS_O_WORKDIR
 
 quantify_links.py $te $species $out.te
 
