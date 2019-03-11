@@ -76,13 +76,13 @@ class quantify:
 
             if total % 1000000 == 0:
                 print('Processed: {:,}'.format(total))
-                break
+                #break
 
             # Measure TEs in detail
             if 'TE' in r[4] and 'TE' in r[9]:
                 # possible to have more than one TE:
                 tel = [i.strip() for i in r[3].split(',') if ':' in i] # can also hoover up some genes, so use ':' to discriminate TEs
-                ter = [i.strip() for i in r[9].split(',') if ':' in i]
+                ter = [i.strip() for i in r[8].split(',') if ':' in i]
                 combs = product(tel, ter)
                 combs = [tuple(sorted(i)) for i in combs] # sort to make it unidirectional
 
@@ -96,7 +96,7 @@ class quantify:
                 if 'TE' in r[4]:
                     TE = [i.strip() for i in r[3].split(',') if ':' in i]
                 elif 'TE' in r[9]:
-                    TE = [i.strip() for i in r[9].split(',') if ':' in i]
+                    TE = [i.strip() for i in r[8].split(',') if ':' in i]
                 for t in TE:
                     if ':' not in t:
                         continue
@@ -119,21 +119,22 @@ class quantify:
         oh.close()
 
         oh_te_te = open('%s_te-te_anchor_frequencies.tsv' % self.project_name, 'w')
-        oh_te_te.write('%s\n' % '\t'.join(['TE1', 'TE2', 'count', 'RPM']))
+        oh_te_te.write('%s\n' % '\t'.join(['TE1', 'TE2', 'RPM', 'RPM per kbp TE', 'TE1_genome_freq', 'TE2_genome_freq']))
         for k in sorted(list(res_te_te)):
             te1 = self.genome._findDataByKeyLazy('name', k[0])
             te2 = self.genome._findDataByKeyLazy('name', k[1])    
             rpm = res_te_te[k]/total*1e6
             joint_kb_size = te1['genome_count'] + te2['genome_count']
-            rpmpkbte = rpm / (joint_kb_size*e3)
+            rpmpkbte = (rpm / joint_kb_size)*1e3
             line = {'te1': k[0], 'te2': k[1],
                 'rpm': rpm, 
                 'rpmpkbte': rpmpkbte,
-                'te1_genome_freq': te1['genome_percent'] / 100.0,
+                'te1_genome_freq': te1['genome_percent'] / 100.0, # Convert back to fraction;
                 'te2_genome_freq': te2['genome_percent'] / 100.0,
                 #'enrichment': #!?!?! 
                 }
-            oh_te_te.write('{i[te1]}\t{i[te2]}\t{rpm}\t{rpmkbte}\t{te1_genome_freq}\t{te2_genome_freq}\n'.format(i=line))
+            oh_te_te.write('{i[te1]}\t{i[te2]}\t{i[rpm]}\t{i[rpmpkbte]}\t{i[te1_genome_freq]}\t{i[te2_genome_freq]}\n'.format(i=line))
+            #print('{i[te1]}\t{i[te2]}\t{rpm}\t{rpmkbte}\t{te1_genome_freq}\t{te2_genome_freq}\n'.format(i=line))
         oh_te_te.close()
 
         te_nn = glbase3.genelist()
@@ -141,7 +142,7 @@ class quantify:
         te_nn = te_nn.map(genelist=self.genome, key='name')
         for te in te_nn:
             te['RPM'] = (res_te_nn[te['name']]/total) * 1e6
-            te['RPM per kbp of TE'] = te['RPM'] / (te['genome_count'] * 1e3)
+            te['RPM per kbp of TE'] = (te['RPM'] / te['genome_count']) * 1e3
             #te['enrichment'] =
         te_nn._optimiseData()
         te_nn.sort('name')
