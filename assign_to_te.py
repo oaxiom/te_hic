@@ -133,6 +133,80 @@ class measureTE:
             out.write('%s\n' % o)
         out.close()
 
+    def load_bed(self, filename, out_filename):
+        '''
+        **Purpose**
+            Load in a BED file, ideally output by collect_valid_pairs.py,
+            although I guess any valid BED will do
+
+            This function is not officially part of te_hic, but could be useful to annotate
+            (for example) a BED list of peaks from a ChIP-seq
+
+        **Arguments**
+            filename (Required)
+                filename of the BED file
+        '''
+        assert filename, 'You must specify a filename'
+
+        done = 0
+        bucket_size = glbase3.config.bucket_size
+
+        output = []
+
+        oh = open(filename, 'r')
+        for idx, line in enumerate(oh):
+            line = line.strip().split('\t')
+
+            # reach into the genelist guts...
+            # work out which of the buckets is required:
+            loc = glbase3.location(chr=line[0], left=line[1], right=line[2])
+            left_buck = int((loc["left"]-1)/bucket_size) * bucket_size
+            right_buck = int((loc["right"])/bucket_size) * bucket_size
+            buckets_reqd = list(range(left_buck, right_buck+bucket_size, bucket_size))
+            result = []
+            # get the ids reqd.
+            loc_ids = set()
+            if buckets_reqd:
+                for buck in buckets_reqd:
+                    if buck in self.genome.buckets[loc["chr"]]:
+                        loc_ids.update(self.genome.buckets[loc["chr"]][buck]) # set = unique ids
+
+                for index in loc_ids:
+                    #print loc.qcollide(self.linearData[index]["loc"]), loc, self.linearData[index]["loc"]
+                    if loc.qcollide(self.genome.linearData[index]["loc"]):
+                        result.append(self.genome.linearData[index])
+
+                read1_feat = []
+                read1_type = []
+                if result:
+                    for r in result:
+                        read1_feat.append(r['name'])
+                        read1_type.append(r['type'])
+
+            if read1_feat:
+                read1_feat = ', '.join(set(read1_feat))
+                read1_type = ', '.join(set(read1_type))
+            else:
+                read1_feat = 'None'
+                read1_type = 'None'
+
+            output.append('\t'.join(line[0:3] + [read1_feat, read1_type]))
+
+            #print(output[-1])
+
+            done += 1
+
+            if done % 1000000 == 0:
+                print('Processed: {:,}'.format(done))
+                #break
+
+        print('Processed {:,} reads'.format(len(output)))
+        oh.close()
+
+        out = open(out_filename, 'w')
+        for o in output:
+            out.write('%s\n' % o)
+        out.close()
 
 if __name__ == '__main__':
     if len(sys.argv) != 4:
