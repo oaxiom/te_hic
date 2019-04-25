@@ -133,7 +133,7 @@ class measureTE:
             out.write('%s\n' % o)
         out.close()
 
-    def load_bed(self, filename, out_filename):
+    def load_bed(self, filename, out_filename, expand_bed=0):
         '''
         **Purpose**
             Load in a BED file, ideally output by collect_valid_pairs.py,
@@ -145,6 +145,10 @@ class measureTE:
         **Arguments**
             filename (Required)
                 filename of the BED file
+
+            expand_bed (Optional, default=0)
+                Optionally expand the BED coordianted left and right by expand_bed
+
         '''
         assert filename, 'You must specify a filename'
 
@@ -159,7 +163,7 @@ class measureTE:
 
             # reach into the genelist guts...
             # work out which of the buckets is required:
-            loc = glbase3.location(chr=line[0], left=line[1], right=line[2])
+            loc = glbase3.location(chr=line[0], left=int(line[1])-expand_bed, right=int(line[2])+expand_bed)
             left_buck = int((loc["left"]-1)/bucket_size) * bucket_size
             right_buck = int((loc["right"])/bucket_size) * bucket_size
             buckets_reqd = list(range(left_buck, right_buck+bucket_size, bucket_size))

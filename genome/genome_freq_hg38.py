@@ -9,7 +9,7 @@ from glbase3 import *
 
 genome = glload('hg38_glb_gencode_tes.glb')
 
-mm10_genome_size = 3096649726 # http://asia.ensembl.org/Mus_musculus/Info/Annotation
+hg38_genome_size = 3096649726 # http://asia.ensembl.org/Homo_sapiens/Info/Annotation
 
 tes = {}
 
@@ -26,7 +26,7 @@ newl = []
 for k in tes:
     newe = {'name': k,
         'genome_count': tes[k],
-        'genome_percent': tes[k] / mm10_genome_size * 100.0}
+        'genome_percent': tes[k] / hg38_genome_size * 100.0}
     newl.append(newe)
 
 gl = genelist()
