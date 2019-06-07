@@ -68,7 +68,7 @@ class measureTE:
 
                 for index in loc_ids:
                     #print loc.qcollide(self.linearData[index]["loc"]), loc, self.linearData[index]["loc"]
-                    if rite >= self.genome.linearData[index]["loc"].loc["left"] and left <= self.genome.linearData[index]["loc"].loc["right"]):
+                    if rite >= self.genome.linearData[index]["loc"].loc["left"] and left <= self.genome.linearData[index]["loc"].loc["right"]:
                         result.append(self.genome.linearData[index])
                     #if loc.qcollide(self.genome.linearData[index]["loc"]):
                     #    result.append(self.genome.linearData[index])
@@ -98,7 +98,7 @@ class measureTE:
 
                 for index in loc_ids:
                     #print loc.qcollide(self.linearData[index]["loc"]), loc, self.linearData[index]["loc"]
-                    if rite >= self.genome.linearData[index]["loc"].loc["left"] and left <= self.genome.linearData[index]["loc"].loc["right"]):
+                    if rite >= self.genome.linearData[index]["loc"].loc["left"] and left <= self.genome.linearData[index]["loc"].loc["right"]:
                         result.append(self.genome.linearData[index])
                     #if loc.qcollide(self.genome.linearData[index]["loc"]):
                     #    result.append(self.genome.linearData[index])
