@@ -51,22 +51,27 @@ class measureTE:
 
             # reach into the genelist guts...
             # work out which of the buckets is required:
-            loc = glbase3.location(chr=line[0], left=line[1], right=line[2])
-            left_buck = ((loc["left"]-1)//bucket_size) * bucket_size
-            right_buck = ((loc["right"])//bucket_size) * bucket_size
+            chrom = line[0].replace('chr', '')
+            left = line[1]
+            rite = line[2]
+            #loc = glbase3.location(chr=line[0], left=line[1], right=line[2])
+            left_buck = ((left-1)//bucket_size) * bucket_size
+            right_buck = (rite//bucket_size) * bucket_size
             buckets_reqd = range(left_buck, right_buck+bucket_size, bucket_size)
             result = []
             # get the ids reqd.
             loc_ids = set()
             if buckets_reqd:
                 for buck in buckets_reqd:
-                    if buck in self.genome.buckets[loc["chr"]]:
-                        loc_ids.update(self.genome.buckets[loc["chr"]][buck]) # set = unique ids
+                    if buck in self.genome.buckets[chrom]:
+                        loc_ids.update(self.genome.buckets[chrom][buck]) # set = unique ids
 
                 for index in loc_ids:
                     #print loc.qcollide(self.linearData[index]["loc"]), loc, self.linearData[index]["loc"]
-                    if loc.qcollide(self.genome.linearData[index]["loc"]):
+                    if rite >= self.genome.linearData[index]["loc"].loc["left"] and left <= self.genome.linearData[index]["loc"].loc["right"]):
                         result.append(self.genome.linearData[index])
+                    #if loc.qcollide(self.genome.linearData[index]["loc"]):
+                    #    result.append(self.genome.linearData[index])
 
                 read1_feat = []
                 read1_type = []
@@ -76,22 +81,27 @@ class measureTE:
                         read1_type.append(r['type'])
 
             # work out which of the buckets is required:
-            loc = glbase3.location(chr=line[3], left=line[4], right=line[5])
-            left_buck = ((loc["left"]-1)//bucket_size) * bucket_size
-            right_buck = ((loc["right"])//bucket_size) * bucket_size
+            chrom = line[0].replace('chr', '')
+            left = line[1]
+            rite = line[2]
+            #loc = glbase3.location(chr=line[3], left=line[4], right=line[5])
+            left_buck = ((left-1)//bucket_size) * bucket_size
+            right_buck = (rite//bucket_size) * bucket_size
             buckets_reqd = range(left_buck, right_buck+bucket_size, bucket_size)
             result = []
             # get the ids reqd.
             loc_ids = set()
             if buckets_reqd:
                 for buck in buckets_reqd:
-                    if buck in self.genome.buckets[loc["chr"]]:
-                        loc_ids.update(self.genome.buckets[loc["chr"]][buck]) # set = unique ids
+                    if buck in self.genome.buckets[chrom]:
+                        loc_ids.update(self.genome.buckets[chrom][buck]) # set = unique ids
 
                 for index in loc_ids:
                     #print loc.qcollide(self.linearData[index]["loc"]), loc, self.linearData[index]["loc"]
-                    if loc.qcollide(self.genome.linearData[index]["loc"]):
+                    if rite >= self.genome.linearData[index]["loc"].loc["left"] and left <= self.genome.linearData[index]["loc"].loc["right"]):
                         result.append(self.genome.linearData[index])
+                    #if loc.qcollide(self.genome.linearData[index]["loc"]):
+                    #    result.append(self.genome.linearData[index])
 
                 read2_feat = []
                 read2_type = []
