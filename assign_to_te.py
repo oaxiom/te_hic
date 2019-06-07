@@ -22,7 +22,6 @@ class measureTE:
             base_path (Required)
                 the path we are being run in
 
-
         '''
         self.base_path = base_path
 
@@ -53,9 +52,9 @@ class measureTE:
             # reach into the genelist guts...
             # work out which of the buckets is required:
             loc = glbase3.location(chr=line[0], left=line[1], right=line[2])
-            left_buck = int((loc["left"]-1)/bucket_size) * bucket_size
-            right_buck = int((loc["right"])/bucket_size) * bucket_size
-            buckets_reqd = list(range(left_buck, right_buck+bucket_size, bucket_size))
+            left_buck = ((loc["left"]-1)//bucket_size) * bucket_size
+            right_buck = ((loc["right"])//bucket_size) * bucket_size
+            buckets_reqd = range(left_buck, right_buck+bucket_size, bucket_size)
             result = []
             # get the ids reqd.
             loc_ids = set()
@@ -78,9 +77,9 @@ class measureTE:
 
             # work out which of the buckets is required:
             loc = glbase3.location(chr=line[3], left=line[4], right=line[5])
-            left_buck = int((loc["left"]-1)/bucket_size) * bucket_size
-            right_buck = int((loc["right"])/bucket_size) * bucket_size
-            buckets_reqd = list(range(left_buck, right_buck+bucket_size, bucket_size))
+            left_buck = ((loc["left"]-1)//bucket_size) * bucket_size
+            right_buck = ((loc["right"])//bucket_size) * bucket_size
+            buckets_reqd = range(left_buck, right_buck+bucket_size, bucket_size)
             result = []
             # get the ids reqd.
             loc_ids = set()
@@ -164,9 +163,9 @@ class measureTE:
             # reach into the genelist guts...
             # work out which of the buckets is required:
             loc = glbase3.location(chr=line[0], left=int(line[1])-expand_bed, right=int(line[2])+expand_bed)
-            left_buck = int((loc["left"]-1)/bucket_size) * bucket_size
-            right_buck = int((loc["right"])/bucket_size) * bucket_size
-            buckets_reqd = list(range(left_buck, right_buck+bucket_size, bucket_size))
+            left_buck = ((loc["left"]-1)//bucket_size) * bucket_size
+            right_buck = ((loc["right"])//bucket_size) * bucket_size
+            buckets_reqd = range(left_buck, right_buck+bucket_size, bucket_size)
             result = []
             # get the ids reqd.
             loc_ids = set()
