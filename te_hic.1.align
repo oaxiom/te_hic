@@ -27,6 +27,7 @@ for sample in samples/*
 do
     # check that's its i nthe expected format, and is a directory, not a file
     if [ ! -d "$sample" ] ;
+    then
         break
     fi
 
