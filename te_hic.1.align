@@ -25,6 +25,11 @@ fi
 # supports SE p33, p64, PE p33
 for sample in samples/*
 do
+    # check that's its i nthe expected format, and is a directory, not a file
+    if [ ! -d "$sample" ] ;
+        break
+    fi
+
     sample_name=`basename $sample`
 
     for fq in $sample/*.fastq.gz
