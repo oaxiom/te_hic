@@ -11,7 +11,7 @@ do
     p2=`echo $p1 | sed 's#_1.bam#_2.bam#g'` # Thanks to name mangling, garunteed to be _1 and _2
     bedpeout=`echo $p1 | sed 's#_1.bam##g'`
 
-    collect_valid_pairs.py $out/$p1 $out/$p2 $out/$bedpeout.bedpe >$out/$bedpeout.out
+    collect_valid_pairs.py $out/$p1 $out/$p2 $out/$bedpeout.bedpe.gz >$out/$bedpeout.out
 done
 
 cat $out/*.bedpe > $out/../$sam_name.bedpe

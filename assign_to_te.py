@@ -224,7 +224,7 @@ class measureTE:
 if __name__ == '__main__':
     if len(sys.argv) != 4:
         print('\nNot enough arguments')
-        print('assign_to_te.py species in.bedpe out.tsv')
+        print('assign_to_te.py species in.bedpe.gz out.tsv')
         common.print_species()
         print()
         sys.exit()

@@ -5,7 +5,7 @@ Pair up all valid reads from a pair of bams
 
 '''
 
-import sys, os
+import sys, os, gzip
 import pysam
 
 valid_chroms = set(['chrX', 'chrY'] + ['chr%s' % i for i in range(1, 30)]) # cut scaffolds
@@ -127,7 +127,7 @@ def save_valid_pairs(pairs, output):
     **Purpose**
         Save the valid pairs to output
     '''
-    oh = open(output, 'w')
+    oh = gzip.open(output, 'w')
     #oh.write('%s\n' % '\t'.join(['chrom1', 'start', 'end', 'chr2', 'start', 'end']))
     for p in pairs:
         oh.write('%s\n' % '\t'.join([p[0], str(p[1]), str(p[2]), p[3], str(p[4]), str(p[5])]))
@@ -139,7 +139,7 @@ if __name__ == '__main__':
 
     if len(sys.argv) != 4:
         print('\nNot enough arguments!')
-        print('collect_valid_pairs.py bam1 bam2 output.bedpe')
+        print('collect_valid_pairs.py bam1 bam2 output.bedpe.gz')
         print('Also note the bam files MUST be sorted by name, or this will result in a mess')
         print()
         sys.exit()
