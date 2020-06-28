@@ -16,7 +16,7 @@ te_dir=`dirname $0`
 for sample in samples/*
 do
     sample_name=`basename $sample`
-    bedpeout=`echo $sample_name | sed 's#_1.bam#.bedpe.gz#g'`
+    bedpeout=`echo run/$sample_name.bedpe.gz`
     
     # check bedpe out does not already exist, if yes, warn and skip
     if [ -f $bedpeout ]
