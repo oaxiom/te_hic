@@ -80,6 +80,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
             reject_too_close += 1
             continue
 
+        # This does duplicate removal in one go.
         pairs_add((read1.reference_name, read1.reference_start, read1.reference_end, read2.reference_name, read2.reference_start, read2.reference_end))
         done += 1 # subtract this number to get the number of duplicates removed
         #if done > 200000:

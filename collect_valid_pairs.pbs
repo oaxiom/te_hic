@@ -2,7 +2,7 @@
 #PBS -j oe
 #PBS -o ${out}.step2.results.txt
 #PBS -V 
-#PBS -l mem=16g
+#PBS -l mem=32g
 cd ${cwd}
 
 for bam in $out/*_1.bam

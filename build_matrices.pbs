@@ -8,4 +8,4 @@ cd ${cwd}
 build_matrices.py $species 500000 $in matrix
 build_matrices.py $species 150000 $in matrix
 build_matrices.py $species 40000 $in matrix
-
+build_matrices.py $species 20000 $in matrix
