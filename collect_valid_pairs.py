@@ -81,7 +81,8 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
             continue
 
         # This does duplicate removal in one go.
-        pairs_add((read1.reference_name, read1.reference_start, read1.reference_end, read2.reference_name, read2.reference_start, read2.reference_end))
+        # Only use the starts, it saves memory, and anyway the 3' ends are unreliable for duplicate removal if the input has been quality/adapter trimmed
+        pairs_add((read1.reference_name, read1.reference_start, read2.reference_name, read2.reference_end))
         done += 1 # subtract this number to get the number of duplicates removed
         #if done > 200000:
         #    break
@@ -131,7 +132,7 @@ def save_valid_pairs(pairs, output):
     oh = gzip.open(output, 'wt')
     #oh.write('%s\n' % '\t'.join(['chrom1', 'start', 'end', 'chr2', 'start', 'end']))
     for p in pairs:
-        oh.write('%s\n' % '\t'.join([p[0], str(p[1]), str(p[2]), p[3], str(p[4]), str(p[5])]))
+        oh.write('%s\n' % '\t'.join([p[0], str(p[1]), str(p[1]+50), p[2], str(p[3]-50), str(p[3])]))
     oh.close()
     print('    Saved           : {:,} pairs'.format(len(pairs)))
 
