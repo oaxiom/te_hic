@@ -45,7 +45,7 @@ class measureTE:
 
         output = []
 
-        oh = gzip.open(filename, 'rt')
+        oh = gzip.open(filename, 'rb')
         for idx, line in enumerate(oh):
             line = line.strip().split('\t')
 
@@ -166,7 +166,7 @@ class measureTE:
 
         output = []
 
-        oh = gzip.open(filename, 'r')
+        oh = gzip.open(filename, 'rb')
         for idx, line in enumerate(oh):
             line = line.strip().split('\t')
 

@@ -129,7 +129,7 @@ def save_valid_pairs(pairs, output):
     **Purpose**
         Save the valid pairs to output
     '''
-    oh = gzip.open(output, 'wt')
+    oh = gzip.open(output, 'wb')
     #oh.write('%s\n' % '\t'.join(['chrom1', 'start', 'end', 'chr2', 'start', 'end']))
     for p in pairs:
         oh.write('%s\n' % '\t'.join([p[0], str(p[1]), str(p[1]+50), p[2], str(p[3]-50), str(p[3])]))
