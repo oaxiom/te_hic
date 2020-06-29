@@ -8,7 +8,7 @@ Basically, does one or more end overlap with a TE?
 
 '''
 
-import sys, os
+import sys, os, gzip
 import glbase3 # glbase3 namespace mangling!
 import common
 
@@ -45,7 +45,7 @@ class measureTE:
 
         output = []
 
-        oh = open(filename, 'r')
+        oh = gzip.open(filename, 'rt')
         for idx, line in enumerate(oh):
             line = line.strip().split('\t')
 
@@ -145,7 +145,7 @@ class measureTE:
     def load_bed(self, filename, out_filename, expand_bed=0):
         '''
         **Purpose**
-            Load in a BED file, ideally output by collect_valid_pairs.py,
+            Load in a BED gz file, ideally output by collect_valid_pairs.py,
             although I guess any valid BED will do
 
             This function is not officially part of te_hic, but could be useful to annotate
@@ -166,7 +166,7 @@ class measureTE:
 
         output = []
 
-        oh = open(filename, 'r')
+        oh = gzip.open(filename, 'r')
         for idx, line in enumerate(oh):
             line = line.strip().split('\t')
 
