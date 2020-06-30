@@ -45,6 +45,8 @@ class measureTE:
 
         output = []
 
+        self_genome_linearData = self.genome.linearData
+
         oh = gzip.open(filename, 'rt')
         for idx, line in enumerate(oh):
             line = line.strip().split('\t')
@@ -52,8 +54,8 @@ class measureTE:
             # reach into the genelist guts...
             # work out which of the buckets is required:
             chrom = line[0].replace('chr', '')
-            left = line[1]
-            rite = line[2]
+            left = int(line[1])
+            rite = int(line[2])
             #loc = glbase3.location(chr=line[0], left=line[1], right=line[2])
             left_buck = ((left-1)//bucket_size) * bucket_size
             right_buck = (rite//bucket_size) * bucket_size
@@ -68,8 +70,8 @@ class measureTE:
 
                 for index in loc_ids:
                     #print loc.qcollide(self.linearData[index]["loc"]), loc, self.linearData[index]["loc"]
-                    if rite >= self.genome.linearData[index]["loc"].loc["left"] and left <= self.genome.linearData[index]["loc"].loc["right"]:
-                        result.append(self.genome.linearData[index])
+                    if rite >= self_genome_linearData[index]["loc"].loc["left"] and left <= self_genome_linearData[index]["loc"].loc["right"]:
+                        result.append(self_genome_linearData[index])
                     #if loc.qcollide(self.genome.linearData[index]["loc"]):
                     #    result.append(self.genome.linearData[index])
 
@@ -98,8 +100,8 @@ class measureTE:
 
                 for index in loc_ids:
                     #print loc.qcollide(self.linearData[index]["loc"]), loc, self.linearData[index]["loc"]
-                    if rite >= self.genome.linearData[index]["loc"].loc["left"] and left <= self.genome.linearData[index]["loc"].loc["right"]:
-                        result.append(self.genome.linearData[index])
+                    if rite >= self_genome_linearData[index]["loc"].loc["left"] and left <= self_genome_linearData[index]["loc"].loc["right"]:
+                        result.append(self_genome_linearData[index])
                     #if loc.qcollide(self.genome.linearData[index]["loc"]):
                     #    result.append(self.genome.linearData[index])
 
