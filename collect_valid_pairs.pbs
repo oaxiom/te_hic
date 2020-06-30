@@ -17,3 +17,5 @@ done
 # Slower, but more portable.
 gunzip -c $out/*.bedpe.gz | sort -T . | uniq | gzip > $out/../$sam_name.bedpe.gz
 tail -n +1 $out/*.out >$out/../$sam_name.summary.out
+
+
