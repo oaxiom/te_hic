@@ -46,6 +46,7 @@ class measureTE:
         output = []
 
         self_genome_linearData = self.genome.linearData
+        self_genome_buckets = self.genome.buckets
 
         oh = gzip.open(filename, 'rt')
         for idx, line in enumerate(oh):
@@ -65,8 +66,8 @@ class measureTE:
             loc_ids = set()
             if buckets_reqd:
                 for buck in buckets_reqd:
-                    if buck in self.genome.buckets[chrom]:
-                        loc_ids.update(self.genome.buckets[chrom][buck]) # set = unique ids
+                    if buck in self_genome_buckets[chrom]:
+                        loc_ids.update(self_genome_buckets[chrom][buck]) # set = unique ids
 
                 for index in loc_ids:
                     #print loc.qcollide(self.linearData[index]["loc"]), loc, self.linearData[index]["loc"]
@@ -84,8 +85,8 @@ class measureTE:
 
             # work out which of the buckets is required:
             chrom = line[0].replace('chr', '')
-            left = line[1]
-            rite = line[2]
+            left = int(line[1])
+            rite = int(line[2])
             #loc = glbase3.location(chr=line[3], left=line[4], right=line[5])
             left_buck = ((left-1)//bucket_size) * bucket_size
             right_buck = (rite//bucket_size) * bucket_size
@@ -95,8 +96,8 @@ class measureTE:
             loc_ids = set()
             if buckets_reqd:
                 for buck in buckets_reqd:
-                    if buck in self.genome.buckets[chrom]:
-                        loc_ids.update(self.genome.buckets[chrom][buck]) # set = unique ids
+                    if buck in self_genome_buckets[chrom]:
+                        loc_ids.update(self_genome_buckets[chrom][buck]) # set = unique ids
 
                 for index in loc_ids:
                     #print loc.qcollide(self.linearData[index]["loc"]), loc, self.linearData[index]["loc"]
