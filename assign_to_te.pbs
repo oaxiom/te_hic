@@ -2,8 +2,8 @@
 #PBS -j oe
 #PBS -o ${out}.step3.results.txt
 #PBS -V 
-#PBS -l mem=16g
+#PBS -l mem=32g
 cd ${cwd}
 
-assign_to_te.py $species $bedpe $out.te.annot.tsv
+assign_to_te.py $species $bedpe $out.te.annot.tsv.gz
 

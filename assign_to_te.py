@@ -136,9 +136,8 @@ class measureTE:
         print('Processed {:,} reads'.format(len(output)))
         oh.close()
 
-        out = open(out_filename, 'w')
-        for o in output:
-            out.write('%s\n' % o)
+        out = gzip.open(out_filename, 'wb')
+        [out.write('%s\n' % o) for o in output]
         out.close()
 
     def load_bed(self, filename, out_filename, expand_bed=0):
