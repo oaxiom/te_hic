@@ -82,9 +82,9 @@ class measureTE:
                         read1_type.append(r['type'])
 
             # work out which of the buckets is required:
-            chrom = line[0].replace('chr', '')
-            left = int(line[1])
-            rite = int(line[2])
+            chrom = line[3].replace('chr', '')
+            left = int(line[4])
+            rite = int(line[5])
 
             left_buck = ((left-1)//bucket_size) * bucket_size
             right_buck = (rite//bucket_size) * bucket_size
