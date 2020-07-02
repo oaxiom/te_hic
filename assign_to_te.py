@@ -136,7 +136,7 @@ class measureTE:
         print('Processed {:,} reads'.format(len(output)))
         oh.close()
 
-        out = gzip.open(out_filename, 'wb')
+        out = gzip.open(out_filename, 'w')
         [out.write('%s\n' % o) for o in output]
         out.close()
 
