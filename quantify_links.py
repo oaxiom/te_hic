@@ -62,7 +62,7 @@ class quantify:
 
         print("Measures anchors...")
         total = 0
-        oh = open(self.filename, 'r')
+        oh = open(self.filename, 'rt')
         for line in oh:
             r = line.strip().split('\t')
             # measure TE anchors
@@ -122,16 +122,16 @@ class quantify:
         oh_te_te.write('%s\n' % '\t'.join(['TE1', 'TE2', 'RPM', 'RPM per kbp TE', 'TE1_genome_freq', 'TE2_genome_freq']))
         for k in sorted(list(res_te_te)):
             te1 = self.genome._findDataByKeyLazy('name', k[0])
-            te2 = self.genome._findDataByKeyLazy('name', k[1])    
+            te2 = self.genome._findDataByKeyLazy('name', k[1])
             rpm = res_te_te[k]/total*1e6
             joint_kb_size = te1['genome_count'] + te2['genome_count']
             rpmpkbte = (rpm / joint_kb_size)*1e3
             line = {'te1': k[0], 'te2': k[1],
-                'rpm': rpm, 
+                'rpm': rpm,
                 'rpmpkbte': rpmpkbte,
                 'te1_genome_freq': te1['genome_percent'] / 100.0, # Convert back to fraction;
                 'te2_genome_freq': te2['genome_percent'] / 100.0,
-                #'enrichment': #!?!?! 
+                #'enrichment': #!?!?!
                 }
             oh_te_te.write('{i[te1]}\t{i[te2]}\t{i[rpm]}\t{i[rpmpkbte]}\t{i[te1_genome_freq]}\t{i[te2_genome_freq]}\n'.format(i=line))
             #print('{i[te1]}\t{i[te2]}\t{rpm}\t{rpmkbte}\t{te1_genome_freq}\t{te2_genome_freq}\n'.format(i=line))

@@ -214,7 +214,7 @@ class measureTE:
         print('Processed {:,} reads'.format(len(output)))
         oh.close()
 
-        out = open(out_filename, 'w')
+        out = open(out_filename, 'wt')
         for o in output:
             out.write('%s\n' % o)
         out.close()
