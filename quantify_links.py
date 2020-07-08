@@ -11,7 +11,7 @@ and collects a variety of info about the sort of linkes observed.
 
 '''
 
-import sys, os
+import sys, os, gzip
 from itertools import product
 import glbase3
 import common
@@ -62,7 +62,7 @@ class quantify:
 
         print("Measures anchors...")
         total = 0
-        oh = open(self.filename, 'rt')
+        oh = gzip.open(self.filename, 'rt')
         for line in oh:
             r = line.strip().split('\t')
             # measure TE anchors
