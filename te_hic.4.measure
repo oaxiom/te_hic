@@ -12,7 +12,7 @@ qstatq=$1
 te_dir=`dirname $0`
 species=$2
 
-for sample in run/*.te.annot.tsv
+for sample in run/*.te.annot.tsv.gz
 do
     sample_name=`basename $sample | sed 's#.te.annot.tsv##g'`
     # spawn 1 job per sample; merge the reps inside the collect_valid_pairs.pbs
