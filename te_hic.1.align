@@ -33,7 +33,7 @@ do
 
     sample_name=`basename $sample`
 
-    for fq in $sample/*.fastq.gz
+    for fq in $sample/*.f*q.gz
     do  
         name=`basename $fq | sed 's#.fastq.gz##g' | sed 's#.fq.gz##g' `
         if [ ! -d run/$sample_name ]
