@@ -47,7 +47,7 @@ do
         # Do some name mangling to make sure the end is always in the form _1.bam
         #
         name=`echo $name | sed 's#.R1$#._1#g' | sed 's#.R2$#._2#g' | sed 's#_R1$#._1.#g' | sed 's#_R2$#._2#g' `
-        name=`echo $name | sed 's#+$#p#g' | sed 's#-$#m#g'` # Some typical things that will break it;
+        name=`echo $name | sed 's#\+$#p#g' | sed 's#\-$#m#g'` # Some typical things that will break it;
 
         echo qsub -q $qstatq -N tehic1.$name -v species=$species,cwd=$PWD,fq=$fq,out=run/$sample_name/$name $te_dir/align.pbs
         
