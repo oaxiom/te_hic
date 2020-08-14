@@ -48,7 +48,7 @@ do
         #
         name=`echo $name | sed 's#.R1$#._1#g' | sed 's#.R2$#._2#g' | sed 's#_R1$#._1.#g' | sed 's#_R2$#._2#g' `
 
-        qsub -q $qstatq -N tehic1.$name -v species=$species,cwd=$PWD,fq=$fq,out=run/$sample_name/$name $te_dir/align.pbs
+        echo qsub -q $qstatq -N tehic1.$name -v species=$species,cwd=$PWD,fq=$fq,out=run/$sample_name/$name $te_dir/align.pbs
         
     done
 done
