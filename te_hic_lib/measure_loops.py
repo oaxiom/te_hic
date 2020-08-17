@@ -1,9 +1,9 @@
 
-import gzip
+import gzip, numpy
 
 class measure_loops:
-    def __init__(self):
-        pass
+    def __init__(self, logger):
+        self.logger = logger
 
     def bed_to_bed(self,
         reads,
@@ -63,7 +63,6 @@ class measure_loops:
                 if bin_left in peaks[chrom_left] and bin_rite in peaks[chrom_rite]:
                     korder = sorted([(chrom_left, bin_left), (chrom_rite, bin_rite)])
                     korder = korder[0] + korder[1]
-                    print(korder)
 
                     if korder not in store:
                         store[korder] = 0
@@ -72,20 +71,32 @@ class measure_loops:
                 pass # chrom is not in peaks, but is in reads
 
             if (idx+1) % 1e6 == 0:
-                print('{0:,} reads processed'.format(idx+1))
-                break
+                self.logger.info('{0:,} reads processed'.format(idx+1))
+                #break
 
         readsin.close()
 
         # Work out histogram;
+        hist_max = 21
+        all_scores = list(store.values())
+        h = numpy.histogram(all_scores, range=[1,hist_max], bins=hist_max-1)
+        self.logger.info('Histogram of loops:')
+        tot = sum(i for i in h[1])
+        perc = [i/tot*100 for i in h[0]]
+        for v, b, p in zip(h[0], h[1], perc):
+            if b == hist_max-1:
+                self.logger.info('  {0}+= {1} ({2:.1f}%) reads'.format(int(b), v, p))
+            else:
+                self.logger.info('  {0} = {1} ({2:.1f}%) reads'.format(int(b), v, p))
 
         oh = gzip.open(outfile, 'wt')
         oh.write('\t'.join(['chrom1', 'left1', 'right1', 'chrom2', 'left1', 'right2', 'read_count']))
         for loop in store:
-            print(loop)
             oh.write('{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n'.format(loop[0], loop[1], loop[1]+window,
                 loop[2], loop[3], loop[3]+window,
                 store[loop]))
+
+        self.logger.info('Saved {0}'.format(outfile))
 
         oh.close()
 

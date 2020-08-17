@@ -91,7 +91,7 @@ def main():
     else:
         raise AssertionError('{0} mode not found'.format(args.mode[0]))
 
-    te_hic = te_hic_lib.measure_loops()
+    te_hic = te_hic_lib.measure_loops(logger=log)
 
     if args.mode == 'bed_to_bed':
 
