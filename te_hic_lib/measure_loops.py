@@ -28,7 +28,7 @@ class measure_loops:
 
         # read all the BED peaks in, and set up the storage container
         peaks = {}
-        for peak in bedin:
+        for len_peaks, peak in enumerate(bedin):
             peak = peak.strip().split('\t')
 
             chrom = peak[0]
@@ -44,6 +44,8 @@ class measure_loops:
 
             peaks[chrom].append(loc)
         bedin.close()
+
+        self.logger.info('Found {0:,} BED peaks'.format(len_peaks))
 
         store = {}
 
@@ -81,7 +83,7 @@ class measure_loops:
         all_scores = list(store.values())
         h = numpy.histogram(all_scores, range=[1,hist_max], bins=hist_max-1)
         self.logger.info('Histogram of loops:')
-        tot = sum(i for i in h[1])
+        tot = sum(i for i in h[0])
         perc = [i/tot*100 for i in h[0]]
         for v, b, p in zip(h[0], h[1], perc):
             if b == hist_max-1:
