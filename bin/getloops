@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+
+'''
+
+get the loops, based on one anchors, or a BED -> gene promoter
+
+'''
+
+import sys, os, argparse, logging
+
+script_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(script_path, '../'))
+import te_hic_lib
+
+# Command-line options;
+def prepare_parser():
+    exmp = 'Example usage: [te_hic] get_loops -i in.bam -o out.bam -g genome -m genes_tes'
+
+    description = ''
+
+    parser = argparse.ArgumentParser(prog='get_loops', description=description, epilog=exmp)
+
+    # Optional:
+    optional = parser._action_groups.pop()
+    #optional.add_argument('--se', action='store_true', required=False, help='Set mode to SE (single-end) mode, default is paired-end mode')
+    #optional.add_argument('--sc', action='store_true', required=False, help='Set te_count to single-cell mode, default is bulk. Expects an CR:Z flag in the BAM/SAM file. Make sure you set --se appropriately')
+    #optional.add_argument('--noumi', action='store_true', required=False, help='If --sc is set, but this single cell data has no UMI in a UR:Z tag, set this switch')
+    #optional.add_argument('-q', '--qual', nargs=1, type=int, default=20, required=False, help='q threshold for qulait filtering, default=20')
+    #optional.add_argument('--maxcells', action='store', type=int, default=10000, required=False, help='keep at most maxcells with the most reads, default=10,000')
+    optional.add_argument('-w', '--window', action='store', type=int, default=1000, required=False, help='Window size (in base pairs) to look around the BED, gene TSS and/or TE, default=1000')
+
+    optional.add_argument('-p', '--inpeaksbed', nargs=1, required=False, help='A BED file contining peaks or sites to consider measuring for loops')
+    optional.add_argument('-g', '--genome', nargs=1, required=False, help='Optional, but requried if "tes" or "genes" in --mode. Genome assembly to use, valid genomes: {0}'.format(te_hic_lib.common.valid_assemblies))
+
+    required = parser.add_argument_group('required arguments')
+
+    required.add_argument('-i', '--inreadsbedpe', nargs=1, required=True, help='A BEDPE file containing the HiC reads, from one side to the other')
+    required.add_argument('-o', '--outtsv', nargs=1, required=True, help='the TSV file to save the genes and count data to')
+    required.add_argument('-m', '--mode', nargs=1, required=True, help='Type of annotation to use, valid modes: {0}'.format(te_hic_lib.common.valid_modes))
+
+    parser._action_groups.append(optional)
+
+    logging.basicConfig(level=logging.DEBUG,
+                    format='%(levelname)-8s: %(message)s',
+                    datefmt='%m-%d %H:%M')
+
+    parser.log = logging.getLogger('get_loops')
+
+    return parser
+
+def main():
+    assert sys.version_info >= (3, 6), 'Python >=3.6 is required'
+
+    script_path = os.path.dirname(os.path.realpath(__file__))
+    parser = prepare_parser()
+    args = parser.parse_args()
+
+    log = parser.log
+    args.mode = args.mode[0]
+
+    log.info('Arguments:')
+    log.info('  inreadsbedpe: %s' % args.inreadsbedpe)
+    log.info('  inpeaksbed: %s' % args.inpeaksbed)
+    log.info('  outtsv: %s' % args.outtsv)
+    log.info('  genome: "%s"' % args.genome)
+    log.info('  mode: "%s"' % args.mode)
+    log.info('  window: %s' % args.window)
+
+    # check BED arg requirements for mode
+    if args.mode == 'bed_to_bed':
+        if not args.inpeaksbed:
+            raise AssertionError('--inpeaksbed cannot be None if --mode=bed_to_bed')
+    elif args.mode == 'bed_to_genes':
+        if not args.inpeaksbed:
+            raise AssertionError('--inpeaksbed cannot be None if --mode=bed_to_genes')
+        if not args.genome:
+            raise AssertionError('--genome cannot be None if --mode=bed_to_genes')
+    elif args.mode == 'genes_to_tes':
+        if not args.genome:
+            raise AssertionError('--genome cannot be None if --mode=genes_to_tes')
+    elif args.mode == 'bed_to_tes':
+        if not args.inpeaksbed:
+            raise AssertionError('--inpeaksbed cannot be None if --mode=bed_to_tes')
+        if not args.genome:
+            raise AssertionError('--genome cannot be None if --mode=bed_to_tes')
+    elif args.mode == 'bed_to_tes_to_genes':
+        if not args.inpeaksbed:
+            raise AssertionError('--inpeaksbed cannot be None if --mode=bed_to_tes_to_genes')
+        if not args.genome:
+            raise AssertionError('--genome cannot be None if --mode=bed_to_tes_to_genes')
+    else:
+        raise AssertionError('{0} mode not found'.format(args.mode[0]))
+
+    te_hic = te_hic_lib.measure_loops()
+
+    if args.mode == 'bed_to_bed':
+
+
+        te_hic.bed_to_bed(
+            reads=args.inreadsbedpe[0],
+            bed=args.inpeaksbed[0],
+            window=args.window,
+            outfile=args.outtsv[0],
+            )
+
+    elif args.mode == 'bed_to_genes':
+        raise AssertionError('-mode=bed_to_genes not implemented')
+    elif args.mode == 'genes_to_tes':
+        raise AssertionError('-mode=genes_to_tes not implemented')
+    elif args.mode == 'bed_to_tes':
+        raise AssertionError('-mode=bed_to_tes not implemented')
+    elif args.mode == 'bed_to_tes_to_genes':
+        raise AssertionError('-mode=bed_to_tes_to_genes not implemented')
+    else:
+        raise AssertionError('{0} mode not found'.format(args.mode[0]))
+
+    return
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.stderr.write("User interrupt\n")
+        sys.exit(0)
