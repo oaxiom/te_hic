@@ -86,10 +86,13 @@ class measure_loops:
         tot = sum(i for i in h[0])
         perc = [i/tot*100 for i in h[0]]
         for v, b, p in zip(h[0], h[1], perc):
-            if b == hist_max-1:
-                self.logger.info('  {0}+= {1} ({2:.1f}%) reads'.format(int(b), v, p))
+            if int(b) == hist_max-1:
+                if int(b) == 1:
+                    self.logger.info('  {1} ({2:.1f}%) loops have {0}+ read'.format(int(b), v, p))
+                else:
+                    self.logger.info('  {1} ({2:.1f}%) loops have {0}+ reads'.format(int(b), v, p))
             else:
-                self.logger.info('  {0} = {1} ({2:.1f}%) reads'.format(int(b), v, p))
+                self.logger.info('  {1} ({2:.1f}%) loops have {0} reads'.format(int(b), v, p))
 
         oh = gzip.open(outfile, 'wt')
         oh.write('\t'.join(['chrom1', 'left1', 'right1', 'chrom2', 'left1', 'right2', 'read_count']))
