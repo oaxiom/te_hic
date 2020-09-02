@@ -143,18 +143,41 @@ class measure_loops:
 
             # We bin the peak to the nearest window
             cpt = (int(peak[1]) + int(peak[2])) // 2
-            bin_left = (cpt // window) * window
-
-            loc = bin_left
+            loc = (cpt // window) * window
 
             peaks[chrom].append(loc)
         bedin.close()
 
         self.logger.info('Found {0:,} BED peaks'.format(len_peaks))
 
+        # And do the same for the genes;
+        genes = {}
+        for len_genes, gene in enumerate(genome_data):
+            chrom = 'chr{0}'.format(gene['loc'].loc['chr'])
+
+            if chrom not in genes:
+                genes[chrom] = []
+
+            # We bin the peak to the nearest window
+            cpt = gene['loc'].loc['left'] # always a point;
+            loc = (cpt // window) * window
+
+            genes[chrom].append(loc)
+
+        # Surely here we should remove bins that are true in both peaks and genes?
+        # TODO!
+
+        print(list(genes.keys()))
+        print(list(peaks.keys()))
+        self.logger.info('Found {0:,} transcripts'.format(len_genes))
+
         store = {}
 
         for idx, read_pair in enumerate(readsin):
+            if (idx+1) % 1e6 == 0:
+                self.logger.info('{0:,} reads processed'.format(idx+1))
+                #break
+
             read_pair = read_pair.strip().split('\t')
 
             chrom_left = read_pair[0]
@@ -166,26 +189,33 @@ class measure_loops:
             bin_rite = (cpt // window) * window
 
             try:
-                # Found a loop between two peaks in the BED
-                if bin_left in peaks[chrom_left] and bin_rite in peaks[chrom_rite]:
-                    korder = sorted([(chrom_left, bin_left), (chrom_rite, bin_rite)])
-                    korder = korder[0] + korder[1]
+                # See if there is a loop between peaks and genes:
+                if bin_left in peaks[chrom_left] or bin_rite in peaks[chrom_rite]: # one side is in a peak;
+                    pass
+                else:
+                    continue
 
-                    if korder not in store:
-                        store[korder] = 0
-                    store[korder] += 1
+                if bin_left in genes[chrom_left] or bin_rite in genes[chrom_rite]: # one side is in a gene promoter;
+                    pass
+                else:
+                    continue
+
+                korder = sorted([(chrom_left, bin_left), (chrom_rite, bin_rite)])
+                korder = korder[0] + korder[1]
+
+                if korder not in store:
+                    store[korder] = 0
+                store[korder] += 1
+
             except KeyError:
                 pass # chrom is not in peaks, but is in reads
-
-            if (idx+1) % 1e6 == 0:
-                self.logger.info('{0:,} reads processed'.format(idx+1))
-                #break
 
         readsin.close()
 
         # Work out histogram;
         hist_max = 21
         all_scores = list(store.values())
+        print(all_scores)
         h = numpy.histogram(all_scores, range=[1,hist_max], bins=hist_max-1)
         self.logger.info('Histogram of loops:')
         tot = sum(i for i in h[0])

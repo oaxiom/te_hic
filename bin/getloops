@@ -10,7 +10,8 @@ import sys, os, argparse, logging
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(script_path, '../'))
-import te_hic_lib, glbase3
+import te_hic_lib
+from glbase3 import glload
 
 # Command-line options;
 def prepare_parser():
@@ -111,10 +112,11 @@ def main():
 
         script_path = os.path.dirname(os.path.realpath(__file__))
         genelist_glb_filename = os.path.join(script_path, '../genome/{0}_glb_gencode_promoters.glb'.format(args.genome))
-        genome_data = glbase3.glload(genelist_glb_filename)
+        genome_data = glload(genelist_glb_filename)
         log.info('Loaded {0}'.format(genelist_glb_filename))
 
         te_hic.bed_to_genespromoter(
+            genome_data=genome_data,
             reads=args.inreadsbedpe[0],
             bed=args.inpeaksbed[0],
             window=args.window,
