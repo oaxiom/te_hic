@@ -70,12 +70,14 @@ for idx, item in enumerate(gencode):
             'name': item['gene_name'],
             'type': item['gene_type'],
             'ensg': item['gene_id'].split('.')[0],
+            'enst': item['transcript_id'].split('.')[0],
             }
     elif item['strand'] == '-':
         prom_locs = {'loc': item['loc'].pointRight(),
             'name': item['gene_name'],
             'type': item['gene_type'],
             'ensg': item['gene_id'].split('.')[0],
+            'enst': item['transcript_id'].split('.')[0],
             }
     else:
         1/0
