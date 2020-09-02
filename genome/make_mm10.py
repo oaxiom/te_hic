@@ -23,6 +23,7 @@ keep_classes = frozenset(['LINE', 'LTR', 'SINE', 'DNA', 'Retroposon'])
 added = 0
 
 newl = []
+promoters = []
 
 print('Repeats')
 p = progressbar(len(repeats))
@@ -43,11 +44,14 @@ for idx, item in enumerate(repeats):
     #print(newentry)
     added += 1
 
-    #if idx > 100000:
-    #    break
+    if idx > 100000:
+        break
     p.update(idx)
 
 print('\nAdded %s features' % added)
+
+
+
 print('Gencode')
 p = progressbar(len(gencode))
 for idx, item in enumerate(gencode):
@@ -69,8 +73,25 @@ for idx, item in enumerate(gencode):
     newl.append(newentry)
     added += 1
 
-    #if idx > 100000:
-    #    break
+    if item['strand'] == '+':
+        prom_locs = {'loc': item['loc'].pointLeft(),
+            'name': item['gene_name'],
+            'type': item['gene_type'],
+            'ensg': item['gene_id'].split('.')[0],
+            }
+    elif item['strand'] == '-':
+        prom_locs = {'loc': item['loc'].pointRight(),
+            'name': item['gene_name'],
+            'type': item['gene_type'],
+            'ensg': item['gene_id'].split('.')[0],
+            }
+    else:
+        1/0
+
+    promoters.append(prom_locs)
+
+    if idx > 100000:
+        break
 
     p.update(idx)
 
@@ -80,4 +101,6 @@ gl = genelist()
 gl.load_list(newl)
 gl.save('mm10_glb_gencode_tes.glb')
 
-
+gl = genelist()
+gl.load_list(promoters)
+gl.save('mm10_glb_gencode_promoters.glb')

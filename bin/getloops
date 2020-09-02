@@ -10,7 +10,7 @@ import sys, os, argparse, logging
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(script_path, '../'))
-import te_hic_lib
+import te_hic_lib, glbase3
 
 # Command-line options;
 def prepare_parser():
@@ -71,20 +71,20 @@ def main():
     if args.mode == 'bed_to_bed':
         if not args.inpeaksbed:
             raise AssertionError('--inpeaksbed cannot be None if --mode=bed_to_bed')
-    elif args.mode == 'bed_to_genes':
+    elif args.mode == 'bed_to_gene':
         if not args.inpeaksbed:
             raise AssertionError('--inpeaksbed cannot be None if --mode=bed_to_genes')
         if not args.genome:
             raise AssertionError('--genome cannot be None if --mode=bed_to_genes')
-    elif args.mode == 'genes_to_tes':
+    elif args.mode == 'genes_to_te':
         if not args.genome:
             raise AssertionError('--genome cannot be None if --mode=genes_to_tes')
-    elif args.mode == 'bed_to_tes':
+    elif args.mode == 'bed_to_te':
         if not args.inpeaksbed:
             raise AssertionError('--inpeaksbed cannot be None if --mode=bed_to_tes')
         if not args.genome:
             raise AssertionError('--genome cannot be None if --mode=bed_to_tes')
-    elif args.mode == 'bed_to_tes_to_genes':
+    elif args.mode == 'bed_to_teandgene':
         if not args.inpeaksbed:
             raise AssertionError('--inpeaksbed cannot be None if --mode=bed_to_tes_to_genes')
         if not args.genome:
@@ -95,7 +95,6 @@ def main():
     te_hic = te_hic_lib.measure_loops(logger=log)
 
     if args.mode == 'bed_to_bed':
-
         te_hic.bed_to_bed(
             reads=args.inreadsbedpe[0],
             bed=args.inpeaksbed[0],
@@ -103,13 +102,30 @@ def main():
             outfile=args.outtsv[0],
             )
 
-    elif args.mode == 'bed_to_genes':
-        raise AssertionError('-mode=bed_to_genes not implemented')
-    elif args.mode == 'genes_to_tes':
+    elif args.mode == 'bed_to_gene':
+        # check genome is available;
+        args.genome = args.genome[0]
+        if args.genome not in te_hic_lib.common.valid_assemblies:
+            log.error('{0} assembly not found'.format(args.genome))
+            log.error('Valid assemblies are: {0}'.format(te_hic_lib.common.valid_assemblies))
+
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        genelist_glb_filename = os.path.join(script_path, '../genome/{0}_glb_gencode_promoters.glb'.format(args.genome))
+        genome_data = glbase3.glload(genelist_glb_filename)
+        log.info('Loaded {0}'.format(genelist_glb_filename))
+
+        te_hic.bed_to_genespromoter(
+            reads=args.inreadsbedpe[0],
+            bed=args.inpeaksbed[0],
+            window=args.window,
+            outfile=args.outtsv[0],
+            )
+
+    elif args.mode == 'genes_to_te':
         raise AssertionError('-mode=genes_to_tes not implemented')
-    elif args.mode == 'bed_to_tes':
+    elif args.mode == 'bed_to_te':
         raise AssertionError('-mode=bed_to_tes not implemented')
-    elif args.mode == 'bed_to_tes_to_genes':
+    elif args.mode == 'bed_to_teandgene':
         raise AssertionError('-mode=bed_to_tes_to_genes not implemented')
     else:
         raise AssertionError('{0} mode not found'.format(args.mode[0]))
