@@ -46,6 +46,8 @@ class measure_loops:
             peaks[chrom].append(loc)
         bedin.close()
 
+        # TODO: Convert the peaks to a set
+
         self.logger.info('Found {0:,} BED peaks'.format(len_peaks))
 
         store = {}
@@ -139,13 +141,13 @@ class measure_loops:
             chrom = peak[0]
 
             if chrom not in peaks:
-                peaks[chrom] = []
+                peaks[chrom] = set([])
 
             # We bin the peak to the nearest window
             cpt = (int(peak[1]) + int(peak[2])) // 2
             loc = (cpt // window) * window
 
-            peaks[chrom].append(loc)
+            peaks[chrom].add(loc)
         bedin.close()
 
         self.logger.info('Found {0:,} BED peaks'.format(len_peaks))
@@ -156,20 +158,32 @@ class measure_loops:
             chrom = 'chr{0}'.format(gene['loc'].loc['chr'])
 
             if chrom not in genes:
-                genes[chrom] = []
+                genes[chrom] = set([])
 
             # We bin the peak to the nearest window
             cpt = gene['loc'].loc['left'] # always a point;
             loc = (cpt // window) * window
 
-            genes[chrom].append(loc)
+            genes[chrom].add(loc)
 
-        # Surely here we should remove bins that are true in both peaks and genes?
-        # TODO!
+        chrom_intersect = set(genes.keys()).union(set(peaks.keys()))
 
-        print(list(genes.keys()))
-        print(list(peaks.keys()))
-        self.logger.info('Found {0:,} transcripts'.format(len_genes))
+        for chrom in chrom_intersect:
+            # Fill in if chrom not present in other list;;
+            if chrom not in genes:
+                continue
+            if chrom not in peaks:
+                continue
+
+            genes_chrom = genes[chrom]
+            peaks_chrom = peaks[chrom]
+
+            common = genes_chrom.intersection(peaks_chrom)
+            peaks[chrom] = peaks_chrom - common
+            genes[chrom] = genes_chrom - common
+
+        self.logger.info('Shrunk peaks from {0:,} to {1:,} by removing duplicate bins and common bins'.format(len_peaks, sum([len(peaks[chrom]) for chrom in peaks])))
+        self.logger.info('Shrunk genes from {0:,} to {1:,} by removing duplicate bins and common bins'.format(len_genes, sum([len(genes[chrom]) for chrom in genes])))
 
         store = {}
 
@@ -200,6 +214,7 @@ class measure_loops:
                 else:
                     continue
 
+                # TODO: This order should always be BED -> gene
                 korder = sorted([(chrom_left, bin_left), (chrom_rite, bin_rite)])
                 korder = korder[0] + korder[1]
 
@@ -215,7 +230,6 @@ class measure_loops:
         # Work out histogram;
         hist_max = 21
         all_scores = list(store.values())
-        print(all_scores)
         h = numpy.histogram(all_scores, range=[1,hist_max], bins=hist_max-1)
         self.logger.info('Histogram of loops:')
         tot = sum(i for i in h[0])
