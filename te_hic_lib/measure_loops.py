@@ -46,8 +46,6 @@ class measure_loops:
             peaks[chrom].append(loc)
         bedin.close()
 
-        # TODO: Convert the peaks to a set
-
         self.logger.info('Found {0:,} BED peaks'.format(len_peaks))
 
         store = {}
@@ -166,7 +164,7 @@ class measure_loops:
 
             genes[chrom].add(loc)
 
-        chrom_intersect = set(genes.keys()).union(set(peaks.keys()))
+        chrom_intersect = set(genes.keys()) & set(peaks.keys())
 
         for chrom in chrom_intersect:
             # Fill in if chrom not present in other list;;
@@ -214,9 +212,14 @@ class measure_loops:
                 else:
                     continue
 
-                # TODO: This order should always be BED -> gene
-                korder = sorted([(chrom_left, bin_left), (chrom_rite, bin_rite)])
-                korder = korder[0] + korder[1]
+                if bin_left in peaks[chrom_left] and bin_rite in genes[chrom_rite]:
+                    korder = (chrom_left, bin_left, chrom_rite, bin_rite)
+
+                elif bin_rite in peaks[chrom_rite] and bin_left in genes[chrom_left]:
+                    korder = (chrom_rite, bin_rite, chrom_left, bin_left)
+
+                else: # Should never reach here...
+                    1/0
 
                 if korder not in store:
                     store[korder] = 0
