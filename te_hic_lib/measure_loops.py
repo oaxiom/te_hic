@@ -247,7 +247,7 @@ class measure_loops:
                 self.logger.info('  {1} ({2:.1f}%) loops have {0} reads'.format(int(b), v, p))
 
         oh = gzip.open(outfile, 'wt')
-        oh.write('{0}\n'.format('\t'.join(['chrom1', 'left1', 'right1', 'chrom2', 'left1', 'right2', 'read_count'])))
+        oh.write('{0}\n'.format('\t'.join(['bedchrom1', 'bedleft1', 'bedright1', 'promchrom2', 'promleft1', 'promright2', 'read_count'])))
         for loop in store:
             oh.write('{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n'.format(loop[0], loop[1], loop[1]+window,
                 loop[2], loop[3], loop[3]+window,
