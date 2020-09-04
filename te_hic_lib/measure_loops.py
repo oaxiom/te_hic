@@ -202,15 +202,6 @@ class measure_loops:
 
             try:
                 # See if there is a loop between peaks and genes:
-                if bin_left in peaks[chrom_left] or bin_rite in peaks[chrom_rite]: # one side is in a peak;
-                    pass
-                else:
-                    continue
-
-                if bin_left in genes[chrom_left] or bin_rite in genes[chrom_rite]: # one side is in a gene promoter;
-                    pass
-                else:
-                    continue
 
                 if bin_left in peaks[chrom_left] and bin_rite in genes[chrom_rite]:
                     korder = (chrom_left, bin_left, chrom_rite, bin_rite)
@@ -219,7 +210,7 @@ class measure_loops:
                     korder = (chrom_rite, bin_rite, chrom_left, bin_left)
 
                 else: # Should never reach here...
-                    1/0
+                    continue
 
                 if korder not in store:
                     store[korder] = 0
