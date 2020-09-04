@@ -29,6 +29,7 @@ def prepare_parser():
     #optional.add_argument('-q', '--qual', nargs=1, type=int, default=20, required=False, help='q threshold for qulait filtering, default=20')
     #optional.add_argument('--maxcells', action='store', type=int, default=10000, required=False, help='keep at most maxcells with the most reads, default=10,000')
     optional.add_argument('-w', '--window', action='store', type=int, default=5000, required=False, help='Window size (in base pairs) to look around the BED, gene TSS and/or TE, default=1000')
+    optional.add_argument('-t', '--threshold', action='store', type=int, default=1, required=False, help='Thresold (in reads) to call a loop default=1')
 
     optional.add_argument('-p', '--inpeaksbed', nargs=1, required=False, help='A BED file contining peaks or sites to consider measuring for loops')
     optional.add_argument('-g', '--genome', nargs=1, required=False, help='Optional, but requried if "tes" or "genes" in --mode. Genome assembly to use, valid genomes: {0}'.format(te_hic_lib.common.valid_assemblies))
@@ -121,6 +122,7 @@ def main():
             bed=args.inpeaksbed[0],
             window=args.window,
             outfile=args.outtsv[0],
+            threshold=args.threshold,
             )
 
     elif args.mode == 'genes_to_te':
