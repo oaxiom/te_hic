@@ -102,6 +102,7 @@ def main():
             bed=args.inpeaksbed[0],
             window=args.window,
             outfile=args.outtsv[0],
+            threshold=args.threshold,
             )
 
     elif args.mode == 'bed_to_gene':

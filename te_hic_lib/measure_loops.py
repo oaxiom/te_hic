@@ -98,9 +98,10 @@ class measure_loops:
         oh = gzip.open(outfile, 'wt')
         oh.write('{0}\n'.format('\t'.join(['chrom1', 'left1', 'right1', 'chrom2', 'left1', 'right2', 'read_count'])))
         for loop in store:
-            oh.write('{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n'.format(loop[0], loop[1], loop[1]+window,
-                loop[2], loop[3], loop[3]+window,
-                store[loop]))
+            if store[loop] >= threshold:
+                oh.write('{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n'.format(loop[0], loop[1], loop[1]+window,
+                    loop[2], loop[3], loop[3]+window,
+                    store[loop]))
 
         self.logger.info('Saved {0}'.format(outfile))
 
@@ -202,14 +203,13 @@ class measure_loops:
 
             try:
                 # See if there is a loop between peaks and genes:
-
                 if bin_left in peaks[chrom_left] and bin_rite in genes[chrom_rite]:
                     korder = (chrom_left, bin_left, chrom_rite, bin_rite)
 
                 elif bin_rite in peaks[chrom_rite] and bin_left in genes[chrom_left]:
                     korder = (chrom_rite, bin_rite, chrom_left, bin_left)
 
-                else: # Should never reach here...
+                else: # no loop;
                     continue
 
                 if korder not in store:
