@@ -68,7 +68,7 @@ def main():
     log.info('  genome: "%s"' % args.genome)
     log.info('  mode: "%s"' % args.mode)
     log.info('  window: %s' % args.window)
-    log.info('  threshold: {0} reads' % args.threshold)
+    log.info('  threshold: {0} reads'.format(args.threshold))
 
     # check BED arg requirements for mode
     if args.mode == 'bed_to_bed':
