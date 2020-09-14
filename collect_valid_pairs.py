@@ -80,9 +80,12 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
             reject_too_close += 1
             continue
 
+        loc_strand1 = '-' if read1.is_reverse else '+'
+        loc_strand2 = '-' if read2.is_reverse else '+'
+
         # This does duplicate removal in one go.
         # Only use the starts, it saves memory, and anyway the 3' ends are unreliable for duplicate removal if the input has been quality/adapter trimmed
-        pairs_add((read1.reference_name, read1.reference_start, read2.reference_name, read2.reference_end))
+        pairs_add((read1.reference_name, read1.reference_start, read2.reference_name, read2.reference_end, loc_strand1, loc_strand2))
         done += 1 # subtract this number to get the number of duplicates removed
         #if done > 200000:
         #    break
@@ -132,7 +135,7 @@ def save_valid_pairs(pairs, output):
     oh = gzip.open(output, 'wt')
     #oh.write('%s\n' % '\t'.join(['chrom1', 'start', 'end', 'chr2', 'start', 'end']))
     for p in pairs:
-        oh.write('%s\n' % '\t'.join([p[0], str(p[1]), str(p[1]+50), p[2], str(p[3]-50), str(p[3])]))
+        oh.write('%s\n' % '\t'.join([p[0], str(p[1]), str(p[1]+50), p[2], str(p[3]-50), str(p[3]), '', '', p[4], p[5]]))
     oh.close()
     print('    Saved           : {:,} pairs'.format(len(pairs)))
 
