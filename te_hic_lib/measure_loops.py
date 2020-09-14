@@ -65,7 +65,7 @@ class measure_loops:
                 # Found a loop between two peaks in the BED
                 if bin_left in peaks[chrom_left] and bin_rite in peaks[chrom_rite]:
                     korder = sorted([(chrom_left, bin_left), (chrom_rite, bin_rite)])
-                    korder = korder[0] + korder[1]
+                    korder = korder[0] + korder[1] # quple;
 
                     if korder not in store:
                         store[korder] = 0

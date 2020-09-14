@@ -4,7 +4,7 @@
 #PBS -V 
 cd ${cwd}
 
-opts='-p 32 --mm' # --very-sensitive' # 
+opts='-p 32 --mm --local --very-sensitive' # 
 # You must output the unaligned!
 
 # You cannot do any filtering here!
