@@ -29,7 +29,7 @@ def prepare_parser():
     # Optional:
     optional = parser._action_groups.pop()
     optional.add_argument('-w', '--window', action='store', type=int, default=defaults['-w'], required=False, help='Window size (in base pairs) to look around the BED, gene TSS and/or TE, default={}'.format(defaults['-w']))
-    optional.add_argument('-t', '--threshold', action='store', type=int, default=defaults['-t'], required=False, help='Thresold (in reads) to call a loop default={}'.format(defaults['-t'])
+    optional.add_argument('-t', '--threshold', action='store', type=int, default=defaults['-t'], required=False, help='Thresold (in reads) to call a loop default={}'.format(defaults['-t']))
 
     optional.add_argument('-p', '--inpeaksbed', nargs=1, required=False, help='A BED file contining peaks or sites to consider measuring for loops')
     optional.add_argument('-g', '--genome', nargs=1, required=False, help='Optional, but requried if "tes" or "genes" in --mode. Genome assembly to use, valid genomes: {}'.format(te_hic_lib.common.valid_assemblies))
