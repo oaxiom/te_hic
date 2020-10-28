@@ -35,7 +35,7 @@ do
 
     for fq in $sample/*.f*q.gz
     do  
-        name=`basename $fq | sed 's#.clean#.#g' | sed 's#.fastq.gz##g' | sed 's#.fq.gz##g' `
+        name=`basename $fq | sed 's#.clean.#.#g' | sed 's#.fastq.gz##g' | sed 's#.fq.gz##g' `
         if [ ! -d run/$sample_name ]
         then
             mkdir run/$sample_name
