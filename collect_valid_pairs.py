@@ -116,7 +116,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
     print('  Final:')
     print('    Kept reads              : {:,} ({:.2%})'.format(len(pairs), len(pairs)/stats_total_reads))
     print('    Kept short-range (<20kb): {:,} ({:.2%})'.format(stats_short_range, stats_short_range/stats_total_reads))
-    print('    Kept long-range (<20kb) : {:,} ({:.2%})'.format(stats_long_range,  stats_long_range/stats_total_reads))
+    print('    Kept long-range (>20kb) : {:,} ({:.2%})'.format(stats_long_range,  stats_long_range/stats_total_reads))
     return pairs
 
 def remove_duplicates(pairs):
@@ -133,7 +133,7 @@ def remove_duplicates(pairs):
             newp.add(p)
 
     print('\nremove_duplicates() stats:')
-    print('  Duplicates        : {:,} ({:.2%})'.format(len(pairs)-len(newp), (len(pairs)-len(newp))/len(pairs)))
+    print('  Duplicates                : {:,} ({:.2%})'.format(len(pairs)-len(newp), (len(pairs)-len(newp))/len(pairs)))
     return list(newp)
 
 def save_valid_pairs(pairs, output):
@@ -146,7 +146,7 @@ def save_valid_pairs(pairs, output):
     for p in pairs:
         oh.write('%s\n' % '\t'.join([p[0], str(p[1]), str(p[1]+50), p[2], str(p[3]-50), str(p[3]), '.', '0', p[4], p[5]]))
     oh.close()
-    print('    Saved           : {:,} pairs'.format(len(pairs)))
+    print('    Saved                    : {:,} pairs'.format(len(pairs)))
 
 if __name__ == '__main__':
     work_path = sys.argv[0]
