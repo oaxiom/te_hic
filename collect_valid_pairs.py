@@ -43,6 +43,8 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
     stats_1aligned = 0
     stats_unaligned = 0
     stats_output = 0
+    stats_short_range = 0
+    stats_long_range = 0
     reject_diff_chrom = 0
     reject_too_close = 0
 
@@ -80,6 +82,11 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
             reject_too_close += 1
             continue
 
+        if dist < 20000:
+            stats_short_range += 1
+        elif dist > 20000:
+            stats_long_range += 1
+
         loc_strand1 = '-' if read1.is_reverse else '+'
         loc_strand2 = '-' if read2.is_reverse else '+'
 
@@ -98,16 +105,18 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
 
     print('\ncollect_valid_pairs() stats:')
     print('  Aligned:')
-    print('    Reads processed : {:,}'.format(stats_total_reads))
-    print('    Low quality     : {:,} ({:.2%})'.format(stats_lowq, stats_lowq/stats_total_reads))
-    print('    Correctly paired: {:,} ({:.2%})'.format(stats_aligned, stats_aligned/stats_total_reads))
-    print('    One pair aligned: {:,} ({:.2%})'.format(stats_1aligned, stats_1aligned/stats_total_reads))
-    print('    No pairs aligned: {:,} ({:.2%})'.format(stats_unaligned, stats_unaligned/stats_total_reads))
+    print('    Reads processed         : {:,}'.format(stats_total_reads))
+    print('    Low quality             : {:,} ({:.2%})'.format(stats_lowq, stats_lowq/stats_total_reads))
+    print('    Correctly paired        : {:,} ({:.2%})'.format(stats_aligned, stats_aligned/stats_total_reads))
+    print('    One pair aligned        : {:,} ({:.2%})'.format(stats_1aligned, stats_1aligned/stats_total_reads))
+    print('    No pairs aligned        : {:,} ({:.2%})'.format(stats_unaligned, stats_unaligned/stats_total_reads))
     print('  Criteria rejected:')
-    print('    Too close       : {:,} ({:.2%})'.format(reject_too_close, reject_too_close/stats_total_reads))
-    print('    Duplicates      : {:,} ({:.2%})'.format(done-len(pairs), (done-len(pairs))/done))
+    print('    Too close               : {:,} ({:.2%})'.format(reject_too_close, reject_too_close/stats_total_reads))
+    print('    Duplicates              : {:,} ({:.2%})'.format(done-len(pairs), (done-len(pairs))/done))
     print('  Final:')
-    print('    Kept reads      : {:,} ({:.2%})'.format(len(pairs), len(pairs)/stats_total_reads))
+    print('    Kept reads              : {:,} ({:.2%})'.format(len(pairs), len(pairs)/stats_total_reads))
+    print('    Kept short-range (<20kb): {:,} ({:.2%})'.format(stats_short_range, stats_short_range/stats_total_reads))
+    print('    Kept long-range (<20kb) : {:,} ({:.2%})'.format(stats_long_range,  stats_long_range/stats_total_reads))
     return pairs
 
 def remove_duplicates(pairs):
