@@ -14,7 +14,7 @@ TODO:
 
 '''
 
-import sys, os, math, numpy, shutil
+import sys, os, math, numpy, shutil, gzip
 #import glbase3
 import common
 
