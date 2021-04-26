@@ -3,14 +3,14 @@
 
 Part of the te_hic suite
 
-Build five (raw) matrices:
+Build four (raw) matrices:
 1. All
 2. TE<=>TE only
 3. TE<=>non-TE only
 4. non-TE <=> non-TE only
 
 TODO:
-5. TE<=>non-TE and TE<=>TE only
+5. TE<=>non-TE and TE<=>TE only?
 
 '''
 
@@ -24,7 +24,7 @@ class build_matrices:
         Load the species and set up the bins
         '''
         # get the samplename:
-        self.sample_name = os.path.split(infilename)[1].replace('.te.annot.tsv', '').replace('.tsv', '') # second is in case the user is messing with the pattern
+        self.sample_name = os.path.split(infilename)[1].replace('.te.annot.tsv.gz', '').replace('.tsv.gz', '') # second is in case the user is messing with the pattern
 
         self.res = resolution
 
@@ -38,7 +38,7 @@ class build_matrices:
         self.num_bins = {}
         self.chrom_bin_offsets = {} # the top and bottom bins for this chrom
 
-        oh = open(os.path.join(script_path, 'genome/%s.chromSizes.clean' % species), 'r')
+        oh = open(os.path.join(script_path, 'genome/{}.chromSizes.clean'.format(species)), 'r')
         for line in oh:
             line = line.strip().split('\t')
             chrom = line[0]
@@ -68,7 +68,7 @@ class build_matrices:
         print('Building in-memory matrices')
 
         done = 0
-        oh = open(infilename, 'r')
+        oh = gzip.open(infilename, 'rt')
         for line in oh:
             line = line.strip().split('\t')
 
@@ -84,6 +84,9 @@ class build_matrices:
             read2_bin = (read2_mid // self.res) + self.chrom_bin_offsets[read2_chrom][0]
 
             bin_pair = tuple(sorted([read1_bin, read2_bin]))
+
+            if read1_bin == read2_bin: # ignore all mid-line self-bins
+                continue
 
             # All:
             if bin_pair not in self.all:
@@ -121,7 +124,7 @@ class build_matrices:
             Save the matrices into out_path/sample/resolution/
         '''
         if not os.path.isdir(out_path):
-            os.mkdir(out_path) # don't delete otherwise this will be unfirendly to others working here
+            os.mkdir(out_path) # don't delete otherwise this will be unfriendly to others working here
 
         if not os.path.isdir(os.path.join(out_path, self.sample_name)):
             os.mkdir(os.path.join(out_path, self.sample_name))
