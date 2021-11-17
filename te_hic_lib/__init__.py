@@ -1,3 +1,3 @@
 from . import common
-from .measure_loops import measure_loops
+from .measure_contacts import measure_contacts
 

@@ -20,18 +20,18 @@ def prepare_parser():
         '-t': 1
         }
 
-    exmp = 'Example usage: [te_hic] get_loops -i in.bam -o out.bam -g genome -m genes_tes'
+    exmp = 'Example usage: [te_hic] getContacts -i in.bam -o out.bam -g genome -m genes_tes'
 
     description = ''
 
-    parser = argparse.ArgumentParser(prog='get_loops', description=description, epilog=exmp)
+    parser = argparse.ArgumentParser(prog='getContacts', description=description, epilog=exmp)
 
     # Optional:
     optional = parser._action_groups.pop()
     optional.add_argument('-w', '--window', action='store', type=int, default=defaults['-w'], required=False, help='Window size (in base pairs) to look around the BED, gene TSS and/or TE, default={}'.format(defaults['-w']))
-    optional.add_argument('-t', '--threshold', action='store', type=int, default=defaults['-t'], required=False, help='Thresold (in reads) to call a loop default={}'.format(defaults['-t']))
+    optional.add_argument('-t', '--threshold', action='store', type=int, default=defaults['-t'], required=False, help='Thresold (in reads) to call a contact default={}'.format(defaults['-t']))
 
-    optional.add_argument('-p', '--inpeaksbed', nargs=1, required=False, help='A BED file contining peaks or sites to consider measuring for loops')
+    optional.add_argument('-p', '--inpeaksbed', nargs=1, required=False, help='A BED file contining peaks or sites to consider measuring for contacts')
     optional.add_argument('-g', '--genome', nargs=1, required=False, help='Optional, but requried if "tes" or "genes" in --mode. Genome assembly to use, valid genomes: {}'.format(te_hic_lib.common.valid_assemblies))
 
     required = parser.add_argument_group('required arguments')
@@ -46,7 +46,7 @@ def prepare_parser():
                     format='%(levelname)-8s: %(message)s',
                     datefmt='%m-%d %H:%M')
 
-    parser.log = logging.getLogger('get_loops')
+    parser.log = logging.getLogger('getContacts')
 
     return parser
 
@@ -60,7 +60,7 @@ def main():
     log = parser.log
     args.mode = args.mode[0]
 
-    log.info('getloops')
+    log.info('getContacts')
     log.info('Arguments:')
     log.info('  inreadsbedpe: %s' % args.inreadsbedpe)
     log.info('  inpeaksbed: %s' % args.inpeaksbed)
@@ -95,7 +95,7 @@ def main():
     else:
         raise AssertionError('{0} mode not found'.format(args.mode[0]))
 
-    te_hic = te_hic_lib.measure_loops(logger=log)
+    te_hic = te_hic_lib.measure_contacts(logger=log)
 
     if args.mode == 'bed_to_bed':
         te_hic.bed_to_bed(

@@ -1,7 +1,7 @@
 
 import gzip, numpy
 
-class measure_loops:
+class measure_contacts:
     def __init__(self, logger):
         self.logger = logger
 
@@ -13,7 +13,7 @@ class measure_loops:
         threshold=1, # in reads;
         **kargs):
         '''
-        Measure the loops between a BED file
+        Measure the contacts between a BED file
 
         '''
 
@@ -62,7 +62,7 @@ class measure_loops:
             bin_rite = (cpt // window) * window
 
             try:
-                # Found a loop between two peaks in the BED
+                # Found a contact between two peaks in the BED
                 if bin_left in peaks[chrom_left] and bin_rite in peaks[chrom_rite]:
                     korder = sorted([(chrom_left, bin_left), (chrom_rite, bin_rite)])
                     korder = korder[0] + korder[1] # quple;
@@ -83,25 +83,25 @@ class measure_loops:
         hist_max = 21
         all_scores = list(store.values())
         h = numpy.histogram(all_scores, range=[1,hist_max], bins=hist_max-1)
-        self.logger.info('Histogram of loops:')
+        self.logger.info('Histogram of contacts:')
         tot = sum(i for i in h[0])
         perc = [i/tot*100 for i in h[0]]
         for v, b, p in zip(h[0], h[1], perc):
             if int(b) == hist_max-1:
                 if int(b) == 1:
-                    self.logger.info('  {1} ({2:.1f}%) loops have {0}+ read'.format(int(b), v, p))
+                    self.logger.info('  {1} ({2:.1f}%) contacts have {0}+ read'.format(int(b), v, p))
                 else:
-                    self.logger.info('  {1} ({2:.1f}%) loops have {0}+ reads'.format(int(b), v, p))
+                    self.logger.info('  {1} ({2:.1f}%) contacts have {0}+ reads'.format(int(b), v, p))
             else:
-                self.logger.info('  {1} ({2:.1f}%) loops have {0} reads'.format(int(b), v, p))
+                self.logger.info('  {1} ({2:.1f}%) contacts have {0} reads'.format(int(b), v, p))
 
         oh = gzip.open(outfile, 'wt')
         oh.write('{0}\n'.format('\t'.join(['chrom1', 'left1', 'right1', 'chrom2', 'left1', 'right2', 'read_count'])))
-        for loop in store:
-            if store[loop] >= threshold:
-                oh.write('{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n'.format(loop[0], loop[1], loop[1]+window,
-                    loop[2], loop[3], loop[3]+window,
-                    store[loop]))
+        for contact in store:
+            if store[contact] >= threshold:
+                oh.write('{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n'.format(contact[0], contact[1], contact[1]+window,
+                    contact[2], contact[3], contact[3]+window,
+                    store[contact]))
 
         self.logger.info('Saved {0}'.format(outfile))
 
@@ -118,7 +118,7 @@ class measure_loops:
         threshold=1, # in reads;
         **kargs):
         '''
-        Measure the loops between a BED file and promoter;
+        Measure the contacts between a BED file and promoter;
 
         '''
 
@@ -202,14 +202,14 @@ class measure_loops:
             bin_rite = (cpt // window) * window
 
             try:
-                # See if there is a loop between peaks and genes:
+                # See if there is a contact between peaks and genes:
                 if bin_left in peaks[chrom_left] and bin_rite in genes[chrom_rite]:
                     korder = (chrom_left, bin_left, chrom_rite, bin_rite)
 
                 elif bin_rite in peaks[chrom_rite] and bin_left in genes[chrom_left]:
                     korder = (chrom_rite, bin_rite, chrom_left, bin_left)
 
-                else: # no loop;
+                else: # no contact;
                     continue
 
                 if korder not in store:
@@ -225,25 +225,25 @@ class measure_loops:
         hist_max = 21
         all_scores = list(store.values())
         h = numpy.histogram(all_scores, range=[1,hist_max], bins=hist_max-1)
-        self.logger.info('Histogram of loops:')
+        self.logger.info('Histogram of contacts:')
         tot = sum(i for i in h[0])
         perc = [i/tot*100 for i in h[0]]
         for v, b, p in zip(h[0], h[1], perc):
             if int(b) == hist_max-1:
                 if int(b) == 1:
-                    self.logger.info('  {1} ({2:.1f}%) loops have {0}+ read'.format(int(b), v, p))
+                    self.logger.info('  {1} ({2:.1f}%) contacts have {0}+ read'.format(int(b), v, p))
                 else:
-                    self.logger.info('  {1} ({2:.1f}%) loops have {0}+ reads'.format(int(b), v, p))
+                    self.logger.info('  {1} ({2:.1f}%) contacts have {0}+ reads'.format(int(b), v, p))
             else:
-                self.logger.info('  {1} ({2:.1f}%) loops have {0} reads'.format(int(b), v, p))
+                self.logger.info('  {1} ({2:.1f}%) contacts have {0} reads'.format(int(b), v, p))
 
         oh = gzip.open(outfile, 'wt')
         oh.write('{0}\n'.format('\t'.join(['bedchrom1', 'bedleft1', 'bedright1', 'promchrom2', 'promleft1', 'promright2', 'read_count'])))
-        for loop in store:
-            if store[loop] >= threshold:
-                oh.write('{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n'.format(loop[0], loop[1], loop[1]+window,
-                    loop[2], loop[3], loop[3]+window,
-                    store[loop]))
+        for contact in store:
+            if store[contact] >= threshold:
+                oh.write('{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n'.format(contact[0], contact[1], contact[1]+window,
+                    contact[2], contact[3], contact[3]+window,
+                    store[contact]))
 
         self.logger.info('Saved {0}'.format(outfile))
 
