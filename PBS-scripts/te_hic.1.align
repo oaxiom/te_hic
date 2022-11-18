@@ -25,7 +25,7 @@ fi
 # supports SE p33, p64, PE p33
 for sample in samples/*
 do
-    # check that's its i nthe expected format, and is a directory, not a file
+    # check that it's in the expected format, and is a directory, not a file
     if [ ! -d "$sample" ] ;
     then
         break

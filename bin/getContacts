@@ -2,7 +2,7 @@
 
 '''
 
-get the loops, based on one anchors, or a BED -> gene promoter
+get chromatin contacts, based on one anchors, or a BED -> gene promoter
 
 '''
 
