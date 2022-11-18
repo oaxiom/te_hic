@@ -1,10 +1,12 @@
 # te_hic
 
-# Why? 
-
 Analysis of TEs in HiC data. 
 
-One of the first steps in HiC analysis is to discard multimapping reads, and low quality mapping reads.
+## Why? 
+
+One of the first steps in HiC analysis is to discard multimapping reads,  low quality mapping reads, or 
+otherwise disregard repeat regions of the genome.
+
 We beleive this is a mistake when you consider that most of the genome consists of badly mapping 
 repeats. 
 
