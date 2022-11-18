@@ -1,5 +1,7 @@
 # te_hic
 
+# Why? 
+
 Analysis of TEs in HiC data. 
 
 One of the first steps in HiC analysis is to discard multimapping reads, and low quality mapping reads.
@@ -11,19 +13,28 @@ This is a set of scripts that aims to fill that gap by looking at HiC data from 
 See the Hutchins lab here:
 https://www.chrom-lab.org/
 
+## What? 
+
 Work in progress.
 
+Doubly so, I as I rework the entire entry platform
+
+## How?
+
 Installation:
+
+stick bin on your PATH:
+
+export PATH=/path/to/te_hic/bin:$PATH
 
 Requires:
 python3
 bowtie2
 samtools
 pysam
-glbase3 (https://bitbucket.org/oaxiom/glbase3)
 
-a PBS/TORQUE-like cluster environment
 
+To fix: 
 You will also need to premake the genome annotation files. Instructions are given for this in 
 te_hic/genomes/
 
@@ -32,7 +43,14 @@ You need to run the scripts in there, and make the .glb files which will be need
 Workflow:
 
 te_hic consists of a series of wrapper scripts around python scripts that are submitted to a cluster.
-HiC data is pretty heavy going, doing it off a cluster is possible, but not reccomended.
+
+Todo!
+
+All should go through te_hic command now.
+
+## PBS-script workflow 
+
+If you are using a PBS-torque cluster environment
 
 A typical run:
 1. setup a 'samples' folder with a structure like this:
@@ -64,12 +82,17 @@ te_hic.2.get_valid_pairs <qstat -q queue name>
 
 3. Step 3. Annotate reads:
 
+## SLURM-script workflow 
 
+If you are using a SLURM cluster environment
 
+Todo?
+
+## License
 
 Release License:
 MIT license:
-Copyright (C) 2019 Andrew Hutchins
+Copyright (C) 2019-2022 Andrew Hutchins
     
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
     
