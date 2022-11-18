@@ -1,0 +1,11 @@
+#PBS -l nodes=1:ppn=1
+#PBS -j oe
+#PBS -o ${out}.step5.results.txt
+#PBS -V 
+#PBS -l mem=16g
+cd ${cwd}
+
+build_matrices.py $species 500000 $in matrix
+build_matrices.py $species 150000 $in matrix
+build_matrices.py $species 40000 $in matrix
+build_matrices.py $species 20000 $in matrix

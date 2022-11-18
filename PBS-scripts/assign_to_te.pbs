@@ -1,0 +1,9 @@
+#PBS -l nodes=1:ppn=1
+#PBS -j oe
+#PBS -o ${out}.step3.results.txt
+#PBS -V 
+#PBS -l mem=32g
+cd ${cwd}
+
+assign_to_te.py $species $bedpe $out.te.annot.tsv.gz
+

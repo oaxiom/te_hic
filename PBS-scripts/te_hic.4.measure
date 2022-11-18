@@ -1,0 +1,23 @@
+
+
+if [ $# -lt 2 ] || [ $# -gt 2 ]; then
+    echo "te_hic.4.measure: not enough arguments"
+    echo
+    echo "te_hic.4.measure <qstat -q name> <species>"
+    echo
+    exit 2
+fi
+
+qstatq=$1
+te_dir=`dirname $0`
+species=$2
+
+for sample in run/*.te.annot.tsv.gz
+do
+    sample_name=`basename $sample | sed 's#.te.annot.tsv.gz##g'`
+    # spawn 1 job per sample; merge the reps inside the collect_valid_pairs.pbs
+    qsub -q $qstatq -N tehic4.$sample_name -v cwd=$PWD,out=run/$sample_name,species=$species,te=$sample $te_dir/quantify_links.pbs
+done
+
+
+

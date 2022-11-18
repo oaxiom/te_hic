@@ -1,0 +1,22 @@
+
+
+if [ $# -lt 2 ] || [ $# -gt 2 ]; then
+    echo "te_hic.5.buildmatrices: not enough arguments"
+    echo
+    echo "te_hic.5.buildmatrices <qstat -q name> <species>"
+    echo
+    exit 2
+fi
+
+qstatq=$1
+te_dir=`dirname $0`
+species=$2
+
+for sample in run/*.te.annot.tsv.gz
+do
+    sample_name=`basename $sample | sed 's#.te.annot.tsv##g'`
+    qsub -q $qstatq -N tehic5.$sample_name -v cwd=$PWD,out=$sample_name,species=$species,in=$sample $te_dir/build_matrices.pbs
+done
+
+
+

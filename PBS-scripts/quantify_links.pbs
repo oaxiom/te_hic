@@ -1,0 +1,10 @@
+#PBS -l nodes=1:ppn=1
+#PBS -j oe
+#PBS -o ${out}.step4.results.txt
+#PBS -V 
+#PBS -l mem=16g
+#cd ${cwd}
+cd $PBS_O_WORKDIR
+
+quantify_links.py $te $species $out.te
+

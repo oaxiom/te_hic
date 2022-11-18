@@ -1,0 +1,32 @@
+
+if [ $# -lt 1 ] || [ $# -gt 1 ]; then
+    echo "te_hic.2.get_valid_pairs: not enough arguments"
+    echo
+    echo "te_hic.1.get_valid_pairs <qstat -q name>"
+    echo
+    #echo "Valid species:"
+    #echo "  hg38"
+    #echo "  mm10"
+    exit 2
+fi
+
+qstatq=$1
+te_dir=`dirname $0` 
+
+for sample in samples/*
+do
+    sample_name=`basename $sample`
+    bedpeout=`echo run/$sample_name.bedpe.gz`
+    
+    # check bedpe out does not already exist, if yes, warn and skip
+    if [ -f $bedpeout ]
+    then
+        echo $bedpeout exists, skipping
+    else
+        # spawn 1 job per sample; merge the reps inside the collect_valid_pairs.pbs 
+        qsub -q $qstatq -N tehic2.$sample_name -v cwd=$PWD,out=run/$sample_name,sam_name=$sample_name $te_dir/collect_valid_pairs.pbs
+    fi
+done
+
+
+
