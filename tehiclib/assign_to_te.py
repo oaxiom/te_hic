@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 '''
 
 Assign the BEDPE to a TE.
@@ -9,7 +7,7 @@ Does one or more end overlap with a TE?
 '''
 
 import sys, os, gzip
-from . import miniglbase3 # miniglbase3 namespace mangling!
+from . import miniglbase3
 from . import common
 
 def map_pairs(valid_pairs, genome):

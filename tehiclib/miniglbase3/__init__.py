@@ -4,11 +4,6 @@ Initialise glbase, import all the libraries, set up the environment etc.
 
 Requires:
 * numpy
-* matplotlib
-* scipy
-* sklearn
-* h5py
-* networkx
 """
 
 import sys, os

@@ -82,6 +82,7 @@ class te_hic:
             #
             out = gzip.open(f'stage2.int.{self.label}.tsv.gz', 'wt')
             for o in mapped_pairs:
+                print(o)
                 line = [o[0][0], o[0][1], o[0][1]+50, ', '.join(o[1]), ', '.join(o[2]), o[0][2], o[0][3]-50, o[0][4], ', '.join(o[3]), ', '.join(o[4])]
                 out.write('{}\n'.format('\t'.join(line)))
             out.close()

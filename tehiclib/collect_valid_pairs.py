@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 '''
 
 Pair up all valid reads from a pair of bams
@@ -8,7 +7,7 @@ Pair up all valid reads from a pair of bams
 import sys, os, gzip
 import pysam
 
-valid_chroms = set(['chrX', 'chrY'] + ['chr%s' % i for i in range(1, 30)]) # cut scaffolds
+valid_chroms = set(['chrX', 'chrY'] + [f'chr{i}' for i in range(1, 30)]) # cut scaffolds
 
 def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000, logger=None, min_qual=None):
     '''
@@ -82,7 +81,6 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000, logger=None
         if read2.reference_name not in valid_chroms:
             stats_not_canonical_chromosome += 1
             continue
-
 
         # criteria1: Check the distance between the two reads
         dist = max([abs(read1.reference_start - read2.reference_end), abs(read1.reference_end - read2.reference_start)])
