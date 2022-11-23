@@ -68,10 +68,9 @@ class te_hic:
             Assign reads to a genome feature
         '''
         assert self.genome, 'genome must be valid'
-        if not self.valid_pairs:
-            raise AssertionError('valid pairs has not been generated')
+        assert self.valid_pairs, 'Stage 1 results "valid pairs" has not been generated correctly'
 
-        mapped_pairs = map_pairs(self.valid_pairs, genome=self.genome)
+        self.mapped_pairs = map_pairs(self.valid_pairs, genome=self.genome)
 
         del self.valid_pairs # not needed
 
@@ -81,12 +80,20 @@ class te_hic:
             # pairs = ('chr7', 150285954, 'chr4', 130529111, '-', '+');
             #
             out = gzip.open(f'stage2.int.{self.label}.tsv.gz', 'wt')
-            for o in mapped_pairs:
-                print(o)
-                line = [o[0][0], o[0][1], o[0][1]+50, ', '.join(o[1]), ', '.join(o[2]), o[0][2], o[0][3]-50, o[0][4], ', '.join(o[3]), ', '.join(o[4])]
+            for o in self.mapped_pairs:
+                read1_names = ', '.join(o[1]) if o[1] else 'None'
+                read1_types = ', '.join(o[2]) if o[2] else 'None'
+                read2_names = ', '.join(o[3]) if o[3] else 'None'
+                read2_types = ', '.join(o[4]) if o[4] else 'None'
+
+                line = [f'chr{o[0][0]}', str(o[0][1]), str(o[0][1]+50),
+                    read1_names, read1_types,
+                    f'chr{o[0][2]}', str(o[0][3]-50), str(o[0][4]),
+                    read2_names, read2_types]
+
                 out.write('{}\n'.format('\t'.join(line)))
             out.close()
-            self.logger.info(f'Intermediate file: Pair assignments {len(self.valid_pairs):,}')
+            self.logger.info(f'Intermediate file: Pair assignments {len(self.mapped_pairs):,} saved')
 
         return True
 
@@ -96,6 +103,9 @@ class te_hic:
             Aggregate the genome contacts.
 
         '''
+        assert self.mapped_pairs, 'Stage 2 results "mapped_pairs" was not generated correctly'
+
+        del self.mapped_pairs
         return True
 
     def stage4_build_matrices(self):

@@ -98,6 +98,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000, logger=None
 
         # This does duplicate removal in one go.
         # Only use the starts, it saves memory, and anyway the 3' ends are unreliable for duplicate removal if the input has been quality/adapter trimmed
+        # Also strip the 'chr' off the front of the contigs. Could be a problem for some genomes?
         pairs_add((read1.reference_name[3:], read1.reference_start, read2.reference_name[3:], read2.reference_end, loc_strand1, loc_strand2))
         done += 1 # subtract this number to get the number of duplicates removed
 
