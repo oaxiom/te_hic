@@ -9,231 +9,109 @@ Does one or more end overlap with a TE?
 '''
 
 import sys, os, gzip
-import glbase3 # glbase3 namespace mangling!
-import common
+#import miniglbase3 # miniglbase3 namespace mangling!
+from . import common
 
-class measureTE:
-    def __init__(self, base_path):
-        '''
-        **Purpose**
-            Constructor
+def map_pairs(valid_pairs, genome):
+    '''
+    **Purpose**
+        Load in a BEDPE file, ideally output by collect_valid_pairs.py, although I guess any valid BEDPE will do
 
-        **Arguments**
-            base_path (Required)
-                the path we are being run in
+    **Arguments**
+        valid_pairs (Required)
+            A list containing valid pairs;
 
-        '''
-        self.base_path = base_path
+        genome (Required)
+            genome glb file
+    '''
+    assert valid_pairs, 'No valid pairs'
 
-    def bind_genome(self, genelist_glb_filename):
-        self.genome = glbase3.glload(genelist_glb_filename)
-        print(f'Loaded {genelist_glb_filename}')
+    done = 0
+    bucket_size = glbase3.config.bucket_size
 
-    def load_bedpe(self, valid_pairs):
-        '''
-        **Purpose**
-            Load in a BEDPE file, ideally output by collect_valid_pairs.py, although I guess any valid BEDPE will do
+    output = []
 
-        **Arguments**
-            filename (Required)
-                filename of the BEDPE file
-        '''
-        assert not (valid_pairs and filename), 'You cannot use both valid_pairs and filename'
-        if valid_pairs
-        assert filename, 'You must specify a filename'
+    self_genome_linearData = genome.linearData
+    self_genome_buckets = genome.buckets
 
-        done = 0
-        bucket_size = glbase3.config.bucket_size
+    for idx, pairs in enumerate(valid_pairs):
+        # pairs format ('chr7', 150285954, 'chr4', 130529111, '-', '+');
+        chrom = pairs[0]
+        left = pairs[1]
+        rite = rite + 50
 
-        output = []
+        left_buck = ((left-1)//bucket_size) * bucket_size
+        right_buck = (rite//bucket_size) * bucket_size
+        buckets_reqd = range(left_buck, right_buck+bucket_size, bucket_size)
+        result = []
 
-        self_genome_linearData = self.genome.linearData
-        self_genome_buckets = self.genome.buckets
+        # get the ids reqd.
+        loc_ids = set()
+        if buckets_reqd:
+            for buck in buckets_reqd:
+                if buck in self_genome_buckets[chrom]:
+                    loc_ids.update(self_genome_buckets[chrom][buck]) # set = unique ids
 
-        oh = gzip.open(filename, 'rt')
-        for idx, pairs in enumerate(valid_pairs):
+            for index in loc_ids:
+                if rite >= self_genome_linearData[index]["loc"].loc["left"] and left <= self_genome_linearData[index]["loc"].loc["right"]:
+                    result.append(self_genome_linearData[index])
 
-            chrom = line[0].replace('chr', '')
-            left = int(line[1])
-            rite = int(line[2])
+            read1_feat = []
+            read1_type = []
+            if result:
+                for r in result:
+                    read1_feat.append(r['name'])
+                    read1_type.append(r['type'])
 
-            left_buck = ((left-1)//bucket_size) * bucket_size
-            right_buck = (rite//bucket_size) * bucket_size
-            buckets_reqd = range(left_buck, right_buck+bucket_size, bucket_size)
-            result = []
+        # work out which of the buckets is required:
+        chrom = pairs[2]
+        left = pairs[3]
+        rite = rite + 50
 
-            # get the ids reqd.
-            loc_ids = set()
-            if buckets_reqd:
-                for buck in buckets_reqd:
-                    if buck in self_genome_buckets[chrom]:
-                        loc_ids.update(self_genome_buckets[chrom][buck]) # set = unique ids
+        left_buck = ((left-1)//bucket_size) * bucket_size
+        right_buck = (rite//bucket_size) * bucket_size
+        buckets_reqd = range(left_buck, right_buck+bucket_size, bucket_size)
+        result = []
 
-                for index in loc_ids:
-                    if rite >= self_genome_linearData[index]["loc"].loc["left"] and left <= self_genome_linearData[index]["loc"].loc["right"]:
-                        result.append(self_genome_linearData[index])
+        # get the ids reqd.
+        loc_ids = set()
+        if buckets_reqd:
+            for buck in buckets_reqd:
+                if buck in self_genome_buckets[chrom]:
+                    loc_ids.update(self_genome_buckets[chrom][buck]) # set = unique ids
 
-                read1_feat = []
-                read1_type = []
-                if result:
-                    for r in result:
-                        read1_feat.append(r['name'])
-                        read1_type.append(r['type'])
+            for index in loc_ids:
+                if rite >= self_genome_linearData[index]["loc"].loc["left"] and left <= self_genome_linearData[index]["loc"].loc["right"]:
+                    result.append(self_genome_linearData[index])
 
-            # work out which of the buckets is required:
-            chrom = line[3].replace('chr', '')
-            left = int(line[4])
-            rite = int(line[5])
+            read2_feat = []
+            read2_type = []
+            if result:
+                for r in result:
+                    read2_feat.append(r['name'])
+                    read2_type.append(r['type'])
 
-            left_buck = ((left-1)//bucket_size) * bucket_size
-            right_buck = (rite//bucket_size) * bucket_size
-            buckets_reqd = range(left_buck, right_buck+bucket_size, bucket_size)
-            result = []
+        if read1_feat:
+            read1_feat = ', '.join(set(read1_feat))
+            read1_type = ', '.join(set(read1_type))
+        else:
+            read1_feat = 'None'
+            read1_type = 'None'
 
-            # get the ids reqd.
-            loc_ids = set()
-            if buckets_reqd:
-                for buck in buckets_reqd:
-                    if buck in self_genome_buckets[chrom]:
-                        loc_ids.update(self_genome_buckets[chrom][buck]) # set = unique ids
+        if read2_feat:
+            read2_feat = ', '.join(set(read2_feat))
+            read2_type = ', '.join(set(read2_type))
+        else:
+            read2_feat = 'None'
+            read2_type = 'None'
 
-                for index in loc_ids:
-                    if rite >= self_genome_linearData[index]["loc"].loc["left"] and left <= self_genome_linearData[index]["loc"].loc["right"]:
-                        result.append(self_genome_linearData[index])
+        output.append((pairs, read1_feat, read1_type, read2_feat, read2_type))
 
-                read2_feat = []
-                read2_type = []
-                if result:
-                    for r in result:
-                        read2_feat.append(r['name'])
-                        read2_type.append(r['type'])
+        done += 1
 
-            if read1_feat:
-                read1_feat = ', '.join(set(read1_feat))
-                read1_type = ', '.join(set(read1_type))
-            else:
-                read1_feat = 'None'
-                read1_type = 'None'
+        if done % 1000000 == 0:
+            print(f'Processed: {done:,}')
 
-            if read2_feat:
-                read2_feat = ', '.join(set(read2_feat))
-                read2_type = ', '.join(set(read2_type))
-            else:
-                read2_feat = 'None'
-                read2_type = 'None'
+    print(f'Processed {len(output):,} reads')
 
-            output.append('\t'.join(line[0:3] + [read1_feat, read1_type] + line[3:] + [read2_feat, read2_type]))
-
-            #print(output[-1])
-
-            done += 1
-
-            if done % 1000000 == 0:
-                print('Processed: {:,}'.format(done))
-                #break
-
-        print('Processed {:,} reads'.format(len(output)))
-        oh.close()
-
-        out = gzip.open(out_filename, 'wt')
-        [out.write('%s\n' % o) for o in output]
-        out.close()
-
-    def load_bed(self, filename, out_filename, expand_bed=0):
-        '''
-        **Purpose**
-            Load in a BED gz file, ideally output by collect_valid_pairs.py,
-            although I guess any valid BED will do
-
-            This function is not officially part of te_hic, but could be useful to annotate
-            (for example) a BED list of peaks from a ChIP-seq
-
-        **Arguments**
-            filename (Required)
-                filename of the BED file
-
-            expand_bed (Optional, default=0)
-                Optionally expand the BED coordianted left and right by expand_bed
-
-        '''
-        assert filename, 'You must specify a filename'
-
-        done = 0
-        bucket_size = glbase3.config.bucket_size
-
-        output = []
-
-        oh = gzip.open(filename, 'rt')
-        for idx, line in enumerate(oh):
-            line = line.strip().split('\t')
-
-            # reach into the genelist guts...
-            # work out which of the buckets is required:
-            loc = glbase3.location(chr=line[0], left=int(line[1])-expand_bed, right=int(line[2])+expand_bed)
-            left_buck = ((loc["left"]-1)//bucket_size) * bucket_size
-            right_buck = ((loc["right"])//bucket_size) * bucket_size
-            buckets_reqd = range(left_buck, right_buck+bucket_size, bucket_size)
-            result = []
-            # get the ids reqd.
-            loc_ids = set()
-            if buckets_reqd:
-                for buck in buckets_reqd:
-                    if buck in self.genome.buckets[loc["chr"]]:
-                        loc_ids.update(self.genome.buckets[loc["chr"]][buck]) # set = unique ids
-
-                for index in loc_ids:
-                    #print loc.qcollide(self.linearData[index]["loc"]), loc, self.linearData[index]["loc"]
-                    if loc.qcollide(self.genome.linearData[index]["loc"]):
-                        result.append(self.genome.linearData[index])
-
-                read1_feat = []
-                read1_type = []
-                if result:
-                    for r in result:
-                        read1_feat.append(r['name'])
-                        read1_type.append(r['type'])
-
-            if read1_feat:
-                read1_feat = ', '.join(set(read1_feat))
-                read1_type = ', '.join(set(read1_type))
-            else:
-                read1_feat = 'None'
-                read1_type = 'None'
-
-            output.append('\t'.join(line[0:3] + [read1_feat, read1_type]))
-
-            #print(output[-1])
-
-            done += 1
-
-            if done % 1000000 == 0:
-                print('Processed: {:,}'.format(done))
-                #break
-
-        print('Processed {:,} reads'.format(len(output)))
-        oh.close()
-
-        out = open(out_filename, 'wt')
-        for o in output:
-            out.write('%s\n' % o)
-        out.close()
-
-if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        print('\nNot enough arguments')
-        print('assign_to_te.py species in.bedpe.gz out.tsv')
-        common.print_species()
-        print()
-        sys.exit()
-
-    species = sys.argv[1]
-    if not common.check_species(species):
-        sys.exit()
-
-    script_path = os.path.dirname(os.path.realpath(__file__))
-
-    mte = measureTE(sys.argv[0])
-    mte.bind_genome(os.path.join(script_path, 'genome/%s_glb_gencode_tes.glb' % species))
-    mte.load_bedpe(sys.argv[2], sys.argv[3])
-
-
+    return output
