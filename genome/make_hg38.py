@@ -8,7 +8,19 @@ This is for the mm10 genome
 
 '''
 
-from glbase3 import *
+import sys
+sys.path.append('../tehiclib')
+from miniglbase3 import delayedlist, progressbar
+
+gtf = {
+    #"feature_type": 1,
+    "feature": 2,
+    "gtf_decorators": 8,
+    "commentlines": "#",
+    "loc": "location(chr=column[0], left=column[3], right=column[4])",
+    "strand": 6,
+    "skiplines": -1,
+    "force_tsv": True}
 
 rmsk_track_form = {"force_tsv": True, 'loc': 'location(chr=column[5], left=column[6], right=column[7])',
     'repName': 10, 'repClass': 11, 'repFamily': 12}
@@ -16,7 +28,7 @@ rmsk_track_form = {"force_tsv": True, 'loc': 'location(chr=column[5], left=colum
 chr_set = frozenset(['X', 'Y'] + ['%s' % i for i in range(1, 30)])
 
 repeats = delayedlist(filename='hg38_rmsk.txt.gz', gzip=True, format=rmsk_track_form)
-gencode = delayedlist('gencode.v29.annotation.gtf.gz', gzip=True, format=format.gtf)
+gencode = delayedlist('gencode.v29.annotation.gtf.gz', gzip=True, format=gtf)
 
 keep_classes = frozenset(['LINE', 'LTR', 'SINE', 'DNA', 'Retroposon'])
 

@@ -55,7 +55,7 @@ def main():
     log.info('Arguments:')
     log.info(f'  read1: {args.read1[0]}')
     log.info(f'  read2: {args.read2[0]}')
-    log.info(f'  genome: "{args.genome[0]}"')
+    log.info(f'  genome: {args.genome[0]}')
     log.info(f'  quality thresold: {args.qual} (default is 10)')
 
     # TODO: Check the genome is avaialble.
@@ -65,7 +65,7 @@ def main():
     log.info('Stage 1: Collect valid read pairs')
     te_hic.stage1_collect_valid_pairs(args.read1[0], args.read2[0], min_dist=args.mindist, min_qual=args.qual)
 
-    log.info(f'Stage 2: Assign to {args.genome[0]} genome feature ')
+    log.info(f'Stage 2: Assign to {args.genome[0]} genome features')
     te_hic.stage2_assign_to_genome_feature()
 
     log.info('Stage 3: Quantify links')

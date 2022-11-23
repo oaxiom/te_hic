@@ -4,7 +4,7 @@ behaves like a normal list, but each element contains a heterogenous set of data
 
 """
 
-import sys, os, csv, copy, random, pickle, re, numpy, scipy, gzip
+import sys, os, csv, copy, random, pickle, re, gzip
 
 from operator import itemgetter
 

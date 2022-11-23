@@ -9,7 +9,7 @@ Does one or more end overlap with a TE?
 '''
 
 import sys, os, gzip
-#import miniglbase3 # miniglbase3 namespace mangling!
+from . import miniglbase3 # miniglbase3 namespace mangling!
 from . import common
 
 def map_pairs(valid_pairs, genome):
@@ -27,18 +27,20 @@ def map_pairs(valid_pairs, genome):
     assert valid_pairs, 'No valid pairs'
 
     done = 0
-    bucket_size = glbase3.config.bucket_size
+    bucket_size = miniglbase3.config.bucket_size
 
     output = []
 
     self_genome_linearData = genome.linearData
     self_genome_buckets = genome.buckets
 
+    print(self_genome_buckets.keys())
+
     for idx, pairs in enumerate(valid_pairs):
         # pairs format ('chr7', 150285954, 'chr4', 130529111, '-', '+');
         chrom = pairs[0]
         left = pairs[1]
-        rite = rite + 50
+        rite = left + 100
 
         left_buck = ((left-1)//bucket_size) * bucket_size
         right_buck = (rite//bucket_size) * bucket_size
@@ -65,8 +67,8 @@ def map_pairs(valid_pairs, genome):
 
         # work out which of the buckets is required:
         chrom = pairs[2]
-        left = pairs[3]
-        rite = rite + 50
+        left = pairs[3] - 100 # Yes, this is correct, it takes reference_end from the BAM
+        rite = pairs[3]
 
         left_buck = ((left-1)//bucket_size) * bucket_size
         right_buck = (rite//bucket_size) * bucket_size
@@ -92,18 +94,18 @@ def map_pairs(valid_pairs, genome):
                     read2_type.append(r['type'])
 
         if read1_feat:
-            read1_feat = ', '.join(set(read1_feat))
-            read1_type = ', '.join(set(read1_type))
+            read1_feat = set(read1_feat)
+            read1_type = set(read1_type)
         else:
-            read1_feat = 'None'
-            read1_type = 'None'
+            read1_feat = None
+            read1_type = None
 
         if read2_feat:
-            read2_feat = ', '.join(set(read2_feat))
-            read2_type = ', '.join(set(read2_type))
+            read2_feat = set(read2_feat)
+            read2_type = set(read2_type)
         else:
-            read2_feat = 'None'
-            read2_type = 'None'
+            read2_feat = None
+            read2_type = None
 
         output.append((pairs, read1_feat, read1_type, read2_feat, read2_type))
 

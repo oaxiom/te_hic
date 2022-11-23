@@ -83,6 +83,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000, logger=None
             stats_not_canonical_chromosome += 1
             continue
 
+
         # criteria1: Check the distance between the two reads
         dist = max([abs(read1.reference_start - read2.reference_end), abs(read1.reference_end - read2.reference_start)])
         if dist < min_dist:
@@ -99,7 +100,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000, logger=None
 
         # This does duplicate removal in one go.
         # Only use the starts, it saves memory, and anyway the 3' ends are unreliable for duplicate removal if the input has been quality/adapter trimmed
-        pairs_add((read1.reference_name, read1.reference_start, read2.reference_name, read2.reference_end, loc_strand1, loc_strand2))
+        pairs_add((read1.reference_name[3:], read1.reference_start, read2.reference_name[3:], read2.reference_end, loc_strand1, loc_strand2))
         done += 1 # subtract this number to get the number of duplicates removed
 
         if stats_total_reads % 1000000 == 0:

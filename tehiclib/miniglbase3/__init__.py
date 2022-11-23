@@ -32,12 +32,6 @@ try:
 except Exception:
     raise LibraryNotFoundError("Fatal - Numpy is not available or not installed")
 
-try:
-    import scipy
-    config.SCIPY_AVAIL = True
-except Exception:
-    raise LibraryNotFoundError("Fatal - Scipy is not available or not installed")
-
 # ----------------------------------------------------------------------
 # Now import the rest of my libraries - assumes here they are available.
 # If I can get config and errors then these are probably available too.

@@ -57,7 +57,7 @@ class te_hic:
             logger=self.logger)
 
         if self.__save_intermediate_files:
-            save_valid_pairs(self.valid_pairs, f'stage1.int.{self.label}.tsv')
+            save_valid_pairs(self.valid_pairs, f'stage1.int.{self.label}.tsv.gz')
             self.logger.info(f'Intermediate file: Saved {len(self.valid_pairs):,} pairs')
 
         return True
@@ -73,11 +73,17 @@ class te_hic:
 
         mapped_pairs = map_pairs(self.valid_pairs, genome=self.genome)
 
+        del self.valid_pairs # not needed
+
         if self.__save_intermediate_files:
             # out form:
-            # ('\t'.join(line[0:3] + [read1_feat, read1_type] + line[3:] + [read2_feat, read2_type]))
+            # ((pairs, read1_feat, read1_type, read2_feat, read2_type))
+            # pairs = ('chr7', 150285954, 'chr4', 130529111, '-', '+');
+            #
             out = gzip.open(f'stage2.int.{self.label}.tsv.gz', 'wt')
-            [out.write('%s\n' % o) for o in output]
+            for o in mapped_pairs:
+                line = [o[0][0], o[0][1], o[0][1]+50, ', '.join(o[1]), ', '.join(o[2]), o[0][2], o[0][3]-50, o[0][4], ', '.join(o[3]), ', '.join(o[4])]
+                out.write('{}\n'.format('\t'.join(line)))
             out.close()
             self.logger.info(f'Intermediate file: Pair assignments {len(self.valid_pairs):,}')
 
