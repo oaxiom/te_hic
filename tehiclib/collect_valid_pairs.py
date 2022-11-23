@@ -10,7 +10,7 @@ import pysam
 
 valid_chroms = set(['chrX', 'chrY'] + ['chr%s' % i for i in range(1, 30)]) # cut scaffolds
 
-def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
+def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000, logger=None, min_qual=None):
     '''
     **Purpose**
         Collect valid pairs for some set of criteria
@@ -23,13 +23,17 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
             min_dist (default=5000)
                 minimum distance for a valid pair
 
+            min_qual (default=10)
+                minimum quality score
+
     **Returns**
         A list of valid fastq pairs
     '''
     assert bam1_filename, 'You must provide a valid filename in bam1_filename'
     assert bam2_filename, 'You must provide a valid filename in bam2_filename'
+    assert min_qual, 'You must specify a minimum quality score'
 
-    print('Started %s and %s' % (bam1_filename, bam2_filename))
+    logger.info(f'Started {bam1_filename} and {bam2_filename}')
 
     bf1 = pysam.AlignmentFile(bam1_filename, 'rb')
     bf2 = pysam.AlignmentFile(bam2_filename, 'rb')
@@ -45,6 +49,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
     stats_output = 0
     stats_short_range = 0
     stats_long_range = 0
+    stats_not_canonical_chromosome = 0
     reject_diff_chrom = 0
     reject_too_close = 0
 
@@ -53,7 +58,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
         stats_total_reads += 1
         # read name sanity check:
         if read1.query_name != read2.query_name:
-            print('ERROR: Mismatched read names (%s != %s), make sure the BAMs contain unaligned reads and are sorted by name' % (read1.query_name, read2.query_name))
+            logger.error('Mismatched read names (%s != %s), make sure the BAMs contain unaligned reads and are sorted by name' % (read1.query_name, read2.query_name))
             sys.quit()
 
         # check both reads are aligned
@@ -66,14 +71,16 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
         stats_aligned += 1
 
         # Check both reads have reasonable quality
-        if read1.mapping_quality < 10 and read2.mapping_quality < 10:
+        if read1.mapping_quality < min_qual and read2.mapping_quality < min_qual:
             stats_lowq += 1
             continue
 
         # Now trim if not a valid chrom (so the above stats are correct)
         if read1.reference_name not in valid_chroms:
+            stats_not_canonical_chromosome += 1
             continue
         if read2.reference_name not in valid_chroms:
+            stats_not_canonical_chromosome += 1
             continue
 
         # criteria1: Check the distance between the two reads
@@ -94,29 +101,30 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000):
         # Only use the starts, it saves memory, and anyway the 3' ends are unreliable for duplicate removal if the input has been quality/adapter trimmed
         pairs_add((read1.reference_name, read1.reference_start, read2.reference_name, read2.reference_end, loc_strand1, loc_strand2))
         done += 1 # subtract this number to get the number of duplicates removed
-        #if done > 200000:
-        #    break
 
         if stats_total_reads % 1000000 == 0:
-            print('Processed: {:,}'.format(stats_total_reads))
+            logger.info('Processed: {:,}'.format(stats_total_reads))
 
     bf1.close()
     bf2.close()
 
-    print('\ncollect_valid_pairs() stats:')
-    print('  Aligned:')
-    print('    Reads processed         : {:,}'.format(stats_total_reads))
-    print('    Low quality             : {:,} ({:.2%})'.format(stats_lowq, stats_lowq/stats_total_reads))
-    print('    Correctly paired        : {:,} ({:.2%})'.format(stats_aligned, stats_aligned/stats_total_reads))
-    print('    One pair aligned        : {:,} ({:.2%})'.format(stats_1aligned, stats_1aligned/stats_total_reads))
-    print('    No pairs aligned        : {:,} ({:.2%})'.format(stats_unaligned, stats_unaligned/stats_total_reads))
-    print('  Criteria rejected:')
-    print('    Too close               : {:,} ({:.2%})'.format(reject_too_close, reject_too_close/stats_total_reads))
-    print('    Duplicates              : {:,} ({:.2%})'.format(done-len(pairs), (done-len(pairs))/done))
-    print('  Final:')
-    print('    Kept reads              : {:,} ({:.2%})'.format(len(pairs), len(pairs)/stats_total_reads))
-    print('    Kept short-range (<20kb): {:,} ({:.2%})'.format(stats_short_range, stats_short_range/stats_total_reads))
-    print('    Kept long-range (>20kb) : {:,} ({:.2%})'.format(stats_long_range,  stats_long_range/stats_total_reads))
+    logger.info('\ncollect_valid_pairs() stats:')
+    logger.info('  Aligned:')
+    logger.info('    Reads processed           : {:,}'.format(stats_total_reads))
+    logger.info('    Correctly paired          : {:,} ({:.2%})'.format(stats_aligned, stats_aligned/stats_total_reads))
+    logger.info('  Rejected reads:')
+    logger.info('    Low quality               : {:,} ({:.2%})'.format(stats_lowq, stats_lowq/stats_total_reads))
+    logger.info('    One pair aligned          : {:,} ({:.2%})'.format(stats_1aligned, stats_1aligned/stats_total_reads))
+    logger.info('    Not canonical chromosome  : {:,} ({:.2%})'.format(stats_not_canonical_chromosome, stats_not_canonical_chromosome/stats_total_reads))
+    logger.info('    No pairs aligned          : {:,} ({:.2%})'.format(stats_unaligned, stats_unaligned/stats_total_reads))
+    logger.info('    Duplicates                : {:,} ({:.2%})'.format(done-len(pairs), (done-len(pairs))/done))
+    logger.info('  Rejected reads (by criteria):')
+    logger.info('    Too close                 : {:,} ({:.2%})'.format(reject_too_close, reject_too_close/stats_total_reads))
+    logger.info('  Final:')
+    logger.info('    Kept reads                : {:,} ({:.2%})'.format(len(pairs), len(pairs)/stats_total_reads))
+    logger.info('    Kept short-range (<20kb)  : {:,} ({:.2%})'.format(stats_short_range, stats_short_range/stats_total_reads))
+    logger.info('    Kept long-range (>20kb)   : {:,} ({:.2%})'.format(stats_long_range,  stats_long_range/stats_total_reads))
+
     return pairs
 
 def remove_duplicates(pairs):
@@ -146,24 +154,3 @@ def save_valid_pairs(pairs, output):
     for p in pairs:
         oh.write('%s\n' % '\t'.join([p[0], str(p[1]), str(p[1]+50), p[2], str(p[3]-50), str(p[3]), '.', '0', p[4], p[5]]))
     oh.close()
-    print('    Saved                   : {:,} pairs'.format(len(pairs)))
-
-if __name__ == '__main__':
-    work_path = sys.argv[0]
-
-    if len(sys.argv) != 4:
-        print('\nNot enough arguments!')
-        print('collect_valid_pairs.py bam1 bam2 output.bedpe.gz')
-        print('Also note the bam files MUST be sorted by name, or this will result in a mess')
-        print()
-        sys.exit()
-
-    bam1_filename = sys.argv[1]
-    bam2_filename = sys.argv[2]
-    output = sys.argv[3]
-
-    pairs = collect_valid_pairs(bam1_filename, bam2_filename)
-    #pairs = remove_duplicates(pairs)
-    save_valid_pairs(pairs, output)
-
-

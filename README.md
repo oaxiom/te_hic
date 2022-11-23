@@ -25,8 +25,7 @@ Doubly so, I as I rework the entire entry platform
 
 Installation:
 
-stick bin on your PATH:
-
+Stick bin on your PATH:
 export PATH=/path/to/te_hic/bin:$PATH
 
 Requires:
@@ -34,7 +33,6 @@ python3
 bowtie2
 samtools
 pysam
-
 
 To fix: 
 You will also need to premake the genome annotation files. Instructions are given for this in 

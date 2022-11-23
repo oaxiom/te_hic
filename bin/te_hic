@@ -23,14 +23,15 @@ def prepare_parser():
 
     # Optional:
     optional = parser._action_groups.pop()
-    optional.add_argument('-q', '--qual', nargs=1, type=int, default=20, required=False, help='q threshold for read quality filtering, default=20')
+    optional.add_argument('-l', '--label', nargs=1, type=str, default='te_hic', required=False, help='label for the sample name and output files, default=te_hic')
+    optional.add_argument('-q', '--qual', nargs=1, type=int, default=10, required=False, help='q threshold for read quality filtering, default=10')
+    optional.add_argument('-d', '--mindist', nargs=1, type=int, default=5000, required=False, help='Minimum distance (in base pairs) , default=5000')
 
     required = parser.add_argument_group('required arguments')
 
     required.add_argument('-a', '--read1', nargs=1, required=True, help='the BAM alignment file containing the reads')
     required.add_argument('-b', '--read2', nargs=1, required=True, help='the TSV file to save the genes and count data to')
-    required.add_argument('-g', '--genome', nargs=1, required=True, help='Genome assembly to use, valid genomes: {0}'.format(te_count.common.valid_assemblies))
-    #required.add_argument('-m', '--mode', nargs=1, required=True, help='Type of annotation to use, valid modes: {0}'.format(te_count.common.valid_modes))
+    required.add_argument('-g', '--genome', nargs=1, required=True, help='Genome assembly to use, valid genomes: {0}'.format(tehiclib.common.valid_assemblies))
 
     parser._action_groups.append(optional)
 
@@ -55,21 +56,23 @@ def main():
     log.info(f'  read1: {args.read1[0]}')
     log.info(f'  read2: {args.read2[0]}')
     log.info(f'  genome: "{args.genome[0]}"')
-    log.info(f'  quality thresold: {args.qual} (default is 20)'
+    log.info(f'  quality thresold: {args.qual} (default is 20)')
+
+    # TODO: Check the genome is avaialble.
 
     # stage 1
 
-    te_hic = tehiclib.main()
+    te_hic = tehiclib.te_hic(label=args.label, logger=log)
 
     log.info('Stage 1: Collect valid read pairs')
+    te_hic.stage1_collect_valid_pairs(args.read1[0], args.read2[0], min_dist=args.mindist, min_qual=args.qual)
 
-    log.info('Stage 2: Assign to {args.genome[0]} genome feature ')
+    log.info(f'Stage 2: Assign to {args.genome[0]} genome feature ')
+    te_hic.stage2_assign_to_genome_feature(args.genome[0])
 
     log.info('Stage 3: Quantify links')
 
     log.info('Stage 4: Build Matrices')
-
-
 
     return
 

@@ -4,7 +4,7 @@
 
 Assign the BEDPE to a TE.
 
-Basically, does one or more end overlap with a TE?
+Does one or more end overlap with a TE?
 
 '''
 
@@ -27,9 +27,9 @@ class measureTE:
 
     def bind_genome(self, genelist_glb_filename):
         self.genome = glbase3.glload(genelist_glb_filename)
-        print('Loaded %s' % genelist_glb_filename)
+        print(f'Loaded {genelist_glb_filename}')
 
-    def load_bedpe(self, filename, out_filename):
+    def load_bedpe(self, valid_pairs):
         '''
         **Purpose**
             Load in a BEDPE file, ideally output by collect_valid_pairs.py, although I guess any valid BEDPE will do
@@ -38,6 +38,8 @@ class measureTE:
             filename (Required)
                 filename of the BEDPE file
         '''
+        assert not (valid_pairs and filename), 'You cannot use both valid_pairs and filename'
+        if valid_pairs
         assert filename, 'You must specify a filename'
 
         done = 0
@@ -49,11 +51,8 @@ class measureTE:
         self_genome_buckets = self.genome.buckets
 
         oh = gzip.open(filename, 'rt')
-        for idx, line in enumerate(oh):
-            line = line.strip().split('\t')
+        for idx, pairs in enumerate(valid_pairs):
 
-            # reach into the genelist guts...
-            # work out which of the buckets is required:
             chrom = line[0].replace('chr', '')
             left = int(line[1])
             rite = int(line[2])
