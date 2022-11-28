@@ -11,19 +11,21 @@ and collects a variety of info about the sort of linkes observed.
 
 '''
 
-import sys, os, gzip
+import sys, os
 from itertools import product
-import miniglbase3
-import common
+from . import miniglbase3
+from . import common
 
 class quantify:
-    def __init__(self, project_name):
+    def __init__(self, project_name, logger=None):
+        assert logger, 'Need to provide a log'
         self.project_name = project_name
+        self.log = logger
 
     def bind_genome(self, genome_glb):
-        self.genome = glbase3.glload(genelist_glb_filename)
+        self.genome = genome_glb
 
-    def measure_te_anchors(self):
+    def measure_te_anchors(self, mapped_pairs):
         '''
         **Purpose**
             Make a crude measure of the
@@ -40,32 +42,31 @@ class quantify:
         res_te_te = {}
         res_te_nn = {}
 
-        # The format of the TE file is:
-        # read1.chrom read1.left read1.right read1.labels read1.type read2.chrom read2.left read2.right read2.labels read2.type
+        # The format of mapped_pairs is:
+        # ('8', 88996379, '8', 89417593, '+', '-'), {'Tigger19a:TcMar-Tigger:DNA'}, {'TE'}, {'MER33:hAT-Charlie:DNA'}, {'TE'})
 
-        print("Measures anchors...")
+        self.log.info("Measures anchors...")
         total = 0
-        oh = gzip.open(self.filename, 'rt')
-        for line in oh:
-            r = line.strip().split('\t')
+        for r in mapped_pairs:
+
             # measure TE anchors
-            if 'TE' in r[4] and 'TE' in r[9]:
+            if 'TE' in r[2] and 'TE' in r[4]:
                 te['TE <-> TE'] += 1
-            elif 'TE' in r[4] or 'TE' in r[9]:
+            elif 'TE' in r[2] or 'TE' in r[4]:
                 te['TE <-> -'] += 1
             else:
                 te['-  <-> -'] += 1
             total += 1
 
-            if total % 1000000 == 0:
-                print('Processed: {:,}'.format(total))
+            if total % 1e6 == 0:
+                self.log.info(f'Processed: {total:,}')
                 #break
 
             # Measure TEs in detail
-            if 'TE' in r[4] and 'TE' in r[9]:
+            if 'TE' in r[2] and 'TE' in r[4]:
                 # possible to have more than one TE:
-                tel = [i.strip() for i in r[3].split(',') if ':' in i] # can also hoover up some genes, so use ':' to discriminate TEs
-                ter = [i.strip() for i in r[8].split(',') if ':' in i]
+                tel = [i for i in r[1] if ':' in i] # can also hoover up some genes, so use ':' to discriminate TEs
+                ter = [i for i in r[3] if ':' in i]
                 combs = product(tel, ter)
                 combs = [tuple(sorted(i)) for i in combs] # sort to make it unidirectional
 
@@ -75,11 +76,12 @@ class quantify:
                         res_te_te[c] = 0
                     res_te_te[c] += 1
 
-            elif 'TE' in r[4] or 'TE' in r[9]:
-                if 'TE' in r[4]:
-                    TE = [i.strip() for i in r[3].split(',') if ':' in i]
-                elif 'TE' in r[9]:
-                    TE = [i.strip() for i in r[8].split(',') if ':' in i]
+            elif 'TE' in r[2] or 'TE' in r[4]:
+                if 'TE' in r[2]:
+                    TE = [i for i in r[1] if ':' in i]
+                elif 'TE' in r[4]:
+                    TE = [i for i in r[3] if ':' in i]
+
                 for t in TE:
                     if ':' not in t:
                         continue
@@ -87,21 +89,19 @@ class quantify:
                         res_te_nn[t] = 0
                     res_te_nn[t] += 1
 
-        oh.close()
+        self.log.info('\nmeasure_te_anchors():')
+        self.log.info('  TE <-> TE : {:,} ({:.2%})'.format(te['TE <-> TE'], te['TE <-> TE']/total))
+        self.log.info('  TE <-> -- : {:,} ({:.2%})'.format(te['TE <-> -'], te['TE <-> -']/total))
+        self.log.info('  -- <-> -- : {:,} ({:.2%})'.format(te['-  <-> -'], te['-  <-> -']/total))
+        self.log.info()
 
-        print('\nmeasure_te_anchors():')
-        print('  TE <-> TE : {:,} ({:.2%})'.format(te['TE <-> TE'], te['TE <-> TE']/total))
-        print('  TE <-> -- : {:,} ({:.2%})'.format(te['TE <-> -'], te['TE <-> -']/total))
-        print('  -- <-> -- : {:,} ({:.2%})'.format(te['-  <-> -'], te['-  <-> -']/total))
-        print()
-
-        oh = open('%s_crude_measures.txt' % self.project_name, 'w')
+        oh = open('stage3.%s_crude_measures.txt' % self.project_name, 'w')
         oh.write('TE <-> TE : {:,} ({:.5%})\n'.format(te['TE <-> TE'], te['TE <-> TE']/total))
         oh.write('TE <-> -- : {:,} ({:.5%})\n'.format(te['TE <-> -'], te['TE <-> -']/total))
         oh.write('-- <-> -- : {:,} ({:.5%})\n'.format(te['-  <-> -'], te['-  <-> -']/total))
         oh.close()
 
-        oh_te_te = open('%s_te-te_anchor_frequencies.tsv' % self.project_name, 'w')
+        oh_te_te = open(f'stage3.{self.project_name}_te-te_anchor_frequencies.tsv', 'w')
         oh_te_te.write('%s\n' % '\t'.join(['TE1', 'TE2', 'RPM', 'RPM per kbp TE', 'TE1_genome_freq', 'TE2_genome_freq']))
         for k in sorted(list(res_te_te)):
             te1 = self.genome._findDataByKeyLazy('name', k[0])
@@ -116,40 +116,23 @@ class quantify:
                 'te2_genome_freq': te2['genome_percent'] / 100.0,
                 #'enrichment': #!?!?!
                 }
-            oh_te_te.write('{i[te1]}\t{i[te2]}\t{i[rpm]}\t{i[rpmpkbte]}\t{i[te1_genome_freq]}\t{i[te2_genome_freq]}\n'.format(i=line))
+            oh_te_te.write(f'{line[te1]}\t{line[te2]}\t{line[rpm]}\t{line[rpmpkbte]}\t{line[te1_genome_freq]}\t{line[te2_genome_freq]}\n')
             #print('{i[te1]}\t{i[te2]}\t{rpm}\t{rpmkbte}\t{te1_genome_freq}\t{te2_genome_freq}\n'.format(i=line))
+
         oh_te_te.close()
 
-        te_nn = glbase3.genelist()
+        te_nn = miniglbase3.genelist()
         te_nn.load_list([{'name': k, 'count': res_te_nn[k]} for k in res_te_nn])
         te_nn = te_nn.map(genelist=self.genome, key='name')
         for te in te_nn:
             te['RPM'] = (res_te_nn[te['name']]/total) * 1e6
             te['RPM per kbp of TE'] = (te['RPM'] / te['genome_count']) * 1e3
             #te['enrichment'] =
+
         te_nn._optimiseData()
         te_nn.sort('name')
-        te_nn.saveTSV('%s_te-nn_anchor_frequencies.tsv' % self.project_name, key_order=['name', 'count', 'genome_count', 'genome_percent', 'RPM'])
+        te_nn.saveTSV(f'stage3.{self.project_name}_te-nn_anchor_frequencies.tsv', key_order=['name', 'count', 'genome_count', 'genome_percent', 'RPM'])
 
         return
-
-if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        print('\nNot enough arguments')
-        print('quantify_links.py in.tsv species project_name')
-        common.print_species()
-        print()
-        sys.exit()
-
-    species = sys.argv[2]
-    if not common.check_species(species):
-        sys.exit()
-
-    script_path = os.path.dirname(os.path.realpath(__file__))
-
-    q = quantify(sys.argv[3])
-    q.bind_genome(os.path.join(script_path, 'genome/%s_te_genome_freqs.glb' % species))
-    q.load_tsv(sys.argv[1])
-    q.measure_te_anchors()
 
 

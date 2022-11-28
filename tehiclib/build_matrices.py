@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
 '''
 
-Part of the te_hic suite
+Part of the te_hic
 
 Build four (raw) matrices:
 1. All
@@ -15,8 +14,7 @@ TODO:
 '''
 
 import sys, os, math, numpy, shutil, gzip
-#import glbase3
-import common
+from . import common
 
 class build_matrices:
     def __init__(self, script_path, species, infilename, resolution):

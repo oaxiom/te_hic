@@ -95,15 +95,15 @@ def map_pairs(valid_pairs, genome):
             read1_feat = set(read1_feat)
             read1_type = set(read1_type)
         else:
-            read1_feat = None
-            read1_type = None
+            read1_feat = set()
+            read1_type = set()
 
         if read2_feat:
             read2_feat = set(read2_feat)
             read2_type = set(read2_type)
         else:
-            read2_feat = None
-            read2_type = None
+            read2_feat = set()
+            read2_type = set()
 
         output.append((pairs, read1_feat, read1_type, read2_feat, read2_type))
 

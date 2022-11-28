@@ -1,9 +1,9 @@
 
 import os, gzip
 from . import common
-from .collect_valid_pairs import collect_valid_pairs, remove_duplicates, save_valid_pairs
+from .collect_valid_pairs import collect_valid_pairs, save_valid_pairs
 from .assign_to_te import map_pairs
-from .quantify_links import quanitfy
+from .quantify_links import quantify
 
 from . import miniglbase3
 
@@ -101,16 +101,16 @@ class te_hic:
     def stage3_quantify_links(self):
         '''
         **Stage 3**
-            Aggregate the genome contacts.
+            Aggregate the genome contacts and output some statistics
 
         '''
         assert self.mapped_pairs, 'Stage 2 results "mapped_pairs" was not generated correctly'
 
-        qfy = quantitfy(self.label)
+        qfy = quantify(self.label, logger=self.logger)
         qfy.bind_genome(self.genome)
+        qfy.measure_te_anchors(self.mapped_pairs)
 
-
-        del self.mapped_pairs
+        #del self.mapped_pairs
         return True
 
     def stage4_build_matrices(self):
@@ -119,4 +119,6 @@ class te_hic:
             Build the matrices at the required resolutions
 
         '''
+        assert self.mapped_pairs, 'Stage 2 results "mapped_pairs" was not generated correctly'
+
         return True
