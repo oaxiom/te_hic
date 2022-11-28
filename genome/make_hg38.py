@@ -45,13 +45,15 @@ for idx, item in enumerate(repeats):
     if str(item['loc']['chr']) not in chr_set:
         continue
 
+    name = f"{item['repName']}:{item['repFamily']}:{item['repClass']}"
+
     newentry = {'loc': item['loc'],
-        'name': '%s:%s:%s' % (item['repName'], item['repFamily'], item['repClass']),
+        'name': name,
         'type': 'TE',
-        'ensg': '%s:%s:%s' % (item['repName'], item['repFamily'], item['repClass'])
+        'ensg': name
         }
     newl.append(newentry)
-    #print(newentry)
+
     added += 1
 
     #if idx > 100000:

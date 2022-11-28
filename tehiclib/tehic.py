@@ -41,11 +41,16 @@ class te_hic:
         self.__save_intermediate_files = save_intermediate_files
         self.__script_path = os.path.dirname(os.path.realpath(__file__))
 
+        oh = open(os.path.join(self.__script_path, f'../genome/{genome}.chromSizes.clean'), 'r')
+        self.chrom_sizes = {}
+        for line in oh:
+            line = line.strip().split('\t')
+            self.chrom_sizes[line[0]] = int(line[1])
+        oh.close()
+
         self.genome = miniglbase3.glload(os.path.join(self.__script_path, f'../genome/{genome}_glb_gencode_tes.glb'))
         # Get the TE frequencies tables
         self.te_genome_freqs = miniglbase3.glload(os.path.join(self.__script_path, f'../genome/{genome}_te_genome_freqs.glb'))
-
-        oh = os.path.join(self.__script_path, f'../genome/{genome}_te_genome_freqs.glb')
 
         return
 
@@ -123,7 +128,7 @@ class te_hic:
         assert self.mapped_pairs, 'Stage 2 results "mapped_pairs" was not generated correctly'
 
         for resolution in resolutions:
-            mat = build_matrices(self.genome_sizes, resolution, logger=self.logger)
+            mat = build_matrices(self.chrom_sizes, resolution, logger=self.logger)
 
             mat.build_matrices(self.mapped_pairs)
             mat.save_matrices(self.label)

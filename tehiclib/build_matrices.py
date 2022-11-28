@@ -38,8 +38,7 @@ class build_matrices:
         self.chrom_bin_offsets = {} # the top and bottom bins for this chrom
 
         for chrom in genome_sizes:
-            num_bins = math.ceil(genome_sizes[chrom]) / self.res)
-            self.chrom_sizes[chrom] = int(line[1])
+            num_bins = math.ceil(genome_sizes[chrom]) / self.res
             self.num_bins[chrom] = num_bins
 
         # work out the min_bin, max_bin
@@ -47,7 +46,7 @@ class build_matrices:
         for chrom in sorted(self.num_bins):
             self.chrom_bin_offsets[chrom] = (cumm_bin, cumm_bin+self.num_bins[chrom])
             cumm_bin += self.num_bins[chrom]+1
-        oh.close()
+
         return
 
     def build_matrices(self, mapped_pairs):
@@ -60,19 +59,20 @@ class build_matrices:
         And also output the hiccys?
 
         '''
-        self.log.info('Building in-memory matrices')
+        self.log.info(f'Building in-memory matrices for resolution {self.res} kbp')
 
+        # The format of mapped_pairs is:
+        # (
+        #   ('8', 88996379, '8', 89417593, '+', '-'),
+        #   {'Tigger19a:TcMar-Tigger:DNA'}, {'TE'},
+        #   {'MER33:hAT-Charlie:DNA'}, {'TE'}
+        # )
 
         for done, pair in enumerate(mapped_pairs):
-            print(pair)
-            1/0
-
-            line = line.strip().split('\t')
-
-            read1_chrom = line[0]
-            read2_chrom = line[5]
-            read1_mid = (int(line[1]) + int(line[2])) // 2
-            read2_mid = (int(line[6]) + int(line[7])) // 2
+            read1_chrom = f'chr{pair[0][0]}'
+            read2_chrom = f'chr{pair[0][2]}'
+            read1_mid = pair[0][1]
+            read2_mid = pair[0][3]
 
             read1_bin = (read1_mid // self.res) + self.chrom_bin_offsets[read1_chrom][0]
             read2_bin = (read2_mid // self.res) + self.chrom_bin_offsets[read2_chrom][0]
@@ -87,13 +87,13 @@ class build_matrices:
                 self.all[bin_pair] = 0
             self.all[bin_pair] += 1
 
-            if 'TE' in line[4] and 'TE' in line[9]:
+            if 'TE' in pair[2] and 'TE' in pair[4]:
                 # TE <=> TE
                 if bin_pair not in self.tete:
                     self.tete[bin_pair] = 0
                 self.tete[bin_pair] += 1
 
-            elif 'TE' in line[4] or 'TE' in line[9]:
+            elif 'TE' in pair[2] or 'TE' in pair[4]:
                 # TE <=> non-TE
                 if bin_pair not in self.tenn:
                     self.tenn[bin_pair] = 0
@@ -113,59 +113,56 @@ class build_matrices:
 
         return
 
-    def save_matrices(self, out_path):
+    def save_matrices(self, label):
         '''
         **Purpose**
             Save the matrices into out_path/sample/resolution/
         '''
-        if not os.path.isdir(out_path):
-            os.mkdir(out_path) # don't delete otherwise this will be unfriendly to others working here
+        if not os.path.isdir(f'matrices_{label}'):
+            os.mkdir(f'matrices_{label}') # don't delete otherwise this will be unfriendly to others working here
 
-        if not os.path.isdir(os.path.join(out_path, self.sample_name)):
-            os.mkdir(os.path.join(out_path, self.sample_name))
-
-        if not os.path.isdir(os.path.join(out_path, self.sample_name, str(self.res))):
-            os.mkdir(os.path.join(out_path, self.sample_name, str(self.res)))
+        if not os.path.isdir(os.path.join(f'matrices_{label}', str(self.res))):
+            os.mkdir(os.path.join(f'matrices_{label}', str(self.res)))
 
         # save the BED file describing the binIDs
-        filename = os.path.join(out_path, self.sample_name, str(self.res), '%s_%s_abs.bed' % (self.sample_name, self.res))
+        filename = os.path.join(f'matrices_{label}', str(self.res), '{label}_{self.res}_abs.bed')
         oh = open(filename, 'w')
         for chrom in self.chrom_bin_offsets:
             #print(chrom)
             for localbinid, binid in enumerate(range(self.chrom_bin_offsets[chrom][0], self.chrom_bin_offsets[chrom][1])):
                 l = localbinid * self.res
                 r = (localbinid * self.res) + self.res
-                oh.write('%s\t%s\t%s\t%s\n' % (chrom, l, r, binid+1)) # The +1 is to mimic HiCpro, remember to also +1 below!!
+                oh.write(f'{chrom}\t{l}\t{r}\t{binid+1}\n') # The +1 is to mimic HiCpro, remember to also +1 below!!
         oh.close()
-        print('Saved BED bins: "%s"' % filename)
+        self.log.info('Saved BED bins: "%s"' % filename)
 
         # Save the matrices:
         # matrices are sparse:
-        filename = os.path.join(out_path, self.sample_name, str(self.res), '%s_%s.all.raw.matrix' % (self.sample_name, self.res))
+        filename = os.path.join(f'matrices_{label}',str(self.res), f'{label}_{self.res}.all.raw.matrix')
         oh = open(filename, 'w')
         for bins in sorted(self.all):
-            oh.write('%s\t%s\t%s\n' % (bins[0]+1, bins[1]+1, self.all[bins])) # The +1 is to mimic HiCpro!
+            oh.write(f'{bins[0]+1}\t{bins[1]+1}\t{self.all[bins]}\n') # The +1 is to mimic HiCpro!
         oh.close()
-        print('Saved All matrix: "%s"' % filename)
+        self.log.info(f'Saved All matrix: "{filename}"')
 
-        filename = os.path.join(out_path, self.sample_name, str(self.res), '%s_%s.tete.raw.matrix' % (self.sample_name, self.res))
+        filename = os.path.join(f'matrices_{label}', str(self.res), f'{label}_{self.res}.tete.raw.matrix')
         oh = open(filename, 'w')
         for bins in sorted(self.tete):
-            oh.write('%s\t%s\t%s\n' % (bins[0]+1, bins[1]+1, self.tete[bins]))# The +1 is to mimic HiCpro!
+            oh.write(f'{bins[0]+1}\t{bins[1]+1}\t{self.tete[bins]}\n')# The +1 is to mimic HiCpro!
         oh.close()
-        print('Saved TE <=> TE matrix: "%s"' % filename)
+        self.log.info(f'Saved TE <=> TE matrix: "{filename}"')
 
-        filename = os.path.join(out_path, self.sample_name, str(self.res), '%s_%s.tenn.raw.matrix' % (self.sample_name, self.res))
+        filename = os.path.join(f'matrices_{label}', str(self.res), f'{label}_{self.res}.tenn.raw.matrix')
         oh = open(filename, 'w')
         for bins in sorted(self.tenn):
-            oh.write('%s\t%s\t%s\n' % (bins[0]+1, bins[1]+1, self.tenn[bins])) # The +1 is to mimic HiCpro!
+            oh.write(f'{bins[0]+1}\t{bins[1]+1}\t{self.tenn[bins]}\n') # The +1 is to mimic HiCpro!
         oh.close()
-        print('Saved TE <=> non-TE matrix: "%s"' % filename)
+        self.log.info(f'Saved TE <=> non-TE matrix: "{filename}"')
 
-        filename = os.path.join(out_path, self.sample_name, str(self.res), '%s_%s.nnnn.raw.matrix' % (self.sample_name, self.res))
+        filename = os.path.join(f'matrices_{label}', str(self.res), f'{label}_{self.res}.nnnn.raw.matrix')
         oh = open(filename, 'w')
         for bins in sorted(self.nnnn):
-            oh.write('%s\t%s\t%s\n' % (bins[0]+1, bins[1]+1, self.nnnn[bins])) # The +1 is to mimic HiCpro!
+            oh.write(f'{bins[0]+1}\t{bins[1]+1}\t{self.nnnn[bins]}\n') # The +1 is to mimic HiCpro!
         oh.close()
-        print('Saved non-TE <=> non-TE matrix: "%s"' % filename)
+        self.log.info(f'Saved non-TE <=> non-TE matrix: "{filename}"')
 

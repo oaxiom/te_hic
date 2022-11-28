@@ -15,6 +15,7 @@ import tehiclib
 
 default_q = 10
 default_mindist = 5000
+default_resolutions = [300, 150, 50]
 
 # Command-line options;
 def prepare_parser():
@@ -28,7 +29,8 @@ def prepare_parser():
     optional = parser._action_groups.pop()
     optional.add_argument('-l', '--label', nargs=1, type=str, default='te_hic', required=False, help='label for the sample name and output files, default=te_hic')
     optional.add_argument('-q', '--qual', nargs=1, type=int, default=default_q, required=False, help=f'q threshold for read quality filtering, default={default_q}')
-    optional.add_argument('-d', '--mindist', nargs=1, type=int, default=5000, required=False, help=f'Minimum distance (in base pairs) , default={default_mindist}')
+    optional.add_argument('-d', '--mindist', nargs=1, type=int, default=default_mindist, required=False, help=f'Minimum distance (in base pairs) , default={default_mindist}')
+    optional.add_argument('-r', '--resolutions', nargs=1, type=list, default=default_resolutions, required=False, help=f'Default resolutions for the matrices default={default_resolutions}')
 
     required = parser.add_argument_group('required arguments')
 
@@ -62,6 +64,7 @@ def main():
     log.info(f'  Genome: {args.genome[0]}')
     log.info(f'  Quality thresold: {args.qual} (default is {default_q})')
     log.info(f'  Minimum contact distance: {args.mindist} (default is {default_mindist})')
+    log.info(f'  Matrix resolutions to build: {args.resolutions} (default is {default_resolutions})')
 
     te_hic = tehiclib.te_hic(genome=args.genome[0], label=args.label, logger=log)
 
@@ -76,7 +79,7 @@ def main():
     te_hic.stage3_quantify_links()
 
     log.info('Stage 4: Build Matrices')
-    te_hic.stage4_build_matrices()
+    te_hic.stage4_build_matrices(args.resolutions)
 
     return
 
