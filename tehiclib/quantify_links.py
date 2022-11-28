@@ -93,11 +93,9 @@ class quantify:
                         res_te_nn[t] = 0
                     res_te_nn[t] += 1
 
-        self.log.info('\nmeasure_te_anchors():')
         self.log.info('  TE <-> TE : {:,} ({:.2%})'.format(te['TE <-> TE'], te['TE <-> TE']/total))
         self.log.info('  TE <-> -- : {:,} ({:.2%})'.format(te['TE <-> -'], te['TE <-> -']/total))
         self.log.info('  -- <-> -- : {:,} ({:.2%})'.format(te['-  <-> -'], te['-  <-> -']/total))
-        self.log.info('')
 
         oh = open('stage3.%s_crude_measures.txt' % self.project_name, 'w')
         oh.write('TE <-> TE : {:,} ({:.5%})\n'.format(te['TE <-> TE'], te['TE <-> TE']/total))
@@ -120,14 +118,13 @@ class quantify:
                 'te2_genome_freq': te2['genome_percent'] / 100.0,
                 #'enrichment': #!?!?!
                 }
-            oh_te_te.write(f'{line[te1]}\t{line[te2]}\t{line[rpm]}\t{line[rpmpkbte]}\t{line[te1_genome_freq]}\t{line[te2_genome_freq]}\n')
-            #print('{i[te1]}\t{i[te2]}\t{rpm}\t{rpmkbte}\t{te1_genome_freq}\t{te2_genome_freq}\n'.format(i=line))
+            oh_te_te.write(f'{line["te1"]}\t{line["te2"]}\t{line["rpm"]}\t{line["rpmpkbte"]}\t{line["te1_genome_freq"]}\t{line["te2_genome_freq"]}\n')
 
         oh_te_te.close()
 
         te_nn = miniglbase3.genelist()
         te_nn.load_list([{'name': k, 'count': res_te_nn[k]} for k in res_te_nn])
-        te_nn = te_nn.map(genelist=self.genome, key='name')
+        te_nn = te_nn.map(genelist=self.te_freqs, key='name')
         for te in te_nn:
             te['RPM'] = (res_te_nn[te['name']]/total) * 1e6
             te['RPM per kbp of TE'] = (te['RPM'] / te['genome_count']) * 1e3
