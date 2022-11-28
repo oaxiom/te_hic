@@ -25,7 +25,7 @@ class build_matrices:
         self.log = logger
 
         # get the samplename:
-        self.res = resolution
+        self.res = resolution * 1000
 
         self.all = {} # 1
         self.tete = {} # 2
@@ -38,7 +38,7 @@ class build_matrices:
         self.chrom_bin_offsets = {} # the top and bottom bins for this chrom
 
         for chrom in genome_sizes:
-            num_bins = math.ceil(genome_sizes[chrom]) / self.res
+            num_bins = math.ceil(genome_sizes[chrom] / self.res)
             self.num_bins[chrom] = num_bins
 
         # work out the min_bin, max_bin
@@ -53,10 +53,6 @@ class build_matrices:
         '''
 
         Build the raw matrices in the style of hicpro
-
-        TODO: Implement ICE normalisation
-
-        And also output the hiccys?
 
         '''
         self.log.info(f'Building in-memory matrices for resolution {self.res} kbp')
@@ -106,10 +102,8 @@ class build_matrices:
                 self.nnnn[bin_pair] += 1
 
             done += 1
-            if done % 1000000 == 0:
+            if done % 1e6 == 0:
                 print(f'Processed: {done:,}')
-
-        oh.close()
 
         return
 
@@ -125,7 +119,7 @@ class build_matrices:
             os.mkdir(os.path.join(f'matrices_{label}', str(self.res)))
 
         # save the BED file describing the binIDs
-        filename = os.path.join(f'matrices_{label}', str(self.res), '{label}_{self.res}_abs.bed')
+        filename = os.path.join(f'matrices_{label}', str(self.res), f'{label}_{self.res}_abs.bed')
         oh = open(filename, 'w')
         for chrom in self.chrom_bin_offsets:
             #print(chrom)
@@ -134,7 +128,7 @@ class build_matrices:
                 r = (localbinid * self.res) + self.res
                 oh.write(f'{chrom}\t{l}\t{r}\t{binid+1}\n') # The +1 is to mimic HiCpro, remember to also +1 below!!
         oh.close()
-        self.log.info('Saved BED bins: "%s"' % filename)
+        self.log.info(f'Saved BED bins: "{filename}"')
 
         # Save the matrices:
         # matrices are sparse:

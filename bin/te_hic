@@ -64,7 +64,7 @@ def main():
     log.info(f'  Genome: {args.genome[0]}')
     log.info(f'  Quality thresold: {args.qual} (default is {default_q})')
     log.info(f'  Minimum contact distance: {args.mindist} (default is {default_mindist})')
-    log.info(f'  Matrix resolutions to build: {args.resolutions} (default is {default_resolutions})')
+    log.info(f'  Matrix resolutions to build: {args.resolutions} kbp (default is {default_resolutions})')
 
     te_hic = tehiclib.te_hic(genome=args.genome[0], label=args.label, logger=log)
 
