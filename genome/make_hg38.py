@@ -9,8 +9,8 @@ This is for the mm10 genome
 '''
 
 import sys
-sys.path.append('../tehiclib')
-from miniglbase3 import delayedlist, progressbar, genelist
+sys.path.append('../')
+from tehiclib import delayedlist, progressbar, genelist
 
 gtf = {
     #"feature_type": 1,

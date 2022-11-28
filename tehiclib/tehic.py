@@ -3,6 +3,7 @@ import os, gzip
 from . import common
 from .collect_valid_pairs import collect_valid_pairs, remove_duplicates, save_valid_pairs
 from .assign_to_te import map_pairs
+from .quantify_links import quanitfy
 
 from . import miniglbase3
 
@@ -104,6 +105,10 @@ class te_hic:
 
         '''
         assert self.mapped_pairs, 'Stage 2 results "mapped_pairs" was not generated correctly'
+
+        qfy = quantitfy(self.label)
+        qfy.bind_genome(self.genome)
+
 
         del self.mapped_pairs
         return True

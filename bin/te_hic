@@ -13,25 +13,29 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(script_path, '../'))
 import tehiclib
 
+default_q = 10
+default_mindist = 5000
+
 # Command-line options;
 def prepare_parser():
     exmp = 'Minimal usage usage: te_hic -a read1.bam -b read2.bam -g genome'
 
     description = 'HiC data analysis, preserving TE information'
 
-    parser = argparse.ArgumentParser(prog='te_count', description=description, epilog=exmp)
+    parser = argparse.ArgumentParser(prog='te_hic', description=description, epilog=exmp)
 
     # Optional:
     optional = parser._action_groups.pop()
     optional.add_argument('-l', '--label', nargs=1, type=str, default='te_hic', required=False, help='label for the sample name and output files, default=te_hic')
-    optional.add_argument('-q', '--qual', nargs=1, type=int, default=10, required=False, help='q threshold for read quality filtering, default=10')
-    optional.add_argument('-d', '--mindist', nargs=1, type=int, default=5000, required=False, help='Minimum distance (in base pairs) , default=5000')
+    optional.add_argument('-q', '--qual', nargs=1, type=int, default=default_q, required=False, help=f'q threshold for read quality filtering, default={default_q}')
+    optional.add_argument('-d', '--mindist', nargs=1, type=int, default=5000, required=False, help=f'Minimum distance (in base pairs) , default={default_mindist}')
 
     required = parser.add_argument_group('required arguments')
 
-    required.add_argument('-a', '--read1', nargs=1, required=True, help='the BAM alignment file containing the reads')
-    required.add_argument('-b', '--read2', nargs=1, required=True, help='the TSV file to save the genes and count data to')
-    required.add_argument('-g', '--genome', nargs=1, required=True, help='Genome assembly to use, valid genomes: {0}'.format(tehiclib.common.valid_assemblies))
+    required.add_argument('-g', '--genome', nargs=1, required=True, help=f'Genome assembly to use, valid genomes: {tehiclib.common.valid_assemblies}')
+    required.add_argument('-1', '--read1', nargs=1, required=True, help='the BAM alignment file containing the aligned reads pair 1')
+    required.add_argument('-2', '--read2', nargs=1, required=True, help='the BAM alignment file containing the aligned reads pair 2')
+
 
     parser._action_groups.append(optional)
 
@@ -69,6 +73,7 @@ def main():
     te_hic.stage2_assign_to_genome_feature()
 
     log.info('Stage 3: Quantify links')
+    te_hic.stage2_assign_to_genome_feature()
 
     log.info('Stage 4: Build Matrices')
 

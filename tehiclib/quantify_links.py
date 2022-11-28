@@ -13,32 +13,15 @@ and collects a variety of info about the sort of linkes observed.
 
 import sys, os, gzip
 from itertools import product
-import glbase3
+import miniglbase3
 import common
 
 class quantify:
     def __init__(self, project_name):
         self.project_name = project_name
 
-    def bind_genome(self, genelist_glb_filename):
+    def bind_genome(self, genome_glb):
         self.genome = glbase3.glload(genelist_glb_filename)
-        print('Loaded %s' % genelist_glb_filename)
-
-    def load_tsv(self, filename):
-        '''
-        load the output from assign_to_te.py
-        '''
-        self.filename = filename
-
-        return
-        # Below is deprecated. It's fast, but when the reads gets above ~100 million it tends to kill
-        # the computer even with >64G RAM
-        self.reads = []
-        oh = open(filename, 'r')
-        for line in oh:
-            line = line.strip().split('\t')
-            self.reads.append(line)
-        oh.close()
 
     def measure_te_anchors(self):
         '''

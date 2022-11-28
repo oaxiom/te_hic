@@ -8,7 +8,9 @@ This is for the mm10 genome
 
 '''
 
-from glbase3 import *
+import sys
+sys.path.append('../')
+from tehiclib import genelist
 
 rmsk_track_form = {"force_tsv": True, 'loc': 'location(chr=column[5], left=column[6], right=column[7])',
     'repName': 10, 'repClass': 11, 'repFamily': 12}

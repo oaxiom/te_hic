@@ -41,5 +41,5 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%m-%d %H:%M'),
 
 
-log = logging.getLogger('glbase3')
+log = logging.getLogger('miniglbase3')
 log.setLevel(logging.INFO)
