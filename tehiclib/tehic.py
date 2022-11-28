@@ -40,12 +40,11 @@ class te_hic:
         self.__save_intermediate_files = save_intermediate_files
         self.__script_path = os.path.dirname(os.path.realpath(__file__))
 
-        self.bind_genome(os.path.join(self.__script_path, f'../genome/{genome}_glb_gencode_tes.glb'))
+        self.genome = miniglbase3.glload(os.path.join(self.__script_path, f'../genome/{genome}_glb_gencode_tes.glb'))
+        # Get the TE frequencies tables
+        self.te_genome_freqs = miniglbase3.glload(os.path.join(self.__script_path, f'../genome/{genome}_te_genome_freqs.glb'))
 
         return
-
-    def bind_genome(self, genelist_glb_filename):
-        self.genome = miniglbase3.glload(genelist_glb_filename)
 
     def stage1_collect_valid_pairs(self, bam1_filename, bam2_filename, min_dist=5000, min_qual=10):
         '''
@@ -107,7 +106,7 @@ class te_hic:
         assert self.mapped_pairs, 'Stage 2 results "mapped_pairs" was not generated correctly'
 
         qfy = quantify(self.label, logger=self.logger)
-        qfy.bind_genome(self.genome)
+        qfy.bind_te_freqs(self.te_genome_freqs)
         qfy.measure_te_anchors(self.mapped_pairs)
 
         #del self.mapped_pairs

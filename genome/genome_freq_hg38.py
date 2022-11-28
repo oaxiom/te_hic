@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 '''
 
-measure the % and number ofbase pairs each type of TE occupuies in the genome
+measure the % and number ofbase pairs each type of TE occupies in the genome
 
 '''
 
-from glbase3 import *
+import sys
+sys.path.append('../')
+from tehiclib import genelist, glload
 
 genome = glload('hg38_glb_gencode_tes.glb')
 
@@ -13,11 +15,12 @@ hg38_genome_size = 3096649726 # http://asia.ensembl.org/Homo_sapiens/Info/Annota
 
 tes = {}
 
-for te in genome:
-    if '?' in te:
-        continue
+for idx, te in enumerate(genome):
     if ':' not in te['name']:
         continue # omit the genes
+    if '?' in te:
+        continue
+
     if te['name'] not in tes:
         tes[te['name']] = 0
     tes[te['name']] += len(te['loc'])

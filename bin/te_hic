@@ -63,7 +63,6 @@ def main():
     log.info(f'  Quality thresold: {args.qual} (default is {default_q})')
     log.info(f'  Minimum contact distance: {args.mindist} (default is {default_mindist})')
 
-    # TODO: Check the genome is avaialble.
     te_hic = tehiclib.te_hic(genome=args.genome[0], label=args.label, logger=log)
 
     # stage 1

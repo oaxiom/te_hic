@@ -22,8 +22,8 @@ class quantify:
         self.project_name = project_name
         self.log = logger
 
-    def bind_genome(self, genome_glb):
-        self.genome = genome_glb
+    def bind_te_freqs(self, te_genome_freqs_glb):
+        self.te_freqs = te_genome_freqs_glb
 
     def measure_te_anchors(self, mapped_pairs):
         '''
@@ -43,7 +43,11 @@ class quantify:
         res_te_nn = {}
 
         # The format of mapped_pairs is:
-        # ('8', 88996379, '8', 89417593, '+', '-'), {'Tigger19a:TcMar-Tigger:DNA'}, {'TE'}, {'MER33:hAT-Charlie:DNA'}, {'TE'})
+        # (
+        #   ('8', 88996379, '8', 89417593, '+', '-'),
+        #   {'Tigger19a:TcMar-Tigger:DNA'}, {'TE'},
+        #   {'MER33:hAT-Charlie:DNA'}, {'TE'}
+        # )
 
         self.log.info("Measures anchors...")
         total = 0
@@ -93,7 +97,7 @@ class quantify:
         self.log.info('  TE <-> TE : {:,} ({:.2%})'.format(te['TE <-> TE'], te['TE <-> TE']/total))
         self.log.info('  TE <-> -- : {:,} ({:.2%})'.format(te['TE <-> -'], te['TE <-> -']/total))
         self.log.info('  -- <-> -- : {:,} ({:.2%})'.format(te['-  <-> -'], te['-  <-> -']/total))
-        self.log.info()
+        self.log.info('')
 
         oh = open('stage3.%s_crude_measures.txt' % self.project_name, 'w')
         oh.write('TE <-> TE : {:,} ({:.5%})\n'.format(te['TE <-> TE'], te['TE <-> TE']/total))
@@ -104,8 +108,8 @@ class quantify:
         oh_te_te = open(f'stage3.{self.project_name}_te-te_anchor_frequencies.tsv', 'w')
         oh_te_te.write('%s\n' % '\t'.join(['TE1', 'TE2', 'RPM', 'RPM per kbp TE', 'TE1_genome_freq', 'TE2_genome_freq']))
         for k in sorted(list(res_te_te)):
-            te1 = self.genome._findDataByKeyLazy('name', k[0])
-            te2 = self.genome._findDataByKeyLazy('name', k[1])
+            te1 = self.te_freqs._findDataByKeyLazy('name', k[0])
+            te2 = self.te_freqs._findDataByKeyLazy('name', k[1])
             rpm = res_te_te[k]/total*1e6
             joint_kb_size = te1['genome_count'] + te2['genome_count']
             rpmpkbte = (rpm / joint_kb_size)*1e3
