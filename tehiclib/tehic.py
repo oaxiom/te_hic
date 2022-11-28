@@ -4,6 +4,7 @@ from . import common
 from .collect_valid_pairs import collect_valid_pairs, save_valid_pairs
 from .assign_to_te import map_pairs
 from .quantify_links import quantify
+from .build_matrices import build_matrices
 
 from . import miniglbase3
 
@@ -43,6 +44,8 @@ class te_hic:
         self.genome = miniglbase3.glload(os.path.join(self.__script_path, f'../genome/{genome}_glb_gencode_tes.glb'))
         # Get the TE frequencies tables
         self.te_genome_freqs = miniglbase3.glload(os.path.join(self.__script_path, f'../genome/{genome}_te_genome_freqs.glb'))
+
+        oh = os.path.join(self.__script_path, f'../genome/{genome}_te_genome_freqs.glb')
 
         return
 
@@ -109,15 +112,22 @@ class te_hic:
         qfy.bind_te_freqs(self.te_genome_freqs)
         qfy.measure_te_anchors(self.mapped_pairs)
 
-        #del self.mapped_pairs
         return True
 
-    def stage4_build_matrices(self):
+    def stage4_build_matrices(self, resolutions):
         '''
         **Stage 4**
             Build the matrices at the required resolutions
 
         '''
         assert self.mapped_pairs, 'Stage 2 results "mapped_pairs" was not generated correctly'
+
+        for resolution in resolutions:
+            mat = build_matrices(self.genome_sizes, resolution, logger=self.logger)
+
+            mat.build_matrices(self.mapped_pairs)
+            mat.save_matrices(self.label)
+
+            del mat
 
         return True

@@ -3,5 +3,4 @@ __pycache__/
 testout.tsv.gz
 *.annotation.gtf.gz
 *_rmsk.txt.gz
-*.chromSizes.gz
 *.glb

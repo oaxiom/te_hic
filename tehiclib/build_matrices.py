@@ -17,13 +17,14 @@ import sys, os, math, numpy, shutil, gzip
 from . import common
 
 class build_matrices:
-    def __init__(self, script_path, species, infilename, resolution):
+    def __init__(self, genome_sizes, resolution, logger):
         '''
         Load the species and set up the bins
         '''
-        # get the samplename:
-        self.sample_name = os.path.split(infilename)[1].replace('.te.annot.tsv.gz', '').replace('.tsv.gz', '') # second is in case the user is messing with the pattern
 
+        self.log = logger
+
+        # get the samplename:
         self.res = resolution
 
         self.all = {} # 1
@@ -36,12 +37,8 @@ class build_matrices:
         self.num_bins = {}
         self.chrom_bin_offsets = {} # the top and bottom bins for this chrom
 
-        oh = open(os.path.join(script_path, 'genome/{}.chromSizes.clean'.format(species)), 'r')
-        for line in oh:
-            line = line.strip().split('\t')
-            chrom = line[0]
-            num_bins = math.ceil(int(line[1]) / self.res)
-
+        for chrom in genome_sizes:
+            num_bins = math.ceil(genome_sizes[chrom]) / self.res)
             self.chrom_sizes[chrom] = int(line[1])
             self.num_bins[chrom] = num_bins
 
@@ -53,7 +50,7 @@ class build_matrices:
         oh.close()
         return
 
-    def build_matrices(self, infilename):
+    def build_matrices(self, mapped_pairs):
         '''
 
         Build the raw matrices in the style of hicpro
@@ -63,15 +60,14 @@ class build_matrices:
         And also output the hiccys?
 
         '''
-        print('Building in-memory matrices')
+        self.log.info('Building in-memory matrices')
 
-        done = 0
-        oh = gzip.open(infilename, 'rt')
-        for line in oh:
+
+        for done, pair in enumerate(mapped_pairs):
+            print(pair)
+            1/0
+
             line = line.strip().split('\t')
-
-            # The format of the TE file is:
-            # read1.chrom read1.left read1.right read1.labels read1.type read2.chrom read2.left read2.right read2.labels read2.type
 
             read1_chrom = line[0]
             read2_chrom = line[5]
@@ -96,11 +92,13 @@ class build_matrices:
                 if bin_pair not in self.tete:
                     self.tete[bin_pair] = 0
                 self.tete[bin_pair] += 1
+
             elif 'TE' in line[4] or 'TE' in line[9]:
                 # TE <=> non-TE
                 if bin_pair not in self.tenn:
                     self.tenn[bin_pair] = 0
                 self.tenn[bin_pair] += 1
+
             else:
                 # non-TE <=> non-TE
                 if bin_pair not in self.nnnn:
@@ -109,8 +107,7 @@ class build_matrices:
 
             done += 1
             if done % 1000000 == 0:
-                print('Processed: {:,}'.format(done))
-                #if done >20000000: break
+                print(f'Processed: {done:,}')
 
         oh.close()
 
@@ -171,28 +168,4 @@ class build_matrices:
             oh.write('%s\t%s\t%s\n' % (bins[0]+1, bins[1]+1, self.nnnn[bins])) # The +1 is to mimic HiCpro!
         oh.close()
         print('Saved non-TE <=> non-TE matrix: "%s"' % filename)
-
-
-if __name__ == '__main__':
-    if len(sys.argv) != 5:
-        print('\nNot enough arguments')
-        print('build_matrices.py species resolution in.te.annot.tsv matrix_path')
-        print('  The input file is the tsv produced by assign_to_te.py')
-        print('  resolution is in base pairs (i.e. 150000)')
-        print()
-        common.print_species()
-        print()
-        sys.exit()
-
-    species = sys.argv[1]
-    if not common.check_species(species):
-        sys.exit()
-
-    script_path = os.path.dirname(os.path.realpath(__file__))
-
-    mat = build_matrices(script_path, species, sys.argv[3], int(sys.argv[2]))
-    mat.build_matrices(sys.argv[3])
-    mat.save_matrices(sys.argv[4])
-
-
 
