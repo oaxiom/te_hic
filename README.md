@@ -17,76 +17,62 @@ https://www.chrom-lab.org/
 
 ## What? 
 
-Work in progress.
+te_hic is designed to assist in the analysis of TEs in HiC data. 
 
-Doubly so, I as I rework the entire entry platform
+It differs from most analysis software as it considers multiple mapped reads and does not delete 
+repeat regions from the genome. It is primarily targeted at the analysis of LINEs, SINEs, LTRs,
+DNA and retroposons (in human). The analysis pipeline excludes simple repeats, low complexity and
+satellites. (The last of these is potentially very interesting, but the genome annotations
+are not great for these, so we omit).
+
 
 ## How?
 
 Installation:
 
-Stick bin on your PATH:
+Stick te_hic/bin on your PATH:
 export PATH=/path/to/te_hic/bin:$PATH
 
 Requires:
-python3
-bowtie2
-samtools
+python3 (>3.7)
 pysam
 
-To fix: 
-You will also need to premake the genome annotation files. Instructions are given for this in 
-te_hic/genomes/
+### Step 0: Build the genome indices for te_hic
 
-You need to run the scripts in there, and make the .glb files which will be needed for later steps
+Build the genome annotations.
 
-Workflow:
+This is not currently automated, but to do you need to go into te_hic and execute these commands:
 
-te_hic consists of a series of wrapper scripts around python scripts that are submitted to a cluster.
+```
+cd te_hic/genome
+./download_data.sh 
 
-Todo!
+# hg38 genome
+python make_hg38.py
+python genome_freq_hg38.py
 
-All should go through te_hic command now.
+# mm10 genome:
+TODO!
 
-## PBS-script workflow 
+```
 
-If you are using a PBS-torque cluster environment
+### Step 1: Align to the genome
 
-A typical run:
-1. setup a 'samples' folder with a structure like this:
-    samples/
-    samples/sample_name1/
-                         FASTQ_seq1_1.fq.gz # PE 1
-                         FASTQ_seq1_2.fq.gz # PE 2
-                         FASTQ_seq2_1.fq.gz # PE 1
-                         FASTQ_seq2_2.fq.gz # PE 2
-    samples/sample_name2/
-                         FASTQ_seq1_1.fq.gz # PE 1
-                         FASTQ_seq1_2.fq.gz # PE 2
-    and so on...
+Align your FASTQ HiC data to the genome using your aligner of choice.
 
-As HiC data is so large it often comes split up. The directory information is important as it will tell 
-te_hic when to merge the FASTQ data. Biological replicates should be at the 'sample_name' level. Whilst technical 
-replicates (i.e. extra sequencing of the same sample, or split lanes from the sequencing run) should be within the 
-sample_name folder (e.g. FASTQ_seq1 and FASTQ_seq2 in the 'sample_name1' exampe above).
+We suggest something like :
 
-te_hic will merge the technical replicates, but will keep the biological replicates. 
+```
+bowtie2 --end-to-end --very-sensitive -x species_index -U read1.fq.gz | samtools view -b | samtools sort -n >${out}.p1.bam
+bowtie2 --end-to-end --very-sensitive -x species_index -U read2.fq.gz | samtools view -b | samtools sort -n >${out}.p2.bam
+```
 
-2. Step 1. Align the reads using bowtie2.  
-te_hic.1.align <qstat -q queue name> <species>
-valid species names are hg38, mm10 more could be made. See the /te_hic/genome/ folder for instructions.
-The qstat q name should be a valid q on your PBS cluster to submit the jobs to
+You may need to merge the resulting BAM files. At the end there should be a single bam file
+per read pair per sample.
 
-2. Step 2. collect valid FASTQ pairs:
-te_hic.2.get_valid_pairs <qstat -q queue name>
+### Step 2: Use te_hic
 
-3. Step 3. Annotate reads:
-
-## SLURM-script workflow 
-
-If you are using a SLURM cluster environment
-
-Todo?
+The 
 
 ## License
 
