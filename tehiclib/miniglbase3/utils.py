@@ -57,3 +57,6 @@ def glload(filename):
     except AttributeError:
         config.log.info("Loaded '%s' binary file with %s items" % (filename, len(newl)))
     return(newl)
+
+def qdeepcopy(anobject):
+    return pickle.loads(pickle.dumps(anobject, -1))

@@ -124,7 +124,7 @@ class quantify:
 
         te_nn = miniglbase3.genelist()
         te_nn.load_list([{'name': k, 'count': res_te_nn[k]} for k in res_te_nn])
-        te_nn = te_nn.map(genelist=self.te_freqs, key='name')
+        te_nn = te_nn.map(genelist=self.te_freqs, key='name', silent=True)
         for te in te_nn:
             te['RPM'] = (res_te_nn[te['name']]/total) * 1e6
             te['RPM per kbp of TE'] = (te['RPM'] / te['genome_count']) * 1e3

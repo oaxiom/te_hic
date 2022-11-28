@@ -12,6 +12,7 @@ from . import config
 from . import utils
 from .location import location
 from .base_genelist import _base_genelist
+from .progress import progressbar
 
 class genelist(_base_genelist):
     """
