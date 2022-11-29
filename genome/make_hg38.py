@@ -20,12 +20,13 @@ gtf = {
     "loc": "location(chr=column[0], left=column[3], right=column[4])",
     "strand": 6,
     "skiplines": -1,
-    "force_tsv": True}
+    "force_tsv": True
+    }
 
 rmsk_track_form = {"force_tsv": True, 'loc': 'location(chr=column[5], left=column[6], right=column[7])',
     'repName': 10, 'repClass': 11, 'repFamily': 12}
 
-chr_set = frozenset(['X', 'Y'] + ['%s' % i for i in range(1, 30)])
+chr_set = frozenset(['X', 'Y'] + [str(i) for i in range(1, 22)])
 
 repeats = delayedlist(filename='hg38_rmsk.txt.gz', gzip=True, format=rmsk_track_form)
 gencode = delayedlist('gencode.v29.annotation.gtf.gz', gzip=True, format=gtf)
@@ -45,7 +46,7 @@ for idx, item in enumerate(repeats):
     if str(item['loc']['chr']) not in chr_set:
         continue
 
-    name = f"{item['repName']}:{item['repFamily']}:{item['repClass']}"
+    name = f"{item['repClass']}:{item['repFamily']}:{item['repName']}"
 
     newentry = {'loc': item['loc'],
         'name': name,

@@ -76,8 +76,116 @@ The
 
 ## HiC example
 
-```
+A toy example is included in te_hic/test/HiC-analysis (the 'HiC-analysis % ' is the user prompt, type
+in the commands after the % to get it it run)
 
+```
+HiC-analysis % te_hic -1 SRR1030718.2_1.100k.bam -2 SRR1030718.2_2.100k.bam -g hg38 -l toy_example
+
+INFO    : Arguments:
+INFO    :   Read1: SRR1030718.2_1.100k.bam
+INFO    :   Read2: SRR1030718.2_2.100k.bam
+INFO    :   Genome: hg38
+INFO    :   Quality thresold: 10 (default is 10)
+INFO    :   Minimum contact distance: 5000 (default is 5000)
+INFO    :   Matrix resolutions to build: [300, 150, 50] kbp (default is [300, 150, 50])
+INFO    : Loaded '/Users/andrew/Tools/te_hic/tehiclib/../genome/hg38_glb_gencode_tes.glb' binary file with 5665930 items
+INFO    : Loaded '/Users/andrew/Tools/te_hic/tehiclib/../genome/hg38_te_genome_freqs.glb' binary file with 1058 items
+INFO    : Stage 1: Collect valid read pairs
+INFO    : Started SRR1030718.2_1.100k.bam and SRR1030718.2_2.100k.bam
+[E::idx_find_and_load] Could not retrieve index file for 'SRR1030718.2_1.100k.bam'
+[E::idx_find_and_load] Could not retrieve index file for 'SRR1030718.2_2.100k.bam'
+INFO    : 
+collect_valid_pairs() stats:
+INFO    :   Aligned:
+INFO    :     Reads processed           : 99,970
+INFO    :     Correctly paired          : 85,809 (85.83%)
+INFO    :   Rejected reads:
+INFO    :     Low quality               : 4,213 (4.21%)
+INFO    :     One pair aligned          : 12,252 (12.26%)
+INFO    :     Not canonical chromosome  : 312 (0.31%)
+INFO    :     No pairs aligned          : 1,909 (1.91%)
+INFO    :     Duplicates                : 25 (0.05%)
+INFO    :   Rejected reads (by criteria):
+INFO    :     Too close                 : 28,649 (28.66%)
+INFO    :   Final:
+INFO    :     Kept reads                : 52,610 (52.63%)
+INFO    :     Kept short-range (<20kb)  : 2,421 (2.42%)
+INFO    :     Kept long-range (>20kb)   : 50,214 (50.23%)
+INFO    : Intermediate file: Saved 52,610 pairs
+INFO    : Stage 2: Assign to hg38 genome features
+Processed 52,610 reads
+INFO    : Intermediate file: Pair assignments 52,610 saved
+INFO    : Stage 3: Quantify links
+INFO    : Measures anchors...
+INFO    :   TE <-> TE : 15,578 (29.61%)
+INFO    :   TE <-> -- : 25,297 (48.08%)
+INFO    :   -- <-> -- : 11,735 (22.31%)
+INFO    : Saved 'stage3.te_hic_te-nn_anchor_frequencies.tsv'
+INFO    : Stage 4: Build Matrices
+INFO    : Building in-memory matrices for resolution 300000 kbp
+INFO    : Saved BED bins: "matrices_te_hic/300000/te_hic_300000_abs.bed"
+INFO    : Saved All matrix: "matrices_te_hic/300000/te_hic_300000.all.raw.matrix"
+INFO    : Saved TE <=> TE matrix: "matrices_te_hic/300000/te_hic_300000.tete.raw.matrix"
+INFO    : Saved TE <=> non-TE matrix: "matrices_te_hic/300000/te_hic_300000.tenn.raw.matrix"
+INFO    : Saved non-TE <=> non-TE matrix: "matrices_te_hic/300000/te_hic_300000.nnnn.raw.matrix"
+INFO    : Building in-memory matrices for resolution 150000 kbp
+INFO    : Saved BED bins: "matrices_te_hic/150000/te_hic_150000_abs.bed"
+INFO    : Saved All matrix: "matrices_te_hic/150000/te_hic_150000.all.raw.matrix"
+INFO    : Saved TE <=> TE matrix: "matrices_te_hic/150000/te_hic_150000.tete.raw.matrix"
+INFO    : Saved TE <=> non-TE matrix: "matrices_te_hic/150000/te_hic_150000.tenn.raw.matrix"
+INFO    : Saved non-TE <=> non-TE matrix: "matrices_te_hic/150000/te_hic_150000.nnnn.raw.matrix"
+INFO    : Building in-memory matrices for resolution 50000 kbp
+INFO    : Saved BED bins: "matrices_te_hic/50000/te_hic_50000_abs.bed"
+INFO    : Saved All matrix: "matrices_te_hic/50000/te_hic_50000.all.raw.matrix"
+INFO    : Saved TE <=> TE matrix: "matrices_te_hic/50000/te_hic_50000.tete.raw.matrix"
+INFO    : Saved TE <=> non-TE matrix: "matrices_te_hic/50000/te_hic_50000.tenn.raw.matrix"
+INFO    : Saved non-TE <=> non-TE matrix: "matrices_te_hic/50000/te_hic_50000.nnnn.raw.matrix"
+
+HiC-analysis % ls -l
+total 27024
+-rw-rw-r--  1 user  user  4208603 Nov 23 10:56 SRR1030718.2_1.100k.bam
+-rw-rw-r--  1 user  user  4318275 Nov 23 11:03 SRR1030718.2_2.100k.bam
+drwxr-xr-x  6 user  user      192 Nov 28 16:35 matrices_te_hic
+-rw-r--r--  1 user  user   961678 Nov 29 07:32 stage1.int.te_hic.tsv.gz
+-rw-r--r--  1 user  user  1111507 Nov 29 07:32 stage2.int.te_hic.tsv.gz
+-rw-r--r--  1 user  user       93 Nov 29 07:32 stage3.te_hic_crude_measures.txt
+-rw-r--r--  1 user  user    79178 Nov 29 07:32 stage3.te_hic_te-nn_anchor_frequencies.tsv
+-rw-r--r--  1 user  user  1357255 Nov 29 07:32 stage3.te_hic_te-te_anchor_frequencies.tsv
+-rw-r--r--  1 user  user       71 Nov 28 13:14 test_script.sh
+
+HiC-analysis % ll matrices_te_hic
+total 0
+drwxr-xr-x  8 user  user  256 Nov 28 16:36 150000
+drwxr-xr-x  8 user  user  256 Nov 28 16:36 300000
+drwxr-xr-x  8 user  user  256 Nov 28 16:36 50000
+
+HiC-analysis % ll matrices_te_hic/150000 
+total 4760
+-rw-r--r--  1 andrew  staff  585851 Nov 29 07:32 te_hic_150000.all.raw.matrix
+-rw-r--r--  1 andrew  staff  130041 Nov 29 07:32 te_hic_150000.nnnn.raw.matrix
+-rw-r--r--  1 andrew  staff  287127 Nov 29 07:32 te_hic_150000.tenn.raw.matrix
+-rw-r--r--  1 andrew  staff  181403 Nov 29 07:32 te_hic_150000.tete.raw.matrix
+-rw-r--r--  1 andrew  staff  603430 Nov 29 07:32 te_hic_150000_abs.bed
+
+HiC-analysis % wc *.tsv
+     904    5428   79178 stage3.te_hic_te-nn_anchor_frequencies.tsv
+   11570   69423 1357255 stage3.te_hic_te-te_anchor_frequencies.tsv
+   12474   74851 1436433 total
+   
+HiC-analysis % head stage3.te_hic_te-nn_anchor_frequencies.tsv
+name	count	genome_count	genome_percent	RPM	RPM per kbp of TE
+Alu:Alu:SINE	7	239798	0.007743788326674956	133.05455236647026	0.5548609761819125
+AluJb:Alu:SINE	471	31276949	1.0100254070518015	8952.670594943927	0.2862386160153897
+AluJo:Alu:SINE	291	17372139	0.5609978698636967	5531.267819806121	0.31839877747962536
+AluJr4:Alu:SINE	79	4637982	0.1497741885709162	1501.6156624215928	0.32376487498692164
+AluJr:Alu:SINE	301	19812811	0.6398144043754208	5721.345751758221	0.28877001611524084
+AluSc5:Alu:SINE	28	1850062	0.05974398668556419	532.218209465881	0.2876758776007945
+AluSc8:Alu:SINE	88	6125921	0.19782415003433296	1672.6858011784832	0.27305050149658855
+AluSc:Alu:SINE	125	9718052	0.31382470927872713	2375.9741494012546	0.2444907836880534
+AluSg4:Alu:SINE	19	1990659	0.06428428063032403	361.1480707089907	0.18142136383428337
+
+```
 
 ## License
 
