@@ -74,6 +74,11 @@ per read pair per sample.
 
 The 
 
+## HiC example
+
+```
+
+
 ## License
 
 Release License:

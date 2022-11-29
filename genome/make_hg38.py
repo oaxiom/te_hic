@@ -61,17 +61,20 @@ for idx, item in enumerate(repeats):
     p.update(idx)
 print('\nAdded %s features' % added)
 
+keep_gene_types = set(('protein_coding', 'lincRNA', 'lncRNA'))
+
 print('Gencode')
 p = progressbar(len(gencode))
 for idx, item in enumerate(gencode):
     if item['feature'] != 'exon':
         continue
-    if item['gene_type'] not in ('protein_coding', 'lincRNA'):
+    if item['gene_type'] not in keep_gene_types:
         continue
-    if item['loc']['chr'] not in chr_set:
+    if item['loc'].loc['chr'] not in chr_set:
         continue
 
-    newentry = {'loc': item['loc'],
+    newentry = {
+        'loc': item['loc'],
         'name': item['gene_name'],
         'type': item['gene_type'],
         'ensg': item['gene_id'].split('.')[0],
@@ -80,17 +83,19 @@ for idx, item in enumerate(gencode):
     added += 1
 
     if item['strand'] == '+':
-        prom_locs = {'loc': item['loc'].pointLeft(),
+        prom_locs = {
+            'loc': item['loc'].pointLeft(),
             'name': item['gene_name'],
             'type': item['gene_type'],
-            'ensg': item['gene_id'].split('.')[0],
+            'ensg': newentry['ensg'],
             'enst': item['transcript_id'].split('.')[0],
             }
     elif item['strand'] == '-':
-        prom_locs = {'loc': item['loc'].pointRight(),
+        prom_locs = {
+            'loc': item['loc'].pointRight(),
             'name': item['gene_name'],
             'type': item['gene_type'],
-            'ensg': item['gene_id'].split('.')[0],
+            'ensg': newentry['ensg'],
             'enst': item['transcript_id'].split('.')[0],
             }
     else:
