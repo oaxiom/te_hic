@@ -60,7 +60,8 @@ for idx, item in enumerate(repeats):
     #if idx > 100000:
     #    break
     p.update(idx)
-print('\nAdded %s features' % added)
+
+print(f'\nAdded {added:,} features')
 
 keep_gene_types = set(('protein_coding', 'lincRNA', 'lncRNA'))
 
@@ -109,7 +110,7 @@ for idx, item in enumerate(gencode):
 
     p.update(idx)
 
-print('\nAdded %s features' % added)
+print(f'\nAdded {added:,} features')
 
 gl = genelist()
 gl.load_list(promoters)

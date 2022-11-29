@@ -27,15 +27,6 @@ ignorekeys = frozenset( # these are functional tags - so I should ignore them.
     '__ignore_empty_columns'
     ])
 
-typical_headers = frozenset(["chipseq_loc", "loc", "chr", "#",
-    "Gene Name", "", "GenBank", "RefSeq",
-    "Systematic", "mm8.refGene.chrom", "mm8", "loc", 'chromosome',
-    "mm9.refGene.chrom", "mm9",
-    "======================================================================", # stupid sissrs format garbage.
-    "=====================================================================", # stupid sissrs format garbage.
-    "======================================================================="] # stupid sissrs format garbage.
-    ) # typical header labels;
-
 class delayedlist(genelist):
     """
     **Purpose**
@@ -142,14 +133,12 @@ class delayedlist(genelist):
                     if column:
                         if "keepifxin" in self.format:
                             if True in [self.format["keepifxin"] in i for i in column]:
-                                if (not (column[0] in typical_headers)):
-                                    d = self._processKey(self.format, column)
+                                d = self._processKey(self.format, column)
                             else:
                                 d = None # not present, skip this line
 
                         else: # just do normally
-                            if (not (column[0] in typical_headers)):
-                                d = self._processKey(self.format, column)
+                            d = self._processKey(self.format, column)
 
                     if not d: # d is bad, grab another
                         column = next(self.__reader)
