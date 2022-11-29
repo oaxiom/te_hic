@@ -112,11 +112,40 @@ for idx, item in enumerate(gencode):
 print('\nAdded %s features' % added)
 
 gl = genelist()
-gl.load_list(newl)
-gl.save('hg38_glb_gencode_tes.glb')
-
-gl = genelist()
 gl.load_list(promoters)
 gl.save('hg38_glb_gencode_promoters.glb')
 
-print(gl)
+gl = genelist()
+gl.load_list(newl)
+gl.save('hg38_glb_gencode_tes.glb')
+genome = gl
+
+hg38_genome_size = 3096649726 # http://asia.ensembl.org/Homo_sapiens/Info/Annotation
+
+tes = {}
+
+for idx, te in enumerate(genome):
+    if ':' not in te['name']:
+        continue # omit the genes
+    if '?' in te:
+        continue
+
+    if te['name'] not in tes:
+        tes[te['name']] = 0
+    tes[te['name']] += len(te['loc'])
+
+newl = []
+for k in tes:
+    newe = {'name': k,
+        'genome_count': tes[k],
+        'genome_percent': tes[k] / hg38_genome_size * 100.0}
+    newl.append(newe)
+
+gl = genelist()
+gl.load_list(newl)
+gl.sort('name')
+gl.saveTSV('hg38_te_genome_freqs.tsv', key_order=['name', 'genome_count', 'genome_percent'])
+gl.save('hg38_te_genome_freqs.glb')
+
+
+
