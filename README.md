@@ -177,47 +177,58 @@ INFO    : Saved TE <=> non-TE matrix: "matrices_toy_example/50000/toy_example_50
 INFO    : Saved non-TE <=> non-TE matrix: "matrices_toy_example/50000/toy_example_50000.nnnn.raw.matrix"
 
 HiC-analysis % ls -l
-total 27024
--rw-rw-r--  1 user  user  4208603 Nov 23 10:56 SRR1030718.2_1.100k.bam
--rw-rw-r--  1 user  user  4318275 Nov 23 11:03 SRR1030718.2_2.100k.bam
-drwxr-xr-x  6 user  user      192 Nov 28 16:35 matrices_te_hic
--rw-r--r--  1 user  user   961678 Nov 29 07:32 stage1.int.te_hic.tsv.gz
--rw-r--r--  1 user  user  1111507 Nov 29 07:32 stage2.int.te_hic.tsv.gz
--rw-r--r--  1 user  user       93 Nov 29 07:32 stage3.te_hic_crude_measures.txt
--rw-r--r--  1 user  user    79178 Nov 29 07:32 stage3.te_hic_te-nn_anchor_frequencies.tsv
--rw-r--r--  1 user  user  1357255 Nov 29 07:32 stage3.te_hic_te-te_anchor_frequencies.tsv
--rw-r--r--  1 user  user       71 Nov 28 13:14 test_script.sh
+total 23608
+-rw-rw-r--  1 andrew  staff  4208603 Nov 23 10:56 SRR1030718.2_1.100k.bam
+-rw-rw-r--  1 andrew  staff  4318275 Nov 23 11:03 SRR1030718.2_2.100k.bam
+drwxr-xr-x  5 andrew  staff      160 Nov 29 10:24 matrices_toy_example
+-rw-r--r--  1 andrew  staff   962448 Nov 29 10:24 stage1.int.toy_example.tsv.gz
+-rw-r--r--  1 andrew  staff  1108437 Nov 29 10:24 stage2.int.toy_example.tsv.gz
+-rw-r--r--  1 andrew  staff       93 Nov 29 10:24 stage3.toy_example_crude_measures.txt
+-rw-r--r--  1 andrew  staff    79178 Nov 29 10:24 stage3.toy_example_te-nn_anchor_frequencies.tsv
+-rw-r--r--  1 andrew  staff  1357255 Nov 29 10:24 stage3.toy_example_te-te_anchor_frequencies.tsv
+-rw-r--r--  1 andrew  staff       71 Nov 28 13:14 test_script.sh
 
-HiC-analysis % ll matrices_te_hic
+HiC-analysis % ll matrices_toy_example 
 total 0
-drwxr-xr-x  8 user  user  256 Nov 28 16:36 150000
-drwxr-xr-x  8 user  user  256 Nov 28 16:36 300000
-drwxr-xr-x  8 user  user  256 Nov 28 16:36 50000
+drwxr-xr-x  7 andrew  staff  224 Nov 29 10:24 150000
+drwxr-xr-x  7 andrew  staff  224 Nov 29 10:24 300000
+drwxr-xr-x  7 andrew  staff  224 Nov 29 10:24 50000
 
-HiC-analysis % ll matrices_te_hic/150000 
-total 4760
--rw-r--r--  1 andrew  staff  585851 Nov 29 07:32 te_hic_150000.all.raw.matrix
--rw-r--r--  1 andrew  staff  130041 Nov 29 07:32 te_hic_150000.nnnn.raw.matrix
--rw-r--r--  1 andrew  staff  287127 Nov 29 07:32 te_hic_150000.tenn.raw.matrix
--rw-r--r--  1 andrew  staff  181403 Nov 29 07:32 te_hic_150000.tete.raw.matrix
--rw-r--r--  1 andrew  staff  603430 Nov 29 07:32 te_hic_150000_abs.bed
+HiC-analysis % ll matrices_toy_example/150000 
+total 3520
+-rw-r--r--  1 andrew  staff  585851 Nov 29 10:24 toy_example_150000.all.raw.matrix
+-rw-r--r--  1 andrew  staff  130041 Nov 29 10:24 toy_example_150000.nnnn.raw.matrix
+-rw-r--r--  1 andrew  staff  287127 Nov 29 10:24 toy_example_150000.tenn.raw.matrix
+-rw-r--r--  1 andrew  staff  181403 Nov 29 10:24 toy_example_150000.tete.raw.matrix
+-rw-r--r--  1 andrew  staff  603430 Nov 29 10:24 toy_example_150000_abs.bed
 
 HiC-analysis % wc *.tsv
-     904    5428   79178 stage3.te_hic_te-nn_anchor_frequencies.tsv
-   11570   69423 1357255 stage3.te_hic_te-te_anchor_frequencies.tsv
+     904    5428   79178 stage3.toy_example_te-nn_anchor_frequencies.tsv
+   11570   69423 1357255 stage3.toy_example_te-te_anchor_frequencies.tsv
    12474   74851 1436433 total
    
-HiC-analysis % head stage3.te_hic_te-nn_anchor_frequencies.tsv
+HiC-analysis % head stage3.toy_example_te-nn_anchor_frequencies.tsv
 name	count	genome_count	genome_percent	RPM	RPM per kbp of TE
-Alu:Alu:SINE	7	239798	0.007743788326674956	133.05455236647026	0.5548609761819125
-AluJb:Alu:SINE	471	31276949	1.0100254070518015	8952.670594943927	0.2862386160153897
-AluJo:Alu:SINE	291	17372139	0.5609978698636967	5531.267819806121	0.31839877747962536
-AluJr4:Alu:SINE	79	4637982	0.1497741885709162	1501.6156624215928	0.32376487498692164
-AluJr:Alu:SINE	301	19812811	0.6398144043754208	5721.345751758221	0.28877001611524084
-AluSc5:Alu:SINE	28	1850062	0.05974398668556419	532.218209465881	0.2876758776007945
-AluSc8:Alu:SINE	88	6125921	0.19782415003433296	1672.6858011784832	0.27305050149658855
-AluSc:Alu:SINE	125	9718052	0.31382470927872713	2375.9741494012546	0.2444907836880534
-AluSg4:Alu:SINE	19	1990659	0.06428428063032403	361.1480707089907	0.18142136383428337
+DNA:DNA:Eulor1	1	11998	0.0003874509893470593	19.007793195210038	1.5842468074020701
+DNA:DNA:Eulor9C	1	9179	0.0002964171221217417	19.007793195210038	2.070791283931805
+DNA:DNA:MER125	2	15748	0.0005085496066208942	38.015586390420076	2.4139945637808022
+DNA:DNA:MER126	3	41040	0.00132530326744485	57.0233795856301	1.3894585669013184
+DNA:DNA:MER135	5	78626	0.0025390666351393465	95.03896597605019	1.2087473097455064
+DNA:DNA:MER136	1	4736	0.000152939480375702	19.007793195210038	4.013469846961579
+DNA:MULE-MuDR:Ricksha	3	119602	0.00386230315284939	57.0233795856301	0.47677613740263625
+DNA:MULE-MuDR:Ricksha_0	1	190682	0.006157687077069174	19.007793195210038	0.09968320657015364
+DNA:MULE-MuDR:Ricksha_a	1	24538	0.0007924047655107635	19.007793195210038	0.7746268316574308
+
+TE1	TE2	RPM	RPM per kbp TE	TE1_genome_freq	TE2_genome_freq
+DNA:DNA:Eulor1	LINE:L1:L1MD1	19.007793195210038	0.004780921880629596	3.874509893470593e-06	0.0012800159368105426
+DNA:DNA:MER126	DNA:TcMar-Tigger:Tigger9a	19.007793195210038	0.08175957569213382	1.32530326744485e-05	6.182294316099218e-05
+DNA:DNA:MER126	LINE:CR1:L3	19.007793195210038	0.0021427946949933996	1.32530326744485e-05	0.002851314414370416
+DNA:DNA:MER126	LINE:L2:L2	19.007793195210038	0.0012459431318053477	1.32530326744485e-05	0.0049132799464707685
+DNA:DNA:MER126	LTR:ERVL-MaLR:MLT1K	19.007793195210038	0.004841691471064424	1.32530326744485e-05	0.001254522901761347
+DNA:DNA:MER130	LTR:ERV1:LTR29	19.007793195210038	0.07713074873480352	1.0474223070071568e-05	6.91072671872479e-05
+DNA:DNA:MER135	LINE:L1:L1ME3G	19.007793195210038	0.004568449665320416	2.5390666351393466e-05	0.0013182117324172945
+DNA:DNA:MER135	SINE:Alu:AluJo	19.007793195210038	0.0010892240652607514	2.5390666351393466e-05	0.005609978698636967
+DNA:DNA:MER135	SINE:Alu:AluSc5	19.007793195210038	0.00985529706993046	2.5390666351393466e-05	0.0005974398668556419
 
 ```
 
