@@ -19,12 +19,11 @@ https://www.chrom-lab.org/
 
 te_hic is designed to assist in the analysis of TEs in HiC data. 
 
-It differs from most analysis software as it considers multiple mapped reads and does not delete 
+It differs from most HiC analysis software as it considers multiple mapped reads and does not delete 
 repeat regions from the genome. It is primarily targeted at the analysis of LINEs, SINEs, LTRs,
 DNA and retroposons (in human). The analysis pipeline excludes simple repeats, low complexity and
 satellites. (The last of these is potentially very interesting, but the genome annotations
 are not great for these, so we omit).
-
 
 ## How?
 
@@ -79,7 +78,7 @@ and resolutions of arrays to build.
 te_hic -1 ${out}.p1.bam -2 ${out}.p2.bam -g hg38 -l sample_label
 ```
 
-These are the full optinos for te_hic:
+These are the full options for te_hic:
 
 ```
 

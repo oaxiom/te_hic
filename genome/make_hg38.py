@@ -26,7 +26,7 @@ gtf = {
 rmsk_track_form = {"force_tsv": True, 'loc': 'location(chr=column[5], left=column[6], right=column[7])',
     'repName': 10, 'repClass': 11, 'repFamily': 12}
 
-chr_set = frozenset(['X', 'Y'] + [str(i) for i in range(1, 22)])
+chr_set = frozenset(['X', 'Y'] + [str(i) for i in range(1, 23)])
 
 repeats = delayedlist(filename='hg38_rmsk.txt.gz', gzip=True, format=rmsk_track_form)
 gencode = delayedlist('gencode.v29.annotation.gtf.gz', gzip=True, format=gtf)
