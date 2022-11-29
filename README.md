@@ -49,7 +49,6 @@ cd te_hic/genome
 
 # hg38 genome
 python make_hg38.py
-python genome_freq_hg38.py
 
 # mm10 genome:
 TODO!
@@ -72,7 +71,43 @@ per read pair per sample.
 
 ### Step 2: Use te_hic
 
-The 
+te_hic is all packed in a single entry point now. To use, supply the aligned read1 and read2 bams
+and the genome. Other options are available to control the q read threshold, minimum distance to consider
+and resolutions of arrays to build.
+
+```
+te_hic -1 ${out}.p1.bam -2 ${out}.p2.bam -g hg38 -l sample_label
+```
+
+These are the full optinos for te_hic:
+
+```
+
+usage: te_hic [-h] [-l LABEL] [-q QUAL] [-d MINDIST] [-r RESOLUTIONS [RESOLUTIONS ...]] -g GENOME -1 READ1 -2 READ2
+
+HiC data analysis, preserving TE information
+
+required arguments:
+  -g GENOME, --genome GENOME
+                        Genome assembly to use, valid genomes: {'hg38'}
+  -1 READ1, --read1 READ1
+                        the BAM alignment file containing the aligned reads pair 1
+  -2 READ2, --read2 READ2
+                        the BAM alignment file containing the aligned reads pair 2
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l LABEL, --label LABEL
+                        label for the sample name and output files, default=te_hic
+  -q QUAL, --qual QUAL  q threshold for read quality filtering, default=10
+  -d MINDIST, --mindist MINDIST
+                        Minimum distance (in base pairs), default=5000
+  -r RESOLUTIONS [RESOLUTIONS ...], --resolutions RESOLUTIONS [RESOLUTIONS ...]
+                        Default resolutions for the matrices default=300 150 50
+
+Minimal usage usage: te_hic -a read1.bam -b read2.bam -g genome
+
+```
 
 ## HiC example
 
