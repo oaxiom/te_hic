@@ -115,11 +115,11 @@ in the commands after the % to get it it run)
 
 ```
 HiC-analysis % te_hic -1 SRR1030718.2_1.100k.bam -2 SRR1030718.2_2.100k.bam -g hg38 -l toy_example
-
 INFO    : Arguments:
 INFO    :   Read1: SRR1030718.2_1.100k.bam
 INFO    :   Read2: SRR1030718.2_2.100k.bam
 INFO    :   Genome: hg38
+INFO    :   Label: toy_example (default is te_hic)
 INFO    :   Quality thresold: 10 (default is 10)
 INFO    :   Minimum contact distance: 5000 (default is 5000)
 INFO    :   Matrix resolutions to build: [300, 150, 50] kbp (default is [300, 150, 50])
@@ -155,26 +155,26 @@ INFO    : Measures anchors...
 INFO    :   TE <-> TE : 15,578 (29.61%)
 INFO    :   TE <-> -- : 25,297 (48.08%)
 INFO    :   -- <-> -- : 11,735 (22.31%)
-INFO    : Saved 'stage3.te_hic_te-nn_anchor_frequencies.tsv'
+INFO    : Saved 'stage3.toy_example_te-nn_anchor_frequencies.tsv'
 INFO    : Stage 4: Build Matrices
 INFO    : Building in-memory matrices for resolution 300000 kbp
-INFO    : Saved BED bins: "matrices_te_hic/300000/te_hic_300000_abs.bed"
-INFO    : Saved All matrix: "matrices_te_hic/300000/te_hic_300000.all.raw.matrix"
-INFO    : Saved TE <=> TE matrix: "matrices_te_hic/300000/te_hic_300000.tete.raw.matrix"
-INFO    : Saved TE <=> non-TE matrix: "matrices_te_hic/300000/te_hic_300000.tenn.raw.matrix"
-INFO    : Saved non-TE <=> non-TE matrix: "matrices_te_hic/300000/te_hic_300000.nnnn.raw.matrix"
+INFO    : Saved BED bins: "matrices_toy_example/300000/toy_example_300000_abs.bed"
+INFO    : Saved All matrix: "matrices_toy_example/300000/toy_example_300000.all.raw.matrix"
+INFO    : Saved TE <=> TE matrix: "matrices_toy_example/300000/toy_example_300000.tete.raw.matrix"
+INFO    : Saved TE <=> non-TE matrix: "matrices_toy_example/300000/toy_example_300000.tenn.raw.matrix"
+INFO    : Saved non-TE <=> non-TE matrix: "matrices_toy_example/300000/toy_example_300000.nnnn.raw.matrix"
 INFO    : Building in-memory matrices for resolution 150000 kbp
-INFO    : Saved BED bins: "matrices_te_hic/150000/te_hic_150000_abs.bed"
-INFO    : Saved All matrix: "matrices_te_hic/150000/te_hic_150000.all.raw.matrix"
-INFO    : Saved TE <=> TE matrix: "matrices_te_hic/150000/te_hic_150000.tete.raw.matrix"
-INFO    : Saved TE <=> non-TE matrix: "matrices_te_hic/150000/te_hic_150000.tenn.raw.matrix"
-INFO    : Saved non-TE <=> non-TE matrix: "matrices_te_hic/150000/te_hic_150000.nnnn.raw.matrix"
+INFO    : Saved BED bins: "matrices_toy_example/150000/toy_example_150000_abs.bed"
+INFO    : Saved All matrix: "matrices_toy_example/150000/toy_example_150000.all.raw.matrix"
+INFO    : Saved TE <=> TE matrix: "matrices_toy_example/150000/toy_example_150000.tete.raw.matrix"
+INFO    : Saved TE <=> non-TE matrix: "matrices_toy_example/150000/toy_example_150000.tenn.raw.matrix"
+INFO    : Saved non-TE <=> non-TE matrix: "matrices_toy_example/150000/toy_example_150000.nnnn.raw.matrix"
 INFO    : Building in-memory matrices for resolution 50000 kbp
-INFO    : Saved BED bins: "matrices_te_hic/50000/te_hic_50000_abs.bed"
-INFO    : Saved All matrix: "matrices_te_hic/50000/te_hic_50000.all.raw.matrix"
-INFO    : Saved TE <=> TE matrix: "matrices_te_hic/50000/te_hic_50000.tete.raw.matrix"
-INFO    : Saved TE <=> non-TE matrix: "matrices_te_hic/50000/te_hic_50000.tenn.raw.matrix"
-INFO    : Saved non-TE <=> non-TE matrix: "matrices_te_hic/50000/te_hic_50000.nnnn.raw.matrix"
+INFO    : Saved BED bins: "matrices_toy_example/50000/toy_example_50000_abs.bed"
+INFO    : Saved All matrix: "matrices_toy_example/50000/toy_example_50000.all.raw.matrix"
+INFO    : Saved TE <=> TE matrix: "matrices_toy_example/50000/toy_example_50000.tete.raw.matrix"
+INFO    : Saved TE <=> non-TE matrix: "matrices_toy_example/50000/toy_example_50000.tenn.raw.matrix"
+INFO    : Saved non-TE <=> non-TE matrix: "matrices_toy_example/50000/toy_example_50000.nnnn.raw.matrix"
 
 HiC-analysis % ls -l
 total 27024

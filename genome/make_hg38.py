@@ -10,7 +10,7 @@ This is for the mm10 genome
 
 import sys
 sys.path.append('../')
-from tehiclib import delayedlist, progressbar, genelist
+from tehiclib import delayedlist, progressbar, genelist, common
 
 gtf = {
     #"feature_type": 1,
@@ -121,8 +121,6 @@ gl.load_list(newl)
 gl.save('hg38_glb_gencode_tes.glb')
 genome = gl
 
-hg38_genome_size = 3096649726 # http://asia.ensembl.org/Homo_sapiens/Info/Annotation
-
 tes = {}
 
 for idx, te in enumerate(genome):
@@ -139,7 +137,7 @@ newl = []
 for k in tes:
     newe = {'name': k,
         'genome_count': tes[k],
-        'genome_percent': tes[k] / hg38_genome_size * 100.0}
+        'genome_percent': tes[k] / common.hg38_genome_size * 100.0}
     newl.append(newe)
 
 gl = genelist()
