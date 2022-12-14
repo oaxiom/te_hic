@@ -34,7 +34,7 @@ INFO    :   0 (0.0%) loops have 18 reads
 INFO    :   0 (0.0%) loops have 19 reads
 INFO    :   0 (0.0%) loops have 20+ reads
 
-getloops -m bed_to_bed -i testbedpe.chr10.bedpe.gz -p CTCF_constitutive.chr10.bed.gz -o testout.tsv.gz
+getContacts -m bed_to_bed -i testbedpe.chr10.bedpe.gz -p CTCF_constitutive.chr10.bed.gz -o testout.tsv.gz
 
 
 # Should give:

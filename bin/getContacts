@@ -10,8 +10,9 @@ import sys, os, argparse, logging
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(script_path, '../'))
-import te_hic_lib
-from glbase3 import glload
+import tehiclib
+sys.path.append(os.path.join(script_path, '../tehiclib'))
+from miniglbase3 import glload
 
 # Command-line options;
 def prepare_parser():
@@ -32,13 +33,13 @@ def prepare_parser():
     optional.add_argument('-t', '--threshold', action='store', type=int, default=defaults['-t'], required=False, help='Thresold (in reads) to call a contact default={}'.format(defaults['-t']))
 
     optional.add_argument('-p', '--inpeaksbed', nargs=1, required=False, help='A BED file contining peaks or sites to consider measuring for contacts')
-    optional.add_argument('-g', '--genome', nargs=1, required=False, help='Optional, but requried if "tes" or "genes" in --mode. Genome assembly to use, valid genomes: {}'.format(te_hic_lib.common.valid_assemblies))
+    optional.add_argument('-g', '--genome', nargs=1, required=False, help='Optional, but requried if "tes" or "genes" in --mode. Genome assembly to use, valid genomes: {}'.format(tehiclib.common.valid_assemblies))
 
     required = parser.add_argument_group('required arguments')
 
     required.add_argument('-i', '--inreadsbedpe', nargs=1, required=True, help='A BEDPE file containing the HiC reads, from one side to the other')
     required.add_argument('-o', '--outtsv', nargs=1, required=True, help='the TSV file to save the genes and count data to')
-    required.add_argument('-m', '--mode', nargs=1, required=True, help='Type of annotation to use, valid modes: {}'.format(te_hic_lib.common.valid_modes))
+    required.add_argument('-m', '--mode', nargs=1, required=True, help='Type of annotation to use, valid modes: {}'.format(tehiclib.common.valid_modes))
 
     parser._action_groups.append(optional)
 
@@ -95,7 +96,7 @@ def main():
     else:
         raise AssertionError('{0} mode not found'.format(args.mode[0]))
 
-    te_hic = te_hic_lib.measure_contacts(logger=log)
+    te_hic = tehiclib.measure_contacts(logger=log)
 
     if args.mode == 'bed_to_bed':
         te_hic.bed_to_bed(
@@ -109,9 +110,9 @@ def main():
     elif args.mode == 'bed_to_gene':
         # check genome is available;
         args.genome = args.genome[0]
-        if args.genome not in te_hic_lib.common.valid_assemblies:
+        if args.genome not in tehiclib.common.valid_assemblies:
             log.error('{0} assembly not found'.format(args.genome))
-            log.error('Valid assemblies are: {0}'.format(te_hic_lib.common.valid_assemblies))
+            log.error('Valid assemblies are: {0}'.format(tehiclib.common.valid_assemblies))
 
         script_path = os.path.dirname(os.path.realpath(__file__))
         genelist_glb_filename = os.path.join(script_path, '../genome/{0}_glb_gencode_promoters.glb'.format(args.genome))
