@@ -32,6 +32,8 @@ def map_pairs(valid_pairs, genome):
     self_genome_linearData = genome.linearData
     self_genome_buckets = genome.buckets
 
+    print(self_genome_buckets)
+
     for idx, pairs in enumerate(valid_pairs):
         # pairs format ('chr7', 150285954, 'chr4', 130529111, '-', '+');
         chrom = pairs[0]
