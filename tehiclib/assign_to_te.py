@@ -105,9 +105,7 @@ def map_pairs(valid_pairs, genome):
 
         output.append((pairs, read1_feat, read1_type, read2_feat, read2_type))
 
-        done += 1
-
-        if done % 1000000 == 0:
+        if idx % 1e6 == 0:
             print(f'Processed: {done:,}')
 
     print(f'Processed {len(output):,} reads')
