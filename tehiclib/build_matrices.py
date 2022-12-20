@@ -55,7 +55,7 @@ class build_matrices:
         Build the raw matrices in the style of hicpro
 
         '''
-        self.log.info(f'Building in-memory matrices for resolution {self.res} kbp')
+        self.log.info(f'Building in-memory matrices for resolution {self.res} bp')
 
         # The format of mapped_pairs is:
         # (
