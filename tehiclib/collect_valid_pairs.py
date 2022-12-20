@@ -4,12 +4,18 @@ Pair up all valid reads from a pair of bams
 
 '''
 
-import sys, os, gzip
+import sys, os, gzip, random, subprocess
 import pysam
 
 valid_chroms = set(['chrX', 'chrY'] + [f'chr{i}' for i in range(1, 30)]) # cut scaffolds
 
-def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000, logger=None, min_qual=None):
+def collect_valid_pairs(bam1_filename,
+    bam2_filename,
+    min_dist=5000,
+    label=None,
+    logger=None,
+    _save_intermediate_files=False,
+    min_qual=None):
     '''
     **Purpose**
         Collect valid pairs for some set of criteria
@@ -31,13 +37,15 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000, logger=None
     assert bam1_filename, 'You must provide a valid filename in bam1_filename'
     assert bam2_filename, 'You must provide a valid filename in bam2_filename'
     assert min_qual, 'You must specify a minimum quality score'
+    assert label, 'Need a label'
 
     logger.info(f'Started {bam1_filename} and {bam2_filename}')
 
     bf1 = pysam.AlignmentFile(bam1_filename, 'rb')
     bf2 = pysam.AlignmentFile(bam2_filename, 'rb')
-    pairs = set([])
-    pairs_add = pairs.add # speedup to skip binding
+
+    temp_filename = f'stage1.{random.randint(10, 1e5):0>7}.{label}.tmp'
+    temp_out = open(temp_filename, 'w')
 
     # We assume the bam files are sorted by name and unaligned were also output
     stats_total_reads = 0
@@ -57,7 +65,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000, logger=None
         stats_total_reads += 1
         # read name sanity check:
         if read1.query_name != read2.query_name:
-            logger.error('Mismatched read names (%s != %s), make sure the BAMs contain unaligned reads and are sorted by name' % (read1.query_name, read2.query_name))
+            logger.error(f'Mismatched read names ({read1.query_name} != {read2.query_name}), make sure the BAMs contain unaligned reads and are sorted by name')
             sys.quit()
 
         # check both reads are aligned
@@ -99,14 +107,38 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000, logger=None
         # This does duplicate removal in one go.
         # Only use the starts, it saves memory, and anyway the 3' ends are unreliable for duplicate removal if the input has been quality/adapter trimmed
         # Also strip the 'chr' off the front of the contigs. Could be a problem for some genomes?
-        pairs_add((read1.reference_name[3:], read1.reference_start, read2.reference_name[3:], read2.reference_end, loc_strand1, loc_strand2))
+        temp_out.write(f'{read1.reference_name[3:]}\t{read1.reference_start}\t{read2.reference_name[3:]}\t{read2.reference_end}\t{loc_strand1}\t{loc_strand2}\n')
+        #pairs_add((read1.reference_name[3:], read1.reference_start, read2.reference_name[3:], read2.reference_end, loc_strand1, loc_strand2))
         done += 1 # subtract this number to get the number of duplicates removed
 
-        if stats_total_reads % 1000000 == 0:
+        if stats_total_reads % 1e6 == 0:
             logger.info('Processed: {:,}'.format(stats_total_reads))
 
     bf1.close()
     bf2.close()
+
+    temp_out.close()
+
+    logger.info('Sorting temp file')
+
+    #subprocess.run(f'sort {temp_filename} | uniq > {temp_filename}.sorted', shell=True)    # Portable memory resilient
+    subprocess.run(f"awk '!x[$0]++' {temp_filename} > {temp_filename}.sorted", shell=True) # Faster, higher peak memory?!
+
+    logger.info('Reloading')
+    pairs = set([])
+    pairs_add = pairs.add # speedup to skip binding
+    oh = open(temp_filename, 'r')
+    for line in oh:
+        line = line.strip().split('\t')
+        pairs_add((line[0], int(line[1]), line[2], int(line[3]))) # You can drop the strands now as not needed anymore, line[4], line[5]))
+    oh.close()
+
+    subprocess.run(f'rm {temp_filename}', shell=True)
+    if _save_intermediate_files:
+        subprocess.run(f'mv {temp_filename}.sorted stage1.int.{label}.tsv.gz', shell=True)
+        logger.info(f'Intermediate file: Saved {len(pairs):,} pairs')
+    else:
+        subprocess.run(f'rm {temp_filename}.sorted', shell=True)
 
     logger.info('\ncollect_valid_pairs() stats:')
     logger.info('  Aligned:')
@@ -122,6 +154,7 @@ def collect_valid_pairs(bam1_filename, bam2_filename, min_dist=5000, logger=None
     logger.info('    Too close                 : {:,} ({:.2%})'.format(reject_too_close, reject_too_close/stats_total_reads))
     logger.info('  Final:')
     logger.info('    Kept reads                : {:,} ({:.2%})'.format(len(pairs), len(pairs)/stats_total_reads))
+    logger.info('    [Note that these numbers below include PCR duplicates]')
     logger.info('    Kept short-range (<20kb)  : {:,} ({:.2%})'.format(stats_short_range, stats_short_range/stats_total_reads))
     logger.info('    Kept long-range (>20kb)   : {:,} ({:.2%})'.format(stats_long_range,  stats_long_range/stats_total_reads))
 

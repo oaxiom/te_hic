@@ -62,11 +62,9 @@ class te_hic:
 
         self.valid_pairs = collect_valid_pairs(bam1_filename, bam2_filename,
             min_dist=5000, min_qual=min_qual,
-            logger=self.logger)
-
-        if self.__save_intermediate_files:
-            save_valid_pairs(self.valid_pairs, f'stage1.int.{self.label}.tsv.gz')
-            self.logger.info(f'Intermediate file: Saved {len(self.valid_pairs):,} pairs')
+            label=self.label,
+            logger=self.logger,
+            _save_intermediate_files=self.__save_intermediate_files)
 
         return True
 
@@ -94,10 +92,12 @@ class te_hic:
                 read2_names = ', '.join(o[3]) if o[3] else 'None'
                 read2_types = ', '.join(o[4]) if o[4] else 'None'
 
-                line = [f'chr{o[0][0]}', str(o[0][1]), str(o[0][1]+50),
+                line = [
+                    f'chr{o[0][0]}', str(o[0][1]), str(o[0][1]+50),
                     read1_names, read1_types,
-                    f'chr{o[0][2]}', str(o[0][3]-50), str(o[0][4]),
-                    read2_names, read2_types]
+                    f'chr{o[0][2]}', str(o[0][3]-50), str(o[0][3]), # Correct as it used reference end
+                    read2_names, read2_types
+                    ]
 
                 out.write('{}\n'.format('\t'.join(line)))
             out.close()
