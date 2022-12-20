@@ -111,6 +111,6 @@ def map_pairs(valid_pairs, genome, logger=False):
         if idx % 1e6 == 0:
             logger.info(f'Processed: {idx:,}')
 
-    logger.info(f'Processed {len(output):,} reads')
+    logger.info(f'Processed: {len(output):,} reads in total')
 
     return output
