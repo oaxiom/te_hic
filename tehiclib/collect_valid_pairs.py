@@ -63,6 +63,9 @@ def collect_valid_pairs(bam1_filename,
     done = 0
     for read1, read2 in zip(bf1, bf2): # needs to be eof...
         stats_total_reads += 1
+        if stats_total_reads % 1e6 == 0:
+            logger.info('Processed: {:,}'.format(stats_total_reads))
+
         # read name sanity check:
         if read1.query_name != read2.query_name:
             logger.error(f'Mismatched read names ({read1.query_name} != {read2.query_name}), make sure the BAMs contain unaligned reads and are sorted by name')
@@ -110,9 +113,6 @@ def collect_valid_pairs(bam1_filename,
         temp_out.write(f'{read1.reference_name[3:]}\t{read1.reference_start}\t{read2.reference_name[3:]}\t{read2.reference_end}\t{loc_strand1}\t{loc_strand2}\n')
         #pairs_add((read1.reference_name[3:], read1.reference_start, read2.reference_name[3:], read2.reference_end, loc_strand1, loc_strand2))
         done += 1 # subtract this number to get the number of duplicates removed
-
-        if stats_total_reads % 1e6 == 0:
-            logger.info('Processed: {:,}'.format(stats_total_reads))
 
     bf1.close()
     bf2.close()
