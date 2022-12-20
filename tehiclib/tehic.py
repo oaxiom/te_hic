@@ -76,7 +76,7 @@ class te_hic:
         assert self.genome, 'genome must be valid'
         assert self.valid_pairs, 'Stage 1 results "valid pairs" has not been generated correctly'
 
-        self.mapped_pairs = map_pairs(self.valid_pairs, genome=self.genome)
+        self.mapped_pairs = map_pairs(self.valid_pairs, genome=self.genome, logger=self.logger)
 
         del self.valid_pairs # not needed
 

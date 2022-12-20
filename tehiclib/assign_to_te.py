@@ -10,7 +10,7 @@ import sys, os, gzip
 from . import miniglbase3
 from . import common
 
-def map_pairs(valid_pairs, genome):
+def map_pairs(valid_pairs, genome, logger=False):
     '''
     **Purpose**
         Load in a BEDPE file, ideally output by collect_valid_pairs.py, although I guess any valid BEDPE will do
@@ -23,6 +23,7 @@ def map_pairs(valid_pairs, genome):
             genome glb file
     '''
     assert valid_pairs, 'No valid pairs'
+    assert logger, 'Need logger for output'
 
     done = 0
     bucket_size = miniglbase3.config.bucket_size
@@ -108,8 +109,8 @@ def map_pairs(valid_pairs, genome):
         output.append((pairs, read1_feat, read1_type, read2_feat, read2_type))
 
         if idx % 1e6 == 0:
-            print(f'Processed: {done:,}')
+            logger.info(f'Processed: {idx:,}')
 
-    print(f'Processed {len(output):,} reads')
+    logger.info(f'Processed {len(output):,} reads')
 
     return output

@@ -103,7 +103,7 @@ class build_matrices:
 
             done += 1
             if done % 1e6 == 0:
-                print(f'Processed: {done:,}')
+                self.log.info(f'Processed: {done:,}')
 
         return
 
