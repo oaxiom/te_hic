@@ -33,6 +33,7 @@ def prepare_parser():
     optional.add_argument('-q', '--qual', nargs=1, type=int, default=default_q, required=False, help=f'q threshold for read quality filtering, default={default_q}')
     optional.add_argument('-d', '--mindist', nargs=1, type=int, default=default_mindist, required=False, help=f'Minimum distance (in base pairs), default={default_mindist}')
     optional.add_argument('-r', '--resolutions', nargs="+", type=int, default=default_resolutions, required=False, help=f'Default resolutions for the matrices default={default_resolutions_str}')
+    optional.add_argument('--keep-intermediate-files', action='store_true', default=False, required=False, help='Keep intermediate files from each stage')
 
     required = parser.add_argument_group('required arguments')
 
@@ -57,6 +58,8 @@ def main():
     parser = prepare_parser()
     args = parser.parse_args()
 
+    print(args)
+
     log = parser.log
 
     log.info('Arguments:')
@@ -68,7 +71,8 @@ def main():
     log.info(f'  Minimum contact distance: {args.mindist} (default is {default_mindist})')
     log.info(f'  Matrix resolutions to build: {args.resolutions} kbp (default is {default_resolutions})')
 
-    te_hic = tehiclib.te_hic(genome=args.genome[0], label=args.label, logger=log)
+    te_hic = tehiclib.te_hic(genome=args.genome[0], label=args.label, logger=log,
+        save_intermediate_files=args.keep_intermediate_files)
 
     # stage 1
     ss = time.time()

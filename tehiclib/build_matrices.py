@@ -49,7 +49,7 @@ class build_matrices:
 
         return
 
-    def build_matrices(self, mapped_pairs):
+    def build_matrices(self, mapped_pairs_temp_file):
         '''
 
         Build the raw matrices in the style of hicpro
@@ -64,11 +64,15 @@ class build_matrices:
         #   {'MER33:hAT-Charlie:DNA'}, {'TE'}
         # )
 
+        mapped_pairs = open(mapped_pairs_temp_file, 'r')
+
         for done, pair in enumerate(mapped_pairs):
-            read1_chrom = f'chr{pair[0][0]}'
-            read2_chrom = f'chr{pair[0][2]}'
-            read1_mid = pair[0][1]
-            read2_mid = pair[0][3]
+            pair = pair.strip().split('\t')
+
+            read1_chrom = f'chr{pair[0]}'
+            read2_chrom = f'chr{pair[3]}'
+            read1_mid = int(pair[1])
+            read2_mid = int(pair[4])
 
             read1_bin = (read1_mid // self.res) + self.chrom_bin_offsets[read1_chrom][0]
             read2_bin = (read2_mid // self.res) + self.chrom_bin_offsets[read2_chrom][0]
@@ -83,13 +87,13 @@ class build_matrices:
                 self.all[bin_pair] = 0
             self.all[bin_pair] += 1
 
-            if 'TE' in pair[2] and 'TE' in pair[4]:
+            if 'TE' in pair[7] and 'TE' in pair[9]:
                 # TE <=> TE
                 if bin_pair not in self.tete:
                     self.tete[bin_pair] = 0
                 self.tete[bin_pair] += 1
 
-            elif 'TE' in pair[2] or 'TE' in pair[4]:
+            elif 'TE' in pair[7] or 'TE' in pair[9]:
                 # TE <=> non-TE
                 if bin_pair not in self.tenn:
                     self.tenn[bin_pair] = 0
@@ -104,6 +108,7 @@ class build_matrices:
             done += 1
             if done % 1e6 == 0:
                 self.log.info(f'Processed: {done:,}')
+        mapped_pairs.close()
 
         return
 

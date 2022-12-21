@@ -25,7 +25,7 @@ class quantify:
     def bind_te_freqs(self, te_genome_freqs_glb):
         self.te_freqs = te_genome_freqs_glb
 
-    def measure_te_anchors(self, mapped_pairs):
+    def measure_te_anchors(self, mapped_pairs_temp_file):
         '''
         **Purpose**
             Make a crude measure of the
@@ -51,12 +51,16 @@ class quantify:
 
         self.log.info("Measures anchors...")
         total = 0
-        for r in mapped_pairs:
 
+        mapped_pairs = open(mapped_pairs_temp_file, 'r')
+
+        for r in mapped_pairs:
+            # (chromA, leftA, riteA, chromB, leftB, riteB, read1_feat, read1_type, read2_feat, read2_type)
+            r = r.strip().split('\t')
             # measure TE anchors
-            if 'TE' in r[2] and 'TE' in r[4]:
+            if 'TE' in r[7] and 'TE' in r[9]:
                 te['TE <-> TE'] += 1
-            elif 'TE' in r[2] or 'TE' in r[4]:
+            elif 'TE' in r[7] or 'TE' in r[9]:
                 te['TE <-> -'] += 1
             else:
                 te['-  <-> -'] += 1
@@ -67,7 +71,7 @@ class quantify:
                 #break
 
             # Measure TEs in detail
-            if 'TE' in r[2] and 'TE' in r[4]:
+            if 'TE' in r[7] and 'TE' in r[9]:
                 # possible to have more than one TE:
                 tel = [i for i in r[1] if ':' in i] # can also hoover up some genes, so use ':' to discriminate TEs
                 ter = [i for i in r[3] if ':' in i]
@@ -80,11 +84,11 @@ class quantify:
                         res_te_te[c] = 0
                     res_te_te[c] += 1
 
-            elif 'TE' in r[2] or 'TE' in r[4]:
-                if 'TE' in r[2]:
-                    TE = [i for i in r[1] if ':' in i]
-                elif 'TE' in r[4]:
-                    TE = [i for i in r[3] if ':' in i]
+            elif 'TE' in r[7] or 'TE' in r[9]:
+                if 'TE' in r[7]:
+                    TE = [i for i in eval(r[6]) if ':' in i]
+                elif 'TE' in r[9]:
+                    TE = [i for i in eval(r[8]) if ':' in i]
 
                 for t in TE:
                     if ':' not in t:
@@ -92,6 +96,8 @@ class quantify:
                     if t not in res_te_nn:
                         res_te_nn[t] = 0
                     res_te_nn[t] += 1
+
+        mapped_pairs.close()
 
         self.log.info('  TE <-> TE : {:,} ({:.2%})'.format(te['TE <-> TE'], te['TE <-> TE']/total))
         self.log.info('  TE <-> -- : {:,} ({:.2%})'.format(te['TE <-> -'], te['TE <-> -']/total))

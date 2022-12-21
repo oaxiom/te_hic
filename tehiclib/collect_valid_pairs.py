@@ -134,11 +134,6 @@ def collect_valid_pairs(bam1_filename,
     oh.close()
 
     subprocess.run(f'rm {temp_filename}', shell=True)
-    if _save_intermediate_files:
-        subprocess.run(f'mv {temp_filename}.sorted stage1.int.{label}.tsv.gz', shell=True)
-        logger.info(f'Intermediate file: Saved {len(pairs):,} pairs')
-    else:
-        subprocess.run(f'rm {temp_filename}.sorted', shell=True)
 
     logger.info('\ncollect_valid_pairs() stats:')
     logger.info('  Aligned:')
@@ -158,7 +153,7 @@ def collect_valid_pairs(bam1_filename,
     logger.info('    Kept short-range (<20kb)  : {:,} ({:.2%})'.format(stats_short_range, stats_short_range/stats_total_reads))
     logger.info('    Kept long-range (>20kb)   : {:,} ({:.2%})'.format(stats_long_range,  stats_long_range/stats_total_reads))
 
-    return pairs
+    return f"{temp_filename}.sorted"
 
 def save_valid_pairs(pairs, output):
     '''

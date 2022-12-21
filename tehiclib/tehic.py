@@ -13,7 +13,7 @@ class te_hic:
         genome:str,
         label:str,
         logger,
-        save_intermediate_files=True
+        save_intermediate_files=False
         ):
         '''
         Entry point for te_hic
@@ -36,7 +36,7 @@ class te_hic:
         assert genome in common.valid_assemblies, f'{genome} not in one of the valid genomes {common.valid_assemblies}'
 
         self.label = label
-        self.valid_pairs = None
+        self.valid_pairs_tmp_file = None
         self.logger = logger
         self.__save_intermediate_files = save_intermediate_files
         self.__script_path = os.path.dirname(os.path.realpath(__file__))
@@ -60,7 +60,7 @@ class te_hic:
             Collect QC passing valid pairs
         '''
 
-        self.valid_pairs = collect_valid_pairs(bam1_filename, bam2_filename,
+        self.valid_pairs_tmp_file = collect_valid_pairs(bam1_filename, bam2_filename,
             min_dist=5000, min_qual=min_qual,
             label=self.label,
             logger=self.logger,
@@ -74,34 +74,9 @@ class te_hic:
             Assign reads to a genome feature
         '''
         assert self.genome, 'genome must be valid'
-        assert self.valid_pairs, 'Stage 1 results "valid pairs" has not been generated correctly'
+        assert self.valid_pairs_tmp_file, 'Stage 1 results "valid pairs" has not been generated correctly'
 
-        self.mapped_pairs = map_pairs(self.valid_pairs, genome=self.genome, logger=self.logger)
-
-        del self.valid_pairs # not needed
-
-        if self.__save_intermediate_files:
-            # out form:
-            # ((pairs, read1_feat, read1_type, read2_feat, read2_type))
-            # pairs = ('chr7', 150285954, 'chr4', 130529111, '-', '+');
-            #
-            out = gzip.open(f'stage2.int.{self.label}.tsv.gz', 'wt')
-            for o in self.mapped_pairs:
-                read1_names = ', '.join(o[1]) if o[1] else 'None'
-                read1_types = ', '.join(o[2]) if o[2] else 'None'
-                read2_names = ', '.join(o[3]) if o[3] else 'None'
-                read2_types = ', '.join(o[4]) if o[4] else 'None'
-
-                line = [
-                    f'chr{o[0][0]}', str(o[0][1]), str(o[0][1]+50),
-                    read1_names, read1_types,
-                    f'chr{o[0][2]}', str(o[0][3]-50), str(o[0][3]), # Correct as it used reference end
-                    read2_names, read2_types
-                    ]
-
-                out.write('{}\n'.format('\t'.join(line)))
-            out.close()
-            self.logger.info(f'Intermediate file: Pair assignments {len(self.mapped_pairs):,} saved')
+        self.mapped_pairs_temp_file = map_pairs(self.valid_pairs_tmp_file, genome=self.genome, label=self.label, logger=self.logger)
 
         return True
 
@@ -111,11 +86,11 @@ class te_hic:
             Aggregate the genome contacts and output some statistics
 
         '''
-        assert self.mapped_pairs, 'Stage 2 results "mapped_pairs" was not generated correctly'
+        assert self.mapped_pairs_temp_file, 'Stage 2 results "mapped_pairs" was not generated correctly'
 
         qfy = quantify(self.label, logger=self.logger)
         qfy.bind_te_freqs(self.te_genome_freqs)
-        qfy.measure_te_anchors(self.mapped_pairs)
+        qfy.measure_te_anchors(self.mapped_pairs_temp_file)
 
         return True
 
@@ -125,12 +100,12 @@ class te_hic:
             Build the matrices at the required resolutions
 
         '''
-        assert self.mapped_pairs, 'Stage 2 results "mapped_pairs" was not generated correctly'
+        assert self.mapped_pairs_temp_file, 'Stage 2 results "mapped_pairs" was not generated correctly'
 
         for resolution in resolutions:
             mat = build_matrices(self.chrom_sizes, resolution, logger=self.logger)
 
-            mat.build_matrices(self.mapped_pairs)
+            mat.build_matrices(self.mapped_pairs_temp_file)
             mat.save_matrices(self.label)
 
             del mat

@@ -6,11 +6,15 @@ Does one or more end overlap with a TE?
 
 '''
 
-import sys, os, gzip
+import sys, os, gzip, random
 from . import miniglbase3
 from . import common
 
-def map_pairs(valid_pairs, genome, logger=False):
+def save_output(output_data, filename_handle):
+    for line in output_data:
+        filename_handle.write('{}\n'.format('\t'.join([str(i) for i in line])))
+
+def map_pairs(valid_pairs_temp_file, genome, label=None, logger=False):
     '''
     **Purpose**
         Load in a BEDPE file, ideally output by collect_valid_pairs.py, although I guess any valid BEDPE will do
@@ -22,8 +26,9 @@ def map_pairs(valid_pairs, genome, logger=False):
         genome (Required)
             genome glb file
     '''
-    assert valid_pairs, 'No valid pairs'
+    assert valid_pairs_temp_file, 'No valid pairs'
     assert logger, 'Need logger for output'
+    assert label, 'Need a label'
 
     done = 0
     bucket_size = miniglbase3.config.bucket_size
@@ -35,14 +40,20 @@ def map_pairs(valid_pairs, genome, logger=False):
 
     #print(self_genome_buckets)
 
+    valid_pairs = open(valid_pairs_temp_file, 'r')
+
+    output_filename = f'stage2.{random.randint(10, 1e5):0>7}.{label}.tmp'
+    output_file = open(output_filename, 'w')
+
     for idx, pairs in enumerate(valid_pairs):
         # pairs format ('chr7', 150285954, 'chr4', 130529111, '-', '+');
-        chrom = pairs[0]
-        left = pairs[1]
-        rite = left + 100
+        pairs = pairs.strip().split('\t')
+        chromA = pairs[0]
+        leftA = int(pairs[1])
+        riteA = leftA + 100
 
-        left_buck = ((left-1)//bucket_size) * bucket_size
-        right_buck = (rite//bucket_size) * bucket_size
+        left_buck = ((leftA-1)//bucket_size) * bucket_size
+        right_buck = (riteA//bucket_size) * bucket_size
         buckets_reqd = range(left_buck, right_buck+bucket_size, bucket_size)
         result = []
 
@@ -50,11 +61,11 @@ def map_pairs(valid_pairs, genome, logger=False):
         loc_ids = set()
         if buckets_reqd:
             for buck in buckets_reqd:
-                if buck in self_genome_buckets[chrom]:
-                    loc_ids.update(self_genome_buckets[chrom][buck]) # set = unique ids
+                if buck in self_genome_buckets[chromA]:
+                    loc_ids.update(self_genome_buckets[chromA][buck]) # set = unique ids
 
             for index in loc_ids:
-                if rite >= self_genome_linearData[index]["loc"].loc["left"] and left <= self_genome_linearData[index]["loc"].loc["right"]:
+                if riteA >= self_genome_linearData[index]["loc"].loc["left"] and leftA <= self_genome_linearData[index]["loc"].loc["right"]:
                     result.append(self_genome_linearData[index])
 
             read1_feat = []
@@ -65,12 +76,12 @@ def map_pairs(valid_pairs, genome, logger=False):
                     read1_type.append(r['type'])
 
         # work out which of the buckets is required:
-        chrom = pairs[2]
-        left = pairs[3] - 100 # Yes, this is correct, it takes reference_end from the BAM
-        rite = pairs[3]
+        chromB = pairs[2]
+        leftB = int(pairs[3]) - 100 # Yes, this is correct, it takes reference_end from the BAM
+        riteB = int(pairs[3])
 
-        left_buck = ((left-1)//bucket_size) * bucket_size
-        right_buck = (rite//bucket_size) * bucket_size
+        left_buck = ((leftB-1)//bucket_size) * bucket_size
+        right_buck = (riteB//bucket_size) * bucket_size
         buckets_reqd = range(left_buck, right_buck+bucket_size, bucket_size)
         result = []
 
@@ -78,11 +89,11 @@ def map_pairs(valid_pairs, genome, logger=False):
         loc_ids = set()
         if buckets_reqd:
             for buck in buckets_reqd:
-                if buck in self_genome_buckets[chrom]:
-                    loc_ids.update(self_genome_buckets[chrom][buck]) # set = unique ids
+                if buck in self_genome_buckets[chromB]:
+                    loc_ids.update(self_genome_buckets[chromB][buck]) # set = unique ids
 
             for index in loc_ids:
-                if rite >= self_genome_linearData[index]["loc"].loc["left"] and left <= self_genome_linearData[index]["loc"].loc["right"]:
+                if riteB >= self_genome_linearData[index]["loc"].loc["left"] and leftB <= self_genome_linearData[index]["loc"].loc["right"]:
                     result.append(self_genome_linearData[index])
 
             read2_feat = []
@@ -106,11 +117,18 @@ def map_pairs(valid_pairs, genome, logger=False):
             read2_feat = set()
             read2_type = set()
 
-        output.append((pairs, read1_feat, read1_type, read2_feat, read2_type))
+        output.append((chromA, leftA, riteA, chromB, leftB, riteB, read1_feat, read1_type, read2_feat, read2_type))
 
         if idx % 1e6 == 0:
             logger.info(f'Processed: {idx:,}')
+            # output reads results:
+            save_output(output, output_file)
+            output = []
 
-    logger.info(f'Processed: {len(output):,} reads in total')
+    save_output(output, output_file)
+    del output
+    output_file.close()
 
-    return output
+    logger.info(f'Processed: {idx:,} reads in total')
+
+    return output_filename
