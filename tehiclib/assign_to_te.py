@@ -42,7 +42,7 @@ def map_pairs(valid_pairs_temp_file, genome, label=None, logger=False):
 
     valid_pairs = open(valid_pairs_temp_file, 'r')
 
-    output_filename = f'stage2.{random.randint(10, 1e5):0>7}.{label}.tmp'
+    output_filename = f'stage2.{random.randint(10, 1e6):0>7}.{label}.tmp'
     output_file = open(output_filename, 'w')
 
     for idx, pairs in enumerate(valid_pairs):

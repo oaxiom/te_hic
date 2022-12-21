@@ -44,7 +44,7 @@ def collect_valid_pairs(bam1_filename,
     bf1 = pysam.AlignmentFile(bam1_filename, 'rb')
     bf2 = pysam.AlignmentFile(bam2_filename, 'rb')
 
-    temp_filename = f'stage1.{random.randint(10, 1e5):0>7}.{label}.tmp'
+    temp_filename = f'stage1.{random.randint(10, 1e6):0>7}.{label}.tmp'
     temp_out = open(temp_filename, 'w')
 
     # We assume the bam files are sorted by name and unaligned were also output
