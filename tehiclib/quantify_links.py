@@ -89,9 +89,9 @@ class quantify:
 
             elif 'TE' in r[7] or 'TE' in r[9]:
                 if 'TE' in r[7]:
-                    TE = [i for i in eval(r[6]) if ':' in i]
+                    TE = [i for i in r[6] if ':' in i]
                 elif 'TE' in r[9]:
-                    TE = [i for i in eval(r[8]) if ':' in i]
+                    TE = [i for i in r[8] if ':' in i]
 
                 for t in TE:
                     if ':' not in t:
