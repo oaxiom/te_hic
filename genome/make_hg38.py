@@ -105,9 +105,6 @@ for idx, item in enumerate(gencode):
 
     promoters.append(prom_locs)
 
-    #if idx > 100000:
-    #    break
-
     p.update(idx)
 
 print(f'\nAdded {added:,} features')

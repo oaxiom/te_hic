@@ -123,11 +123,12 @@ def collect_valid_pairs(bam1_filename,
 
     #subprocess.run(f'sort {temp_filename} | uniq > {temp_filename}.sorted', shell=True)    # Portable memory resilient
     subprocess.run(f"awk '!x[$0]++' {temp_filename} > {temp_filename}.sorted", shell=True) # Faster, higher peak memory?!
+    os.remove(f'{temp_filename}') # only sorted needed now;
 
     logger.info('Reloading')
     pairs = set([])
     pairs_add = pairs.add # speedup to skip binding
-    oh = open(temp_filename, 'r')
+    oh = open(f'{temp_filename}.sorted', 'r')
     for line in oh:
         line = line.strip().split('\t')
         pairs_add((line[0], int(line[1]), line[2], int(line[3]))) # You can drop the strands now as not needed anymore, line[4], line[5]))
@@ -144,14 +145,18 @@ def collect_valid_pairs(bam1_filename,
     logger.info('    One pair aligned          : {:,} ({:.2%})'.format(stats_1aligned, stats_1aligned/stats_total_reads))
     logger.info('    Not canonical chromosome  : {:,} ({:.2%})'.format(stats_not_canonical_chromosome, stats_not_canonical_chromosome/stats_total_reads))
     logger.info('    No pairs aligned          : {:,} ({:.2%})'.format(stats_unaligned, stats_unaligned/stats_total_reads))
-    logger.info('    Duplicates                : {:,} ({:.2%})'.format(done-len(pairs), (done-len(pairs))/done))
     logger.info('  Rejected reads (by criteria):')
     logger.info('    Too close                 : {:,} ({:.2%})'.format(reject_too_close, reject_too_close/stats_total_reads))
     logger.info('  Final:')
-    logger.info('    Kept reads                : {:,} ({:.2%})'.format(len(pairs), len(pairs)/stats_total_reads))
     logger.info('    [Note that these numbers below include PCR duplicates]')
+    logger.info('    Kept reads                : {:,} ({:.2%})'.format(len(pairs), len(pairs)/stats_total_reads))
     logger.info('    Kept short-range (<20kb)  : {:,} ({:.2%})'.format(stats_short_range, stats_short_range/stats_total_reads))
     logger.info('    Kept long-range (>20kb)   : {:,} ({:.2%})'.format(stats_long_range,  stats_long_range/stats_total_reads))
+
+    ret = subprocess.run(f"wc {temp_filename}.sorted", shell=True, capture_output=True).stdout.decode()
+    ret = int(str(ret).strip().split(' ')[0])
+    logger.info('    [This number is after duplicate removal]')
+    logger.info('    Kept long-range (>20kb)   : {:,} ({:.2%})'.format(ret,  ret/stats_total_reads))
 
     return f"{temp_filename}.sorted"
 

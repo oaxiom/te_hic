@@ -23,7 +23,7 @@ It differs from most HiC analysis software as it considers multiple mapped reads
 repeat regions from the genome. It is primarily targeted at the analysis of LINEs, SINEs, LTRs,
 DNA and retroposons (in human). The analysis pipeline excludes simple repeats, low complexity and
 satellites. (The last of these is potentially very interesting, but the genome annotations
-are not great for these, so we omit).
+are not great, so we omit).
 
 ## How?
 
@@ -73,6 +73,8 @@ per read pair per sample.
 te_hic is all packed in a single entry point now. To use, supply the aligned read1 and read2 bams
 and the genome. Other options are available to control the q read threshold, minimum distance to consider
 and resolutions of arrays to build.
+
+Note that te_hic uses one CPU core, and has a peak memory usage of about 11 Gb. 
 
 ```
 te_hic -1 ${out}.p1.bam -2 ${out}.p2.bam -g hg38 -l sample_label

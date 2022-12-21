@@ -58,8 +58,6 @@ def main():
     parser = prepare_parser()
     args = parser.parse_args()
 
-    print(args)
-
     log = parser.log
 
     log.info('Arguments:')

@@ -78,6 +78,9 @@ class te_hic:
 
         self.mapped_pairs_temp_file = map_pairs(self.valid_pairs_tmp_file, genome=self.genome, label=self.label, logger=self.logger)
 
+        if not self.__save_intermediate_files:
+            os.remove(self.valid_pairs_tmp_file) # not needed anymore
+
         return True
 
     def stage3_quantify_links(self):
@@ -109,5 +112,8 @@ class te_hic:
             mat.save_matrices(self.label)
 
             del mat
+
+        if not self.__save_intermediate_files:
+            os.remove(self.mapped_pairs_temp_file) # not needed anymore
 
         return True
