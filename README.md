@@ -50,7 +50,7 @@ cd te_hic/genome
 python make_hg38.py
 
 # mm10 genome:
-TODO!
+python make_mm10.py
 
 ```
 
@@ -70,7 +70,7 @@ per read pair per sample.
 
 ### Step 2: Use te_hic
 
-te_hic is all packed in a single entry point now. To use, supply the aligned read1 and read2 bams
+te_hic is all packed in a single entry point. To use, supply the aligned read1 and read2 bams
 and the genome. Other options are available to control the q read threshold, minimum distance to consider
 and resolutions of arrays to build.
 
@@ -84,13 +84,15 @@ These are the full options for te_hic:
 
 ```
 
-usage: te_hic [-h] [-l LABEL] [-q QUAL] [-d MINDIST] [-r RESOLUTIONS [RESOLUTIONS ...]] -g GENOME -1 READ1 -2 READ2
+% te_hic -h
+
+usage: te_hic [-h] [-l LABEL] [-q QUAL] [-d MINDIST] [-r RESOLUTIONS [RESOLUTIONS ...]] [--keep-intermediate-files] -g GENOME -1 READ1 -2 READ2
 
 HiC data analysis, preserving TE information
 
 required arguments:
   -g GENOME, --genome GENOME
-                        Genome assembly to use, valid genomes: {'hg38'}
+                        Genome assembly to use, valid genomes: {'hg38', 'mm10'}
   -1 READ1, --read1 READ1
                         the BAM alignment file containing the aligned reads pair 1
   -2 READ2, --read2 READ2
@@ -105,6 +107,8 @@ optional arguments:
                         Minimum distance (in base pairs), default=5000
   -r RESOLUTIONS [RESOLUTIONS ...], --resolutions RESOLUTIONS [RESOLUTIONS ...]
                         Default resolutions for the matrices default=300 150 50
+  --keep-intermediate-files
+                        Keep intermediate files from each stage
 
 Minimal usage usage: te_hic -a read1.bam -b read2.bam -g genome
 
@@ -116,12 +120,12 @@ A toy example is included in te_hic/test/HiC-analysis (the 'HiC-analysis % ' is 
 in the commands after the % to get it it run)
 
 ```
-HiC-analysis % te_hic -1 SRR1030718.2_1.100k.bam -2 SRR1030718.2_2.100k.bam -g hg38 -l toy_example
+HiC-analysis % te_hic -1 SRR1030718.2_1.100k.bam -2 SRR1030718.2_2.100k.bam -g hg38 
 INFO    : Arguments:
 INFO    :   Read1: SRR1030718.2_1.100k.bam
 INFO    :   Read2: SRR1030718.2_2.100k.bam
 INFO    :   Genome: hg38
-INFO    :   Label: toy_example (default is te_hic)
+INFO    :   Label: te_hic (default is te_hic)
 INFO    :   Quality thresold: 10 (default is 10)
 INFO    :   Minimum contact distance: 5000 (default is 5000)
 INFO    :   Matrix resolutions to build: [300, 150, 50] kbp (default is [300, 150, 50])
@@ -131,6 +135,9 @@ INFO    : Stage 1: Collect valid read pairs
 INFO    : Started SRR1030718.2_1.100k.bam and SRR1030718.2_2.100k.bam
 [E::idx_find_and_load] Could not retrieve index file for 'SRR1030718.2_1.100k.bam'
 [E::idx_find_and_load] Could not retrieve index file for 'SRR1030718.2_2.100k.bam'
+INFO    : Sorting temp file
+INFO    : Reloading
+rm: stage1.0036117.te_hic.tmp: No such file or directory
 INFO    : 
 collect_valid_pairs() stats:
 INFO    :   Aligned:
@@ -141,75 +148,79 @@ INFO    :     Low quality               : 4,213 (4.21%)
 INFO    :     One pair aligned          : 12,252 (12.26%)
 INFO    :     Not canonical chromosome  : 312 (0.31%)
 INFO    :     No pairs aligned          : 1,909 (1.91%)
-INFO    :     Duplicates                : 25 (0.05%)
 INFO    :   Rejected reads (by criteria):
 INFO    :     Too close                 : 28,649 (28.66%)
 INFO    :   Final:
+INFO    :     [Note that these numbers below include PCR duplicates]
 INFO    :     Kept reads                : 52,610 (52.63%)
 INFO    :     Kept short-range (<20kb)  : 2,421 (2.42%)
 INFO    :     Kept long-range (>20kb)   : 50,214 (50.23%)
-INFO    : Intermediate file: Saved 52,610 pairs
+INFO    :     [This number is after duplicate removal]
+INFO    :     Kept long-range (>20kb)   : 52,610 (52.63%)
+INFO    : Took 1.0s
 INFO    : Stage 2: Assign to hg38 genome features
-Processed 52,610 reads
-INFO    : Intermediate file: Pair assignments 52,610 saved
+INFO    : Processed: 0
+INFO    : Processed: 52,609 reads in total
+INFO    : Took 3.2s
 INFO    : Stage 3: Quantify links
 INFO    : Measures anchors...
 INFO    :   TE <-> TE : 15,578 (29.61%)
 INFO    :   TE <-> -- : 25,297 (48.08%)
 INFO    :   -- <-> -- : 11,735 (22.31%)
-INFO    : Saved 'stage3.toy_example_te-nn_anchor_frequencies.tsv'
+INFO    : Saved 'stage3.te_hic_te-nn_anchor_frequencies.tsv'
+INFO    : Took 0.3s
 INFO    : Stage 4: Build Matrices
-INFO    : Building in-memory matrices for resolution 300000 kbp
-INFO    : Saved BED bins: "matrices_toy_example/300000/toy_example_300000_abs.bed"
-INFO    : Saved All matrix: "matrices_toy_example/300000/toy_example_300000.all.raw.matrix"
-INFO    : Saved TE <=> TE matrix: "matrices_toy_example/300000/toy_example_300000.tete.raw.matrix"
-INFO    : Saved TE <=> non-TE matrix: "matrices_toy_example/300000/toy_example_300000.tenn.raw.matrix"
-INFO    : Saved non-TE <=> non-TE matrix: "matrices_toy_example/300000/toy_example_300000.nnnn.raw.matrix"
-INFO    : Building in-memory matrices for resolution 150000 kbp
-INFO    : Saved BED bins: "matrices_toy_example/150000/toy_example_150000_abs.bed"
-INFO    : Saved All matrix: "matrices_toy_example/150000/toy_example_150000.all.raw.matrix"
-INFO    : Saved TE <=> TE matrix: "matrices_toy_example/150000/toy_example_150000.tete.raw.matrix"
-INFO    : Saved TE <=> non-TE matrix: "matrices_toy_example/150000/toy_example_150000.tenn.raw.matrix"
-INFO    : Saved non-TE <=> non-TE matrix: "matrices_toy_example/150000/toy_example_150000.nnnn.raw.matrix"
-INFO    : Building in-memory matrices for resolution 50000 kbp
-INFO    : Saved BED bins: "matrices_toy_example/50000/toy_example_50000_abs.bed"
-INFO    : Saved All matrix: "matrices_toy_example/50000/toy_example_50000.all.raw.matrix"
-INFO    : Saved TE <=> TE matrix: "matrices_toy_example/50000/toy_example_50000.tete.raw.matrix"
-INFO    : Saved TE <=> non-TE matrix: "matrices_toy_example/50000/toy_example_50000.tenn.raw.matrix"
-INFO    : Saved non-TE <=> non-TE matrix: "matrices_toy_example/50000/toy_example_50000.nnnn.raw.matrix"
+INFO    : Building in-memory matrices for resolution 300000 bp
+INFO    : Saved BED bins: "matrices_te_hic/300000/te_hic_300000_abs.bed"
+INFO    : Saved All matrix: "matrices_te_hic/300000/te_hic_300000.all.raw.matrix"
+INFO    : Saved TE <=> TE matrix: "matrices_te_hic/300000/te_hic_300000.tete.raw.matrix"
+INFO    : Saved TE <=> non-TE matrix: "matrices_te_hic/300000/te_hic_300000.tenn.raw.matrix"
+INFO    : Saved non-TE <=> non-TE matrix: "matrices_te_hic/300000/te_hic_300000.nnnn.raw.matrix"
+INFO    : Building in-memory matrices for resolution 150000 bp
+INFO    : Saved BED bins: "matrices_te_hic/150000/te_hic_150000_abs.bed"
+INFO    : Saved All matrix: "matrices_te_hic/150000/te_hic_150000.all.raw.matrix"
+INFO    : Saved TE <=> TE matrix: "matrices_te_hic/150000/te_hic_150000.tete.raw.matrix"
+INFO    : Saved TE <=> non-TE matrix: "matrices_te_hic/150000/te_hic_150000.tenn.raw.matrix"
+INFO    : Saved non-TE <=> non-TE matrix: "matrices_te_hic/150000/te_hic_150000.nnnn.raw.matrix"
+INFO    : Building in-memory matrices for resolution 50000 bp
+INFO    : Saved BED bins: "matrices_te_hic/50000/te_hic_50000_abs.bed"
+INFO    : Saved All matrix: "matrices_te_hic/50000/te_hic_50000.all.raw.matrix"
+INFO    : Saved TE <=> TE matrix: "matrices_te_hic/50000/te_hic_50000.tete.raw.matrix"
+INFO    : Saved TE <=> non-TE matrix: "matrices_te_hic/50000/te_hic_50000.tenn.raw.matrix"
+INFO    : Saved non-TE <=> non-TE matrix: "matrices_te_hic/50000/te_hic_50000.nnnn.raw.matrix"
+INFO    : Took 1.0s
+INFO    : In total took 5.6s
 
 HiC-analysis % ls -l
-total 23608
+total 16960
 -rw-rw-r--  1 andrew  staff  4208603 Nov 23 10:56 SRR1030718.2_1.100k.bam
 -rw-rw-r--  1 andrew  staff  4318275 Nov 23 11:03 SRR1030718.2_2.100k.bam
-drwxr-xr-x  5 andrew  staff      160 Nov 29 10:24 matrices_toy_example
--rw-r--r--  1 andrew  staff   962448 Nov 29 10:24 stage1.int.toy_example.tsv.gz
--rw-r--r--  1 andrew  staff  1108437 Nov 29 10:24 stage2.int.toy_example.tsv.gz
--rw-r--r--  1 andrew  staff       93 Nov 29 10:24 stage3.toy_example_crude_measures.txt
--rw-r--r--  1 andrew  staff    79178 Nov 29 10:24 stage3.toy_example_te-nn_anchor_frequencies.tsv
--rw-r--r--  1 andrew  staff  1357255 Nov 29 10:24 stage3.toy_example_te-te_anchor_frequencies.tsv
+drwxr-xr-x  5 andrew  staff      160 Dec 21 08:31 matrices_te_hic
+-rw-r--r--  1 andrew  staff       93 Dec 21 08:31 stage3.te_hic_crude_measures.txt
+-rw-r--r--  1 andrew  staff    79178 Dec 21 08:31 stage3.te_hic_te-nn_anchor_frequencies.tsv
+-rw-r--r--  1 andrew  staff       59 Dec 21 08:31 stage3.te_hic_te-te_anchor_frequencies.tsv
 -rw-r--r--  1 andrew  staff       71 Nov 28 13:14 test_script.sh
 
-HiC-analysis % ll matrices_toy_example 
+HiC-analysis % ll matrices_te_hic 
 total 0
-drwxr-xr-x  7 andrew  staff  224 Nov 29 10:24 150000
-drwxr-xr-x  7 andrew  staff  224 Nov 29 10:24 300000
-drwxr-xr-x  7 andrew  staff  224 Nov 29 10:24 50000
+drwxr-xr-x  7 andrew  staff  224 Dec 21 08:31 150000
+drwxr-xr-x  7 andrew  staff  224 Dec 21 08:31 300000
+drwxr-xr-x  7 andrew  staff  224 Dec 21 08:31 50000
 
-HiC-analysis % ll matrices_toy_example/150000 
+HiC-analysis % ll matrices_te_hic/150000 
 total 3520
--rw-r--r--  1 andrew  staff  585851 Nov 29 10:24 toy_example_150000.all.raw.matrix
--rw-r--r--  1 andrew  staff  130041 Nov 29 10:24 toy_example_150000.nnnn.raw.matrix
--rw-r--r--  1 andrew  staff  287127 Nov 29 10:24 toy_example_150000.tenn.raw.matrix
--rw-r--r--  1 andrew  staff  181403 Nov 29 10:24 toy_example_150000.tete.raw.matrix
--rw-r--r--  1 andrew  staff  603430 Nov 29 10:24 toy_example_150000_abs.bed
+-rw-r--r--  1 andrew  staff  585827 Dec 21 08:31 te_hic_150000.all.raw.matrix
+-rw-r--r--  1 andrew  staff  130043 Dec 21 08:31 te_hic_150000.nnnn.raw.matrix
+-rw-r--r--  1 andrew  staff  287113 Dec 21 08:31 te_hic_150000.tenn.raw.matrix
+-rw-r--r--  1 andrew  staff  181391 Dec 21 08:31 te_hic_150000.tete.raw.matrix
+-rw-r--r--  1 andrew  staff  603430 Dec 21 08:31 te_hic_150000_abs.bed
 
 HiC-analysis % wc *.tsv
      904    5428   79178 stage3.toy_example_te-nn_anchor_frequencies.tsv
    11570   69423 1357255 stage3.toy_example_te-te_anchor_frequencies.tsv
    12474   74851 1436433 total
    
-HiC-analysis % head stage3.toy_example_te-nn_anchor_frequencies.tsv
+HiC-analysis % head stage3.te_hic_te-nn_anchor_frequencies.tsv 
 name	count	genome_count	genome_percent	RPM	RPM per kbp of TE
 DNA:DNA:Eulor1	1	11998	0.0003874509893470593	19.007793195210038	1.5842468074020701
 DNA:DNA:Eulor9C	1	9179	0.0002964171221217417	19.007793195210038	2.070791283931805

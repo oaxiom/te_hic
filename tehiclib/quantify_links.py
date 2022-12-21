@@ -70,11 +70,14 @@ class quantify:
                 self.log.info(f'Processed: {total:,}')
                 #break
 
+            r[6] = eval(r[6])
+            r[8] = eval(r[8])
+
             # Measure TEs in detail
             if 'TE' in r[7] and 'TE' in r[9]:
                 # possible to have more than one TE:
-                tel = [i for i in r[1] if ':' in i] # can also hoover up some genes, so use ':' to discriminate TEs
-                ter = [i for i in r[3] if ':' in i]
+                tel = [i for i in r[6] if ':' in i] # can also hoover up some genes, so use ':' to discriminate TEs
+                ter = [i for i in r[8] if ':' in i]
                 combs = product(tel, ter)
                 combs = [tuple(sorted(i)) for i in combs] # sort to make it unidirectional
 

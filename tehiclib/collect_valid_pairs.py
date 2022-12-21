@@ -134,8 +134,6 @@ def collect_valid_pairs(bam1_filename,
         pairs_add((line[0], int(line[1]), line[2], int(line[3]))) # You can drop the strands now as not needed anymore, line[4], line[5]))
     oh.close()
 
-    subprocess.run(f'rm {temp_filename}', shell=True)
-
     logger.info('\ncollect_valid_pairs() stats:')
     logger.info('  Aligned:')
     logger.info('    Reads processed           : {:,}'.format(stats_total_reads))
