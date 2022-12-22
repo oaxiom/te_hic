@@ -9,6 +9,10 @@ import pysam
 
 valid_chroms = set(['chrX', 'chrY'] + [f'chr{i}' for i in range(1, 30)]) # cut scaffolds
 
+def dump_to_file(pairs, filehandle):
+    [filehandle.write(p) for p in sorted(pairs)]
+    del pairs
+
 def collect_valid_pairs(bam1_filename,
     bam2_filename,
     min_dist=5000,
@@ -60,11 +64,17 @@ def collect_valid_pairs(bam1_filename,
     reject_diff_chrom = 0
     reject_too_close = 0
 
+    pairs = set([])
+    pairs_add = pairs.add
+
     done = 0
     for read1, read2 in zip(bf1, bf2): # needs to be eof...
         stats_total_reads += 1
-        if stats_total_reads % 1e6 == 0:
+        if stats_total_reads % 10e6 == 0:
             logger.info('Processed: {:,}'.format(stats_total_reads))
+            dump_to_file(pairs, temp_out) # semi pair removed;
+            pairs = set([])
+            pairs_add = pairs.add
 
         # read name sanity check:
         if read1.query_name != read2.query_name:
@@ -111,11 +121,14 @@ def collect_valid_pairs(bam1_filename,
         # Only use the starts, it saves memory, and anyway the 3' ends are unreliable for duplicate removal if the input has been quality/adapter trimmed
         # Also strip the 'chr' off the front of the contigs. Could be a problem for some genomes?
         temp_out.write(f'{read1.reference_name[3:]}\t{read1.reference_start}\t{read2.reference_name[3:]}\t{read2.reference_end}\t{loc_strand1}\t{loc_strand2}\n')
-        #pairs_add((read1.reference_name[3:], read1.reference_start, read2.reference_name[3:], read2.reference_end, loc_strand1, loc_strand2))
-        done += 1 # subtract this number to get the number of duplicates removed
+        pairs_add(f'{read1.reference_name[3:]}\t{read1.reference_start}\t{read2.reference_name[3:]}\t{read2.reference_end}\t{loc_strand1}\t{loc_strand2}\n')
+        done += 1
 
     bf1.close()
     bf2.close()
+
+    # Final dump
+    dump_to_file(pairs, temp_out)
 
     temp_out.close()
 
@@ -138,7 +151,7 @@ def collect_valid_pairs(bam1_filename,
         pairs_add((line[0], int(line[1]), line[2], int(line[3]))) # You can drop the strands now as not needed anymore, line[4], line[5]))
     oh.close()
 
-    logger.info('\ncollect_valid_pairs() stats:')
+    logger.info('Stage 1 stats:')
     logger.info('  Aligned:')
     logger.info('    Reads processed           : {:,}'.format(stats_total_reads))
     logger.info('    Correctly paired          : {:,} ({:.2%})'.format(stats_aligned, stats_aligned/stats_total_reads))
@@ -157,7 +170,7 @@ def collect_valid_pairs(bam1_filename,
 
     ret = subprocess.run(f"wc {temp_filename}.sorted", shell=True, capture_output=True).stdout.decode()
     ret = int(str(ret).strip().split(' ')[0])
-    logger.info('    [This number is after duplicate removal]')
+    logger.info('    [Sorted, unique should match above number]')
     logger.info('    Kept long-range (>20kb)   : {:,} ({:.2%})'.format(ret,  ret/stats_total_reads))
 
     return f"{temp_filename}.sorted"
