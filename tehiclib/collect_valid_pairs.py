@@ -121,10 +121,10 @@ def collect_valid_pairs(bam1_filename,
 
     logger.info('Sorting temp file')
 
-    if done > 400e6: # We saw failures at 650M and 1300M
-        subprocess.run(f'sort {temp_filename} | uniq > {temp_filename}.sorted', shell=True)    # Portable memory resilient, slower?
-    else:
-        subprocess.run(f"awk '!x[$0]++' {temp_filename} > {temp_filename}.sorted", shell=True) # Faster, higher peak memory?!
+    # It seems awk gets killed in the region of ~200M so just use sort | uniq
+    subprocess.run(f'sort {temp_filename} | uniq > {temp_filename}.sorted', shell=True)    # Portable memory resilient, slower?
+    #if done > 200e6: # We saw failures at 650M and 1300M
+    #subprocess.run(f"awk '!x[$0]++' {temp_filename} > {temp_filename}.sorted", shell=True) # Faster, higher peak memory?!
 
     if not _save_intermediate_files:
         os.remove(f'{temp_filename}') # only sorted needed now;
@@ -150,8 +150,8 @@ def collect_valid_pairs(bam1_filename,
     logger.info('  Rejected reads (by criteria):')
     logger.info('    Too close                 : {:,} ({:.2%})'.format(reject_too_close, reject_too_close/stats_total_reads))
     logger.info('  Final:')
-    logger.info('    [Note that these numbers below include PCR duplicates]')
     logger.info('    Kept reads                : {:,} ({:.2%})'.format(len(pairs), len(pairs)/stats_total_reads))
+    logger.info('    [Note that these numbers below include PCR duplicates]')
     logger.info('    Kept short-range (<20kb)  : {:,} ({:.2%})'.format(stats_short_range, stats_short_range/stats_total_reads))
     logger.info('    Kept long-range (>20kb)   : {:,} ({:.2%})'.format(stats_long_range,  stats_long_range/stats_total_reads))
 
