@@ -121,8 +121,11 @@ def collect_valid_pairs(bam1_filename,
 
     logger.info('Sorting temp file')
 
-    #subprocess.run(f'sort {temp_filename} | uniq > {temp_filename}.sorted', shell=True)    # Portable memory resilient
-    subprocess.run(f"awk '!x[$0]++' {temp_filename} > {temp_filename}.sorted", shell=True) # Faster, higher peak memory?!
+    if done > 1000e6:
+        subprocess.run(f'sort {temp_filename} | uniq > {temp_filename}.sorted', shell=True)    # Portable memory resilient
+    else:
+        subprocess.run(f"awk '!x[$0]++' {temp_filename} > {temp_filename}.sorted", shell=True) # Faster, higher peak memory?!
+
     os.remove(f'{temp_filename}') # only sorted needed now;
 
     logger.info('Reloading')
