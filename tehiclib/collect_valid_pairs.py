@@ -69,7 +69,7 @@ def collect_valid_pairs(bam1_filename,
     pairs = set([])
     pairs_add = pairs.add
 
-    step = int(10e6)
+    step = int(50e6) # Peak memory ~
 
     done = 0
     for read1, read2 in zip(bf1, bf2): # needs to be eof...
