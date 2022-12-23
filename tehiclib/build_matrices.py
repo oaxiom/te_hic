@@ -106,7 +106,7 @@ class build_matrices:
                 self.nnnn[bin_pair] += 1
 
             done += 1
-            if done % 1e6 == 0:
+            if done % 1e7 == 0:
                 self.log.info(f'Processed: {done:,}')
         mapped_pairs.close()
 
