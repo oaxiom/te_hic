@@ -70,6 +70,7 @@ def collect_valid_pairs(bam1_filename,
     pairs_add = pairs.add
 
     step = int(100e6) # Peak memory ~10Gb
+    this_step = 0
 
     done = 0
     for read1, read2 in zip(bf1, bf2): # needs to be eof...
@@ -78,6 +79,7 @@ def collect_valid_pairs(bam1_filename,
             num_saved = dump_to_file(pairs, temp_out) # semi pair removed;
             pairs = set([])
             pairs_add = pairs.add
+            this_step = 0 # reset so last write is accurate
             logger.info(f'Processed: {stats_total_reads:,} reads, removed {step-num_saved:,} ({(step-num_saved)/step:.1%}) reads by preduplicate removal')
 
         # read name sanity check:
@@ -127,13 +129,14 @@ def collect_valid_pairs(bam1_filename,
         #temp_out.write(f'{read1.reference_name[3:]}\t{read1.reference_start}\t{read2.reference_name[3:]}\t{read2.reference_end}\t{loc_strand1}\t{loc_strand2}\n')
         pairs_add(f'{read1.reference_name[3:]}\t{read1.reference_start}\t{read2.reference_name[3:]}\t{read2.reference_end}\t{loc_strand1}\t{loc_strand2}\n')
         done += 1
+        this_step += 1
 
     bf1.close()
     bf2.close()
 
     # Final dump
     num_saved = dump_to_file(pairs, temp_out)
-    logger.info(f'Processed: {stats_total_reads:,} reads, removed {step-num_saved:,} ({(step-num_saved)/step:.1%}) reads by preduplicate removal')
+    logger.info(f'Processed: {stats_total_reads:,} reads, removed {this_step-num_saved:,} ({(this_step-num_saved)/step:.1%}) reads by preduplicate removal')
     temp_out.close()
     del pairs
 
