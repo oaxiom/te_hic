@@ -4,7 +4,7 @@ Pair up all valid reads from a pair of bams
 
 '''
 
-import sys, os, gzip, random, subprocess
+import sys, os, gzip, random, subprocess, time
 import pysam
 
 valid_chroms = set(['chrX', 'chrY'] + [f'chr{i}' for i in range(1, 30)]) # cut scaffolds
@@ -50,7 +50,7 @@ def collect_valid_pairs(bam1_filename,
     bf1 = pysam.AlignmentFile(bam1_filename, 'rb')
     bf2 = pysam.AlignmentFile(bam2_filename, 'rb')
 
-    temp_filename = f'stage1.{random.randint(10, 1e6):0>7}.{label}.tmp'
+    temp_filename = f'stage1.{str(int(time.time()))[5:]}{random.randint(10, 1e6):0>7}.{label}.tmp'
     temp_out = open(temp_filename, 'w')
 
     # We assume the bam files are sorted by name and unaligned were also output
@@ -124,7 +124,7 @@ def collect_valid_pairs(bam1_filename,
         # This does duplicate removal in one go.
         # Only use the starts, it saves memory, and anyway the 3' ends are unreliable for duplicate removal if the input has been quality/adapter trimmed
         # Also strip the 'chr' off the front of the contigs. Could be a problem for some genomes?
-        temp_out.write(f'{read1.reference_name[3:]}\t{read1.reference_start}\t{read2.reference_name[3:]}\t{read2.reference_end}\t{loc_strand1}\t{loc_strand2}\n')
+        #temp_out.write(f'{read1.reference_name[3:]}\t{read1.reference_start}\t{read2.reference_name[3:]}\t{read2.reference_end}\t{loc_strand1}\t{loc_strand2}\n')
         pairs_add(f'{read1.reference_name[3:]}\t{read1.reference_start}\t{read2.reference_name[3:]}\t{read2.reference_end}\t{loc_strand1}\t{loc_strand2}\n')
         done += 1
 
