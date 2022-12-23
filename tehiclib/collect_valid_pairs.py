@@ -11,7 +11,9 @@ valid_chroms = set(['chrX', 'chrY'] + [f'chr{i}' for i in range(1, 30)]) # cut s
 
 def dump_to_file(pairs, filehandle):
     [filehandle.write(p) for p in sorted(pairs)]
+    num_saved = len(pairs)
     del pairs
+    return num_saved
 
 def collect_valid_pairs(bam1_filename,
     bam2_filename,
@@ -71,10 +73,10 @@ def collect_valid_pairs(bam1_filename,
     for read1, read2 in zip(bf1, bf2): # needs to be eof...
         stats_total_reads += 1
         if stats_total_reads % 10e6 == 0:
-            logger.info('Processed: {:,}'.format(stats_total_reads))
-            dump_to_file(pairs, temp_out) # semi pair removed;
+            num_saved = dump_to_file(pairs, temp_out) # semi pair removed;
             pairs = set([])
             pairs_add = pairs.add
+            logger.info(f'Processed: {stats_total_reads:,}, removed {10e6-num_saved:,} reads by preduplicate removal')
 
         # read name sanity check:
         if read1.query_name != read2.query_name:

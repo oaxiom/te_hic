@@ -41,6 +41,7 @@ class te_hic:
         self.__save_intermediate_files = save_intermediate_files
         self.__script_path = os.path.dirname(os.path.realpath(__file__))
 
+
         oh = open(os.path.join(self.__script_path, f'../genome/{genome}.chromSizes.clean'), 'r')
         self.chrom_sizes = {}
         for line in oh:
@@ -48,7 +49,10 @@ class te_hic:
             self.chrom_sizes[line[0]] = int(line[1])
         oh.close()
 
-        self.genome = miniglbase3.glload(os.path.join(self.__script_path, f'../genome/{genome}_glb_gencode_tes.glb'))
+        # Check they exist, but don't load until stage2 to save memory
+        self.genome = os.path.join(self.__script_path,f'../genome/{genome}_glb_gencode_tes.glb')
+        assert os.path.exists(self.genome), f'{genome} not found'
+
         # Get the TE frequencies tables
         self.te_genome_freqs = miniglbase3.glload(os.path.join(self.__script_path, f'../genome/{genome}_te_genome_freqs.glb'))
 
@@ -73,7 +77,8 @@ class te_hic:
         **Stage 2**
             Assign reads to a genome feature
         '''
-        assert self.genome, 'genome must be valid'
+        self.genome = miniglbase3.glload(os.path.join(self.__script_path, self.genome))
+
         assert self.valid_pairs_tmp_file, 'Stage 1 results "valid pairs" has not been generated correctly'
 
         self.mapped_pairs_temp_file = map_pairs(self.valid_pairs_tmp_file, genome=self.genome, label=self.label, logger=self.logger)
