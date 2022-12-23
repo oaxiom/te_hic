@@ -136,7 +136,7 @@ def collect_valid_pairs(bam1_filename,
     # Final dump
     num_saved = dump_to_file(pairs, temp_out)
     total_saved += num_saved
-    logger.info(f'Processed: {stats_total_reads:,} reads, removed {stats_total_reads-total_saved:,} ({(stats_total_reads-total_saved)/step:.1%}) reads by preduplicate removal')
+    logger.info(f'Processed: {stats_total_reads:,} reads, removed {stats_total_reads-total_saved:,} ({(stats_total_reads-total_saved)/stats_total_reads:.1%}) reads by preduplicate removal')
     temp_out.close()
     del pairs
 
