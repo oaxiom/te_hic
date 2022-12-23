@@ -69,7 +69,7 @@ def collect_valid_pairs(bam1_filename,
     pairs = set([])
     pairs_add = pairs.add
 
-    step = int(50e6) # Peak memory ~
+    step = int(100e6) # Peak memory ~10Gb
 
     done = 0
     for read1, read2 in zip(bf1, bf2): # needs to be eof...
@@ -134,8 +134,8 @@ def collect_valid_pairs(bam1_filename,
     # Final dump
     num_saved = dump_to_file(pairs, temp_out)
     logger.info(f'Processed: {stats_total_reads:,} reads, removed {step-num_saved:,} ({(step-num_saved)/step:.1%}) reads by preduplicate removal')
-
     temp_out.close()
+    del pairs
 
     logger.info('Sorting temp file')
 
