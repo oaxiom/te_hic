@@ -171,7 +171,7 @@ def collect_valid_pairs(bam1_filename,
     logger.info('  Rejected reads (by criteria):')
     logger.info('    Too close                 : {:,} ({:.2%})'.format(reject_too_close, reject_too_close/stats_total_reads))
     logger.info('  Final:')
-    logger.info('    Kept reads                : {:,} ({:.2%})'.format(len(pairs), len(pairs)/stats_total_reads))
+    logger.info('    Kept reads                : {:,} ({:.2%})'.format(stats_total_reads-total_saved, (stats_total_reads-total_saved)/stats_total_reads))
     logger.info('    [Note that these numbers below include PCR duplicates]')
     logger.info('    Kept short-range (<20kb)  : {:,} ({:.2%})'.format(stats_short_range, stats_short_range/stats_total_reads))
     logger.info('    Kept long-range (>20kb)   : {:,} ({:.2%})'.format(stats_long_range,  stats_long_range/stats_total_reads))
