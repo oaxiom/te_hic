@@ -77,11 +77,13 @@ class te_hic:
         **Stage 2**
             Assign reads to a genome feature
         '''
-        self.genome = miniglbase3.glload(os.path.join(self.__script_path, self.genome))
-
         assert self.valid_pairs_tmp_file, 'Stage 1 results "valid pairs" has not been generated correctly'
 
+        self.genome = miniglbase3.glload(os.path.join(self.__script_path, self.genome))
+
         self.mapped_pairs_temp_file = map_pairs(self.valid_pairs_tmp_file, genome=self.genome, label=self.label, logger=self.logger)
+
+        del self.genome
 
         if not self.__save_intermediate_files:
             os.remove(self.valid_pairs_tmp_file) # not needed anymore

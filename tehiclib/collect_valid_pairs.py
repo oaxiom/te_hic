@@ -69,14 +69,16 @@ def collect_valid_pairs(bam1_filename,
     pairs = set([])
     pairs_add = pairs.add
 
+    step = int(10e6)
+
     done = 0
     for read1, read2 in zip(bf1, bf2): # needs to be eof...
         stats_total_reads += 1
-        if stats_total_reads % 10e6 == 0:
+        if stats_total_reads % step == 0:
             num_saved = dump_to_file(pairs, temp_out) # semi pair removed;
             pairs = set([])
             pairs_add = pairs.add
-            logger.info(f'Processed: {stats_total_reads:,}, removed {10e6-num_saved:,} reads by preduplicate removal')
+            logger.info(f'Processed: {stats_total_reads:,} reads, removed {step-num_saved:,} ({(step-num_saved)/step:.1%}) reads by preduplicate removal')
 
         # read name sanity check:
         if read1.query_name != read2.query_name:
@@ -130,7 +132,8 @@ def collect_valid_pairs(bam1_filename,
     bf2.close()
 
     # Final dump
-    dump_to_file(pairs, temp_out)
+    num_saved = dump_to_file(pairs, temp_out)
+    logger.info(f'Processed: {stats_total_reads:,} reads, removed {step-num_saved:,} ({(step-num_saved)/step:.1%}) reads by preduplicate removal')
 
     temp_out.close()
 
