@@ -150,14 +150,14 @@ def collect_valid_pairs(bam1_filename,
     if not _save_intermediate_files:
         os.remove(f'{temp_filename}') # only sorted needed now;
 
-    logger.info('Reloading')
-    pairs = set([])
-    pairs_add = pairs.add # speedup to skip binding
-    oh = open(f'{temp_filename}.sorted', 'r')
-    for line in oh:
-        line = line.strip().split('\t')
-        pairs_add((line[0], int(line[1]), line[2], int(line[3]))) # You can drop the strands now as not needed anymore, line[4], line[5]))
-    oh.close()
+    #logger.info('Reloading')
+    #pairs = set([])
+    #pairs_add = pairs.add # speedup to skip binding
+    #oh = open(f'{temp_filename}.sorted', 'r')
+    #for line in oh:
+    #    line = line.strip().split('\t')
+    #    pairs_add((line[0], int(line[1]), line[2], int(line[3]))) # You can drop the strands now as not needed anymore, line[4], line[5]))
+    #oh.close()
 
     logger.info('Stage 1 stats:')
     logger.info('  Aligned:')
