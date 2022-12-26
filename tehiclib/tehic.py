@@ -85,6 +85,8 @@ class te_hic:
 
         del self.genome
 
+        # TODO: convert the temp to a BEDPE;
+
         if not self.__save_intermediate_files:
             os.remove(self.valid_pairs_tmp_file) # not needed anymore
 

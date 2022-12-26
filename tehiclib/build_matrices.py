@@ -16,6 +16,43 @@ TODO:
 import sys, os, math, numpy, shutil, gzip
 from . import common
 
+
+def binnify(chromsizes, binsize):
+    """
+    Divide a genome into evenly sized bins.
+    Parameters
+    ----------
+    chromsizes : Series
+        pandas Series indexed by chromosome name with chromosome lengths in bp.
+    binsize : int
+        size of bins in bp
+    Returns
+    -------
+    bins : :py:class:`pandas.DataFrame`
+        Dataframe with columns: ``chrom``, ``start``, ``end``.
+    """
+    import pandas as pd
+    import numpy as np
+
+    def _each(chrom):
+        clen = chromsizes[chrom]
+        n_bins = int(np.ceil(clen / binsize))
+        binedges = np.arange(0, (n_bins + 1)) * binsize
+        binedges[-1] = clen
+        return pd.DataFrame(
+            {"chrom": [chrom] * n_bins, "start": binedges[:-1], "end": binedges[1:]},
+            columns=["chrom", "start", "end"],
+        )
+        print(n_bins, {"chrom": chrom, "start": len(binedges[:-1]), "end": len(binedges[1:])})
+
+    bintable = pd.concat(map(_each, chromsizes.keys()), axis=0, ignore_index=True)
+
+    #bintable["chrom"] = pd.Categorical(
+    #    bintable["chrom"], categories=list(chromsizes.index), ordered=True
+    #)
+
+    return bintable
+
 class build_matrices:
     def __init__(self, genome_sizes, resolution, logger):
         '''
@@ -45,7 +82,22 @@ class build_matrices:
         cumm_bin = 0
         for chrom in sorted(self.num_bins):
             self.chrom_bin_offsets[chrom] = (cumm_bin, cumm_bin+self.num_bins[chrom])
-            cumm_bin += self.num_bins[chrom]+1
+            cumm_bin += self.num_bins[chrom]
+        '''
+        print(self.chrom_bin_offsets)
+
+        # This is the cooler code;
+        binsize = self.res
+        for chrom in genome_sizes:
+            clen = genome_sizes[chrom]
+            n_bins = int(numpy.ceil(clen / binsize))
+            binedges = numpy.arange(0, (n_bins + 1)) * binsize
+            binedges[-1] = clen
+            print(n_bins, {"chrom": chrom, "start": len(binedges[:-1]), "end": len(binedges[1:])})
+
+
+        print(binnify(genome_sizes, self.res))
+        '''
 
         return
 
@@ -57,14 +109,8 @@ class build_matrices:
         '''
         self.log.info(f'Building in-memory matrices for resolution {self.res} bp')
 
-        # The format of mapped_pairs is:
-        # (
-        #   ('8', 88996379, '8', 89417593, '+', '-'),
-        #   {'Tigger19a:TcMar-Tigger:DNA'}, {'TE'},
-        #   {'MER33:hAT-Charlie:DNA'}, {'TE'}
-        # )
-
         mapped_pairs = open(mapped_pairs_temp_file, 'r')
+        math_floor = math.floor
 
         for done, pair in enumerate(mapped_pairs):
             pair = pair.strip().split('\t')
@@ -74,13 +120,12 @@ class build_matrices:
             read1_mid = int(pair[1])
             read2_mid = int(pair[4])
 
-            read1_bin = (read1_mid // self.res) + self.chrom_bin_offsets[read1_chrom][0]
-            read2_bin = (read2_mid // self.res) + self.chrom_bin_offsets[read2_chrom][0]
+            read1_bin = math_floor(read1_mid / self.res) + self.chrom_bin_offsets[read1_chrom][0]
+            read2_bin = math_floor(read2_mid / self.res) + self.chrom_bin_offsets[read2_chrom][0]
+
+            #print(read1_bin, read1_mid, read2_bin, read2_mid)
 
             bin_pair = tuple(sorted([read1_bin, read2_bin]))
-
-            #if read1_bin == read2_bin: # Needed for balancing
-            #    continue
 
             # All:
             if bin_pair not in self.all:
@@ -140,28 +185,28 @@ class build_matrices:
         filename = os.path.join(f'matrices_{label}',str(self.res), f'{label}_{self.res}.all.raw.matrix')
         oh = open(filename, 'w')
         for bins in sorted(self.all):
-            oh.write(f'{bins[0]+1}\t{bins[1]+1}\t{self.all[bins]}\n') # The +1 is to mimic HiCpro!
+            oh.write(f'{bins[0]}\t{bins[1]}\t{self.all[bins]}\n') # The +1 is to mimic HiCpro!
         oh.close()
         self.log.info(f'Saved All matrix: "{filename}"')
 
         filename = os.path.join(f'matrices_{label}', str(self.res), f'{label}_{self.res}.tete.raw.matrix')
         oh = open(filename, 'w')
         for bins in sorted(self.tete):
-            oh.write(f'{bins[0]+1}\t{bins[1]+1}\t{self.tete[bins]}\n')# The +1 is to mimic HiCpro!
+            oh.write(f'{bins[0]}\t{bins[1]}\t{self.tete[bins]}\n')# The +1 is to mimic HiCpro!
         oh.close()
         self.log.info(f'Saved TE <=> TE matrix: "{filename}"')
 
         filename = os.path.join(f'matrices_{label}', str(self.res), f'{label}_{self.res}.tenn.raw.matrix')
         oh = open(filename, 'w')
         for bins in sorted(self.tenn):
-            oh.write(f'{bins[0]+1}\t{bins[1]+1}\t{self.tenn[bins]}\n') # The +1 is to mimic HiCpro!
+            oh.write(f'{bins[0]}\t{bins[1]}\t{self.tenn[bins]}\n') # The +1 is to mimic HiCpro!
         oh.close()
         self.log.info(f'Saved TE <=> non-TE matrix: "{filename}"')
 
         filename = os.path.join(f'matrices_{label}', str(self.res), f'{label}_{self.res}.nnnn.raw.matrix')
         oh = open(filename, 'w')
         for bins in sorted(self.nnnn):
-            oh.write(f'{bins[0]+1}\t{bins[1]+1}\t{self.nnnn[bins]}\n') # The +1 is to mimic HiCpro!
+            oh.write(f'{bins[0]}\t{bins[1]}\t{self.nnnn[bins]}\n') # The +1 is to mimic HiCpro!
         oh.close()
         self.log.info(f'Saved non-TE <=> non-TE matrix: "{filename}"')
 
