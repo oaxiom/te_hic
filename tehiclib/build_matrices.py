@@ -79,8 +79,8 @@ class build_matrices:
 
             bin_pair = tuple(sorted([read1_bin, read2_bin]))
 
-            if read1_bin == read2_bin: # ignore all mid-line self-bins
-                continue
+            #if read1_bin == read2_bin: # Needed for balancing
+            #    continue
 
             # All:
             if bin_pair not in self.all:

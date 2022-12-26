@@ -136,7 +136,7 @@ def collect_valid_pairs(bam1_filename,
     # Final dump
     num_saved = dump_to_file(pairs, temp_out)
     total_saved += num_saved
-    logger.info(f'Processed: {stats_total_reads:,} reads, removed {stats_total_reads-total_saved:,} ({(stats_total_reads-total_saved)/stats_total_reads:.1%}) reads by preduplicate removal')
+    logger.info(f'Processed: {stats_total_reads:,} reads in total, removed {stats_total_reads-total_saved:,} ({(stats_total_reads-total_saved)/stats_total_reads:.1%}) reads by preduplicate removal')
     temp_out.close()
     del pairs
 
@@ -178,7 +178,7 @@ def collect_valid_pairs(bam1_filename,
 
     ret = subprocess.run(f"wc {temp_filename}.sorted", shell=True, capture_output=True).stdout.decode()
     ret = int(str(ret).strip().split(' ')[0])
-    logger.info('    [Sorted, unique should match above number]')
+    logger.info('    [Sorted, unique after full duplicate removal]')
     logger.info('    Kept long-range (>20kb)   : {:,} ({:.2%})'.format(ret,  ret/stats_total_reads))
 
     return f"{temp_filename}.sorted"
