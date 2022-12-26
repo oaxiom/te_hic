@@ -117,7 +117,7 @@ def map_pairs(valid_pairs_temp_file, genome, label=None, logger=False):
             read2_feat = set()
             read2_type = set()
 
-        output.append((chromA, leftA, riteA, chromB, leftB, riteB, read1_feat, read1_type, read2_feat, read2_type))
+        output.append((chromA, leftA, riteA, chromB, leftB, riteB, read1_feat, read1_type, read2_feat, read2_type, pairs[4], pairs[5]))
 
         if idx % 1e7 == 0:
             logger.info(f'Processed: {idx:,}')

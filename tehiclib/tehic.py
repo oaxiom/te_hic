@@ -86,6 +86,37 @@ class te_hic:
         del self.genome
 
         # TODO: convert the temp to a BEDPE;
+        # save out the BEDPEs:
+        self.logger.info('Saving BEDPE files')
+        all = gzip.open(f'stage2.all.{self.label}.bedpe.gz', 'w')
+        tete = gzip.open(f'stage2.tete.{self.label}.bedpe.gz', 'w')
+        tenn = gzip.open(f'stage2.tenn.{self.label}.bedpe.gz', 'w')
+        nnnn = gzip.open(f'stage2.nnnn.{self.label}.bedpe.gz', 'w')
+        mapped_pairs_temp_file = open(self.mapped_pairs_temp_file, 'r')
+
+        # File format:
+        # (chromA, leftA, riteA, chromB, leftB, riteB, read1_feat, read1_type, read2_feat, read2_type, read1_strand, read2_strand)
+
+        for done, pair in enumerate(mapped_pairs_temp_file):
+            pair = pair.strip().split('\t')
+
+            line = f'chr{pair[0]}\t{pair[1]}\t{pair[2]}\tchr{pair[3]}\t{pair[4]}\t{pair[5]}\t0\t{pair[10]}\t{pair[11]}\t{pair[6]}-{pair[7]}\t{pair[8]}-{pair[9]}\n'
+
+            # All:
+            all.write(line)
+
+            if 'TE' in pair[7] and 'TE' in pair[9]: # TE <=> TE
+                tete.write(line)
+            elif 'TE' in pair[7] or 'TE' in pair[9]: # TE <=> non-TE
+                tenn.write(line)
+            else: # non-TE <=> non-TE
+                nnnn.write(line)
+
+        mapped_pairs_temp_file.close()
+        all.close()
+        tete.close()
+        tenn.close()
+        nnnn.close()
 
         if not self.__save_intermediate_files:
             os.remove(self.valid_pairs_tmp_file) # not needed anymore
