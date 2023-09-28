@@ -73,9 +73,7 @@ class te_hic:
         return True
 
     def __set_to_str(self, set_obj):
-        if not set_obj:
-            return 'None'
-
+        # It's already a str at this point, not a real set
         return str(set_obj).translate({ord(c): None for c in "{}, '"}).replace('set()', 'None')
 
     def stage2_assign_to_genome_feature(self):

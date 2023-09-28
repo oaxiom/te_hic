@@ -85,7 +85,7 @@ def collect_valid_pairs(bam1_filename,
         # read name sanity check:
         if read1.query_name != read2.query_name:
             logger.error(f'Mismatched read names ({read1.query_name} != {read2.query_name}), make sure the BAMs contain unaligned reads and are sorted by name')
-            sys.quit()
+            sys.exit()
 
         # check both reads are aligned
         if read1.is_unmapped and read2.is_unmapped:
