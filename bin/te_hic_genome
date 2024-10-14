@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+
+'''
+
+Build the genome indices for te_hic
+
+'''
+
+import sys, os, argparse, logging
+
+script_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(script_path, '../'))
+import tehiclib.genome
+
+# Command-line options;
+def prepare_parser():
+    exmp = 'Example usage: te_hic_genome -g hg38'
+
+    description = 'Builds the indices for te_hic'
+
+    parser = argparse.ArgumentParser(prog='te_hic_genome', description=description, epilog=exmp)
+
+    #optional = parser._action_groups.pop()
+
+    required = parser.add_argument_group('required arguments')
+    required.add_argument('-g', '--genome', nargs=1, required=True, help='Genome assembly to use, valid genomes: {0}'.format(tehiclib.genome.valid_assemblies))
+
+    logging.basicConfig(level=logging.DEBUG,
+                    format='%(levelname)-8s: %(message)s',
+                    datefmt='%m-%d %H:%M')
+    parser.log = logging.getLogger('te_genome')
+
+    return parser
+
+def main():
+    assert sys.version_info >= (3, 7), 'Python >=3.7 is required'
+
+    script_path = os.path.dirname(os.path.realpath(__file__))
+    parser = prepare_parser()
+    args = parser.parse_args()
+
+    log = parser.log
+    log.info('Arguments:')
+    log.info('  genome: "%s"' % args.genome[0])
+
+    log.info('Finding prepackaged Genome')
+    genome = args.genome[0]
+
+    if tehiclib.genome.check_genome_done(genome):
+        log.error(f'{genome} genome already built')
+        sys.exit()
+
+    log.info(f'{genome} genome not found, building')
+
+    tehiclib.genome.make_index(genome, log)
+
+    log.info('Done')
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.stderr.write("User interrupt\n")
+        sys.exit(0)
