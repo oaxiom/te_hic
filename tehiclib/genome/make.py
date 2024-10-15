@@ -8,7 +8,7 @@ This is for the mm10 genome
 
 '''
 
-import sys, subprocess
+import sys, subprocess, os
 sys.path.append('../')
 from ..miniglbase3 import delayedlist, progressbar, genelist
 from .common import genome_sizes
@@ -21,25 +21,27 @@ gunzip -c hg38.chromSizes.gz | grep -v -E 'random|chrUn|chrM|_alt|_fix'  >hg38.c
 rm hg38.chromSizes.gz
 """
 
+# IS it possible to avoid hardcoding these?
 download_addresses = {
-    'hg38': [
-        "ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_29/gencode.v29.annotation.gtf.gz",
-        "http://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/rmsk.txt.gz",
-        "ftp://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/chromInfo.txt.gz",
-        ],
-    'mm10': [
-
-        ],
+    'hg38': "ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_29/gencode.v29.annotation.gtf.gz",
+    'mm10': 'ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M20/gencode.vM20.annotation.gtf.gz',
     }
 
 def make_index(genome, log):
+    script_path = os.path.dirname(os.path.realpath(__file__))
+
     # Download data:
 
-    # neds to wait for uoutput;
-    chroms = subprocess.Popen(f'wget -c "ftp://hgdownload.cse.ucsc.edu/goldenPath/{genome}/database/chromInfo.txt.gz" -O ../../genome/', shell=True)
-    #rmsk = subprocess.run(f'wget -c -O rmsk.{genome}.txt.gz http://hgdownload.soe.ucsc.edu/goldenPath/{genome}/database/rmsk.txt.gz', capture_output=True)
+    chrom_sizes_path = f'{script_path}/../../genome/{genome}.chromSizes.gz'
+    rmsk_path = f'{script_path}/../../genome/{genome}.rmsk.txt.gz'
+    annotation_path = f'{script_path}/../../genome/{genome}.rmsk.txt.gz'
 
-    1/0
+    # neds to wait for output;
+    subprocess.run(f'wget -c ftp://hgdownload.cse.ucsc.edu/goldenPath/{genome}/database/chromInfo.txt.gz -O {chrom_sizes_path}', shell=True)
+    subprocess.run(f'wget -c http://hgdownload.soe.ucsc.edu/goldenPath/{genome}/database/rmsk.txt.gz -O {rmsk_path}', shell=True)
+    subprocess.run(f"wget -c {download_addresses[genome]} -O {annotation_path}", shell=True)
+
+
 
     gtf = {
         #"feature_type": 1,
@@ -55,11 +57,13 @@ def make_index(genome, log):
     rmsk_track_form = {"force_tsv": True, 'loc': 'location(chr=column[5], left=column[6], right=column[7])',
         'repName': 10, 'repClass': 11, 'repFamily': 12}
 
+    # TODO: Fix for other species?
     chr_set = frozenset(['X', 'Y'] + [str(i) for i in range(1, 23)])
 
-    repeats = delayedlist(filename='hg38_rmsk.txt.gz', gzip=True, format=rmsk_track_form)
-    gencode = delayedlist('gencode.v29.annotation.gtf.gz', gzip=True, format=gtf)
+    ###### Repeats table;
+    repeats = delayedlist(filename=rmsk_path, gzip=True, format=rmsk_track_form)
 
+    # Needs to be expanded for other species?
     keep_classes = frozenset(['LINE', 'LTR', 'SINE', 'DNA', 'Retroposon'])
 
     added = 0
@@ -86,12 +90,13 @@ def make_index(genome, log):
 
         added += 1
 
-        #if idx > 100000:
-        #    break
         p.update(idx)
 
     log.info(f'\nAdded {added:,} features')
+    del repeats
 
+    ###### Annotation table
+    gencode = delayedlist(annotation_path, gzip=True, format=gtf)
     keep_gene_types = set(('protein_coding', 'lincRNA', 'lncRNA'))
 
     log.info('Gencode')
@@ -140,11 +145,11 @@ def make_index(genome, log):
 
     gl = genelist()
     gl.load_list(promoters)
-    gl.save('hg38_glb_gencode_promoters.glb')
+    gl.save(f'{genome}_glb_gencode_promoters.glb')
 
     gl = genelist()
     gl.load_list(newl)
-    gl.save('hg38_glb_gencode_tes.glb')
+    gl.save(f'{genome}_glb_gencode_tes.glb')
     genome = gl
 
     tes = {}
@@ -169,8 +174,8 @@ def make_index(genome, log):
     gl = genelist()
     gl.load_list(newl)
     gl.sort('name')
-    gl.saveTSV('hg38_te_genome_freqs.tsv', key_order=['name', 'genome_count', 'genome_percent'])
-    gl.save('hg38_te_genome_freqs.glb')
+    gl.saveTSV(f'{genome}_te_genome_freqs.tsv', key_order=['name', 'genome_count', 'genome_percent'])
+    gl.save(f'{genome}_te_genome_freqs.glb')
 
 
 
