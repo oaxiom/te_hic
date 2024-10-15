@@ -34,7 +34,7 @@ def make_index(genome, log):
     rmsk_path = f'{script_path}/../../genome/{genome}.rmsk.txt.gz'
     annotation_path = f'{script_path}/../../genome/{genome}.annotation.txt.gz'
 
-    subprocess.run(f'wget -c http://hgdownload.cse.ucsc.edu/goldenPath/{genome}/database/chromInfo.txt.gz -O {chrom_sizes_path}', shell=True)
+    subprocess.run(f'wget -c http://hgdownload.soe.ucsc.edu/goldenPath/{genome}/database/chromInfo.txt.gz -O {chrom_sizes_path}', shell=True)
     subprocess.run(f'wget -c http://hgdownload.soe.ucsc.edu/goldenPath/{genome}/database/rmsk.txt.gz -O {rmsk_path}', shell=True)
     subprocess.run(f"wget -c {genome_options[genome]['download']} -O {annotation_path}", shell=True)
 
