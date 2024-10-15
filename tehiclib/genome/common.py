@@ -6,6 +6,12 @@ Package for genome annotations
 
 import os, gzip
 
+valid_assemblies = {
+    'hg38',
+    'mm10',
+    'rn7',
+    }
+
 genome_sizes = dict(
     hg38      = 3096649726,
     mm10      = 2728222451,
@@ -19,12 +25,12 @@ genome_sizes = dict(
 # Cleaners for chromsome names to define canonical;
 def clean_chroms_animal(genome):
     # Confirmed to work for:
-    # hg38
-    
+    # hg38, mm10
+
     script_path = os.path.dirname(os.path.realpath(__file__))
-    
+
     out = open(f'{script_path}/../../genome/{genome}.chromSizes.clean', 'wt')
-    
+
     with gzip.open(f'{script_path}/../../genome/{genome}.chromSizes.gz', 'rt') as inp:
         for chrom in inp:
             if '_alt' in chrom: continue
@@ -33,6 +39,23 @@ def clean_chroms_animal(genome):
             if '_KI' in chrom: continue
             if chrom.startswith('chrUn'): continue
             if chrom.startswith('chrM'): continue
-            
+
             out.write(f'{chrom}')
     out.close()
+
+genome_options = {
+    'hg38': {
+        'download': "ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_29/gencode.v29.annotation.gtf.gz",
+        'chrom_cleaner': clean_chroms_animal,
+        },
+    'mm10': {
+        'download': 'ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M20/gencode.vM20.annotation.gtf.gz',
+        'chrom_cleaner': clean_chroms_animal,
+        },
+    'rn7': {
+        'download': 'https://ftp.ensembl.org/pub/release-112/gtf/rattus_norvegicus/Rattus_norvegicus.mRatBN7.2.112.gtf.gz',
+        'chrom_cleaner': clean_chroms_animal,
+        }
+    }
+
+

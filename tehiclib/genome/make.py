@@ -11,20 +11,11 @@ This is for the mm10 genome
 import sys, subprocess, os, gzip
 sys.path.append('../')
 from ..miniglbase3 import delayedlist, progressbar, genelist
-from .common import genome_sizes, clean_chroms_animal
+from .common import genome_sizes, clean_chroms_animal, genome_options
 
 # IS it possible to avoid hardcoding these?
 # Also can include options for specific genome filtering?
-genome_options = {
-    'hg38': {
-        'download': "ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_29/gencode.v29.annotation.gtf.gz",
-        'chrom_cleaner': clean_chroms_animal,
-        },
-    'mm10': {
-        'download': 'ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M20/gencode.vM20.annotation.gtf.gz',
-        'chrom_cleaner': clean_chroms_animal,
-        }
-    }
+
 
 def make_index(genome, log):
     script_path = os.path.dirname(os.path.realpath(__file__))
@@ -52,6 +43,8 @@ def make_index(genome, log):
 
     # TODO: Needs to be expanded for other species?
     keep_classes = frozenset(['LINE', 'LTR', 'SINE', 'DNA', 'Retroposon'])
+    classes_seen = set()
+    gene_types_seen = set()
 
     added = 0
 
@@ -62,7 +55,10 @@ def make_index(genome, log):
     p = progressbar(len(repeats))
     for idx, item in enumerate(repeats):
         if item['repClass'] not in keep_classes:
+            if '?' not in item['repClass']:
+                classes_seen.add(item['repClass'])
             continue
+
         if str(item['loc']['chr']) not in chr_set:
             continue
 
@@ -75,11 +71,19 @@ def make_index(genome, log):
             }
         newl.append(newentry)
 
+        if idx > 1e5:
+            break
+
         added += 1
 
         p.update(idx)
 
-    log.info(f'\nAdded {added:,} features')
+    print() # tidy up after progressbar
+    log.info('TE types seen but not added:')
+    for seen_te in classes_seen:
+        log.info(f'    {seen_te}')
+
+    log.info(f'Added {added:,} features')
     del repeats
 
     ###### Annotation table
@@ -97,21 +101,39 @@ def make_index(genome, log):
     gencode = delayedlist(annotation_path, gzip=True, format=gtf)
     keep_gene_types = set(('protein_coding', 'lincRNA', 'lncRNA'))
 
+    key_gene_type = None
+    key_gene_name = None
 
     log.info('Adding gene annotations')
     p = progressbar(len(gencode))
     for idx, item in enumerate(gencode):
         if item['feature'] != 'exon':
             continue
-        if item['gene_type'] not in keep_gene_types:
-            continue
         if item['loc'].loc['chr'] not in chr_set:
             continue
 
+        # guess the gene_biotype and name;
+        if not key_gene_type:
+            if 'gene_biotype' in item: key_gene_type = 'gene_biotype'
+            if 'gene_type' in item: key_gene_type = 'gene_type'
+        if not key_gene_name:
+            if 'gene_name' in item: key_gene_name = 'gene_name'
+
+        if item[key_gene_type] not in keep_gene_types:
+            gene_types_seen.add(item[key_gene_type])
+            continue
+
+        # type is always valid (right?) but gene name might not be.
+        gene_type = item[key_gene_type]
+        try:
+            gene_name = item[key_gene_name]
+        except KeyError:
+            gene_name = item['gene_id'].split('.')[0]
+
         newentry = {
             'loc': item['loc'],
-            'name': item['gene_name'],
-            'type': item['gene_type'],
+            'name': gene_name,
+            'type': gene_type,
             'ensg': item['gene_id'].split('.')[0],
             }
         newl.append(newentry)
@@ -120,16 +142,16 @@ def make_index(genome, log):
         if item['strand'] == '+':
             prom_locs = {
                 'loc': item['loc'].pointLeft(),
-                'name': item['gene_name'],
-                'type': item['gene_type'],
+                'name': gene_name,
+                'type': gene_type,
                 'ensg': newentry['ensg'],
                 'enst': item['transcript_id'].split('.')[0],
                 }
         elif item['strand'] == '-':
             prom_locs = {
                 'loc': item['loc'].pointRight(),
-                'name': item['gene_name'],
-                'type': item['gene_type'],
+                'name': gene_name,
+                'type': gene_type,
                 'ensg': newentry['ensg'],
                 'enst': item['transcript_id'].split('.')[0],
                 }
@@ -140,7 +162,12 @@ def make_index(genome, log):
 
         p.update(idx)
 
-    log.info(f'\nAdded {added:,} features')
+    print() # tidy up after progressbar
+    log.info('gene_types seen but not added:')
+    for seen_gene in gene_types_seen:
+        log.info(f'    {seen_gene}')
+
+    log.info(f'Added {added:,} features')
 
     gl = genelist()
     gl.load_list(promoters)

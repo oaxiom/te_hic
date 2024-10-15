@@ -45,8 +45,9 @@ def main():
 
     genome = args.genome[0]
 
-    if genome not in tehiclib.common.valid_assemblies:
+    if genome not in tehiclib.genome.valid_assemblies:
         log.error(f'{genome} is not supported')
+        log.error(f'These genomes are supported: {", ".join(tehiclib.genome.valid_assemblies)}')
         sys.exit()
 
     log.info('Finding prepackaged Genome')
