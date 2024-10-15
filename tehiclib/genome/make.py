@@ -150,7 +150,7 @@ def make_index(genome, log):
     gl_tes.load_list(newl)
     gl_tes.save(f'{script_path}/../../genome/{genome}_tes.glb') # Includes genes and TEs;
 
-    log.info(f'Genome annotation has {len(gl_tes:,} features in total')
+    log.info(f'Genome annotation has {len(gl_tes):,} features in total')
 
     # Count all the TE types
     tes = {}
