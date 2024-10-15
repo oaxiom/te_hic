@@ -13,14 +13,6 @@ sys.path.append('../')
 from ..miniglbase3 import delayedlist, progressbar, genelist
 from .common import genome_sizes
 
-"""
-wget -c ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_29/gencode.v29.annotation.gtf.gz
-wget -c -O hg38_rmsk.txt.gz http://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/rmsk.txt.gz
-wget ftp://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/chromInfo.txt.gz -O hg38.chromSizes.gz
-gunzip -c hg38.chromSizes.gz | grep -v -E 'random|chrUn|chrM|_alt|_fix'  >hg38.chromSizes.clean
-rm hg38.chromSizes.gz
-"""
-
 # IS it possible to avoid hardcoding these?
 download_addresses = {
     'hg38': "ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_29/gencode.v29.annotation.gtf.gz",
@@ -31,28 +23,13 @@ def make_index(genome, log):
     script_path = os.path.dirname(os.path.realpath(__file__))
 
     # Download data:
-
     chrom_sizes_path = f'{script_path}/../../genome/{genome}.chromSizes.gz'
     rmsk_path = f'{script_path}/../../genome/{genome}.rmsk.txt.gz'
-    annotation_path = f'{script_path}/../../genome/{genome}.rmsk.txt.gz'
+    annotation_path = f'{script_path}/../../genome/{genome}.annotation.txt.gz'
 
-    # neds to wait for output;
     subprocess.run(f'wget -c ftp://hgdownload.cse.ucsc.edu/goldenPath/{genome}/database/chromInfo.txt.gz -O {chrom_sizes_path}', shell=True)
     subprocess.run(f'wget -c http://hgdownload.soe.ucsc.edu/goldenPath/{genome}/database/rmsk.txt.gz -O {rmsk_path}', shell=True)
     subprocess.run(f"wget -c {download_addresses[genome]} -O {annotation_path}", shell=True)
-
-
-
-    gtf = {
-        #"feature_type": 1,
-        "feature": 2,
-        "gtf_decorators": 8,
-        "commentlines": "#",
-        "loc": "location(chr=column[0], left=column[3], right=column[4])",
-        "strand": 6,
-        "skiplines": -1,
-        "force_tsv": True
-        }
 
     rmsk_track_form = {"force_tsv": True, 'loc': 'location(chr=column[5], left=column[6], right=column[7])',
         'repName': 10, 'repClass': 11, 'repFamily': 12}
@@ -71,7 +48,7 @@ def make_index(genome, log):
     newl = []
     promoters = []
 
-    log.info('Repeats')
+    log.info('Adding repeat annotations')
     p = progressbar(len(repeats))
     for idx, item in enumerate(repeats):
         if item['repClass'] not in keep_classes:
@@ -96,10 +73,21 @@ def make_index(genome, log):
     del repeats
 
     ###### Annotation table
+    gtf = {
+        #"feature_type": 1,
+        "feature": 2,
+        "gtf_decorators": 8,
+        "commentlines": "#",
+        "loc": "location(chr=column[0], left=column[3], right=column[4])",
+        "strand": 6,
+        "skiplines": -1,
+        "force_tsv": True,
+        }
+    
     gencode = delayedlist(annotation_path, gzip=True, format=gtf)
     keep_gene_types = set(('protein_coding', 'lincRNA', 'lncRNA'))
 
-    log.info('Gencode')
+    log.info('Adding gene annotations')
     p = progressbar(len(gencode))
     for idx, item in enumerate(gencode):
         if item['feature'] != 'exon':
@@ -135,7 +123,7 @@ def make_index(genome, log):
                 'enst': item['transcript_id'].split('.')[0],
                 }
         else:
-            1/0
+            1/0 # Panic!
 
         promoters.append(prom_locs)
 
