@@ -40,19 +40,31 @@ pysam
 
 Build the genome annotations.
 
-This is not currently automated, but to do you need to go into te_hic and execute these commands:
+```
+te_hic_genome -h
+usage: te_hic_genome [-h] -g GENOME
+
+Builds the indices for te_hic
+
+options:
+  -h, --help            show this help message and exit
+
+required arguments:
+  -g GENOME, --genome GENOME
+                        Genome assembly to use, valid genomes: {'hg38', 'mm10'}
+
+Example usage: te_hic_genome -g hg38
 
 ```
-cd te_hic/genome
-./download_data.sh 
 
-# hg38 genome
-python make_hg38.py
-
-# mm10 genome:
-python make_mm10.py
+For example:
 
 ```
+te_hic_genome -g hg38
+```
+
+This assumes you have wget on your machine
+
 
 ### Step 1: Align to the genome
 

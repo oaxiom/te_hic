@@ -93,7 +93,7 @@ def make_index(genome, log):
         "skiplines": -1,
         "force_tsv": True,
         }
-    
+
     gencode = delayedlist(annotation_path, gzip=True, format=gtf)
     keep_gene_types = set(('protein_coding', 'lincRNA', 'lncRNA'))
 
@@ -143,11 +143,11 @@ def make_index(genome, log):
 
     gl = genelist()
     gl.load_list(promoters)
-    gl.save(f'{genome}_glb_gencode_promoters.glb')
+    gl.save(f'{script_path}/../../genome/{genome}_glb_gencode_promoters.glb')
 
     gl = genelist()
     gl.load_list(newl)
-    gl.save(f'{genome}_glb_gencode_tes.glb')
+    gl.save(f'{script_path}/../../genome/{genome}_glb_gencode_tes.glb')
     genome = gl
 
     tes = {}
@@ -172,8 +172,8 @@ def make_index(genome, log):
     gl = genelist()
     gl.load_list(newl)
     gl.sort('name')
-    gl.saveTSV(f'{genome}_te_genome_freqs.tsv', key_order=['name', 'genome_count', 'genome_percent'])
-    gl.save(f'{genome}_te_genome_freqs.glb')
+    gl.saveTSV(f'{script_path}/../../genome/{genome}_te_genome_freqs.tsv', key_order=['name', 'genome_count', 'genome_percent'])
+    gl.save(f'{script_path}/../../genome/{genome}_te_genome_freqs.glb')
 
 
 
