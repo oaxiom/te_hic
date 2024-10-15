@@ -8,15 +8,22 @@ This is for the mm10 genome
 
 '''
 
-import sys, subprocess, os
+import sys, subprocess, os, gzip
 sys.path.append('../')
 from ..miniglbase3 import delayedlist, progressbar, genelist
-from .common import genome_sizes
+from .common import genome_sizes, clean_chroms_animal
 
 # IS it possible to avoid hardcoding these?
-download_addresses = {
-    'hg38': "ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_29/gencode.v29.annotation.gtf.gz",
-    'mm10': 'ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M20/gencode.vM20.annotation.gtf.gz',
+# Also can include options for specific genome filtering?
+genome_options = {
+    'hg38': {
+        'download': "ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_29/gencode.v29.annotation.gtf.gz",
+        'chrom_cleaner': clean_chroms_animal,
+        },
+    'mm10': {
+        'download': 'ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M20/gencode.vM20.annotation.gtf.gz',
+        'chrom_cleaner': clean_chroms_animal,
+        }
     }
 
 def make_index(genome, log):
@@ -29,7 +36,10 @@ def make_index(genome, log):
 
     subprocess.run(f'wget -c ftp://hgdownload.cse.ucsc.edu/goldenPath/{genome}/database/chromInfo.txt.gz -O {chrom_sizes_path}', shell=True)
     subprocess.run(f'wget -c http://hgdownload.soe.ucsc.edu/goldenPath/{genome}/database/rmsk.txt.gz -O {rmsk_path}', shell=True)
-    subprocess.run(f"wget -c {download_addresses[genome]} -O {annotation_path}", shell=True)
+    subprocess.run(f"wget -c {genome_options[genome]['download']} -O {annotation_path}", shell=True)
+
+    if genome_options[genome]['chrom_cleaner']:
+        genome_options[genome]['chrom_cleaner'](genome)
 
     rmsk_track_form = {"force_tsv": True, 'loc': 'location(chr=column[5], left=column[6], right=column[7])',
         'repName': 10, 'repClass': 11, 'repFamily': 12}
@@ -40,7 +50,7 @@ def make_index(genome, log):
     ###### Repeats table;
     repeats = delayedlist(filename=rmsk_path, gzip=True, format=rmsk_track_form)
 
-    # Needs to be expanded for other species?
+    # TODO: Needs to be expanded for other species?
     keep_classes = frozenset(['LINE', 'LTR', 'SINE', 'DNA', 'Retroposon'])
 
     added = 0
