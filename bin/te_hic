@@ -21,7 +21,7 @@ default_resolutions_str = " ".join([str(i) for i in default_resolutions])
 
 # Command-line options;
 def prepare_parser():
-    exmp = 'Minimal usage usage: te_hic -a read1.bam -b read2.bam -g genome'
+    exmp = 'Minimal usage example: te_hic -a read1.bam -b read2.bam -g genome'
 
     description = 'HiC data analysis, preserving TE information'
 

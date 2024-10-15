@@ -50,7 +50,7 @@ class te_hic:
         oh.close()
 
         # Check they exist, but don't load until stage2 to save memory
-        self.genome = os.path.join(self.__script_path,f'../genome/{genome}_glb_gencode_tes.glb')
+        self.genome = os.path.join(self.__script_path,f'../genome/{genome}_tes.glb')
         assert os.path.exists(self.genome), f'{genome} not found'
 
         # Get the TE frequencies tables
