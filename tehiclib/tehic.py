@@ -109,8 +109,6 @@ class te_hic:
 
             line = f'chr{pair[0]}\t{pair[1]}\t{pair[2]}\tchr{pair[3]}\t{pair[4]}\t{pair[5]}\t0\t{pair[10]}\t{pair[11]}\t{self.__set_to_str(pair[7])}-{self.__set_to_str(pair[6])}\t{self.__set_to_str(pair[9])}-{self.__set_to_str(pair[8])}\n'
 
-            print(line)
-
             # All:
             file_all.write(line)
 
