@@ -14,7 +14,7 @@ class te_hic:
         genome:str,
         label:str,
         logger,
-        save_intermediate_files=False
+        save_intermediate_files:bool=False
         ):
         '''
         Entry point for te_hic
@@ -51,7 +51,7 @@ class te_hic:
         oh.close()
 
         # Check they exist, but don't load until stage2 to save memory
-        self.genome = os.path.join(self.__script_path,f'../genome/{genome}_tes.glb')
+        self.genome = os.path.join(self.__script_path, f'../genome/{genome}_tes.glb')
         assert os.path.exists(self.genome), f'{genome} not found'
 
         # Get the TE frequencies tables
@@ -108,6 +108,8 @@ class te_hic:
             pair = pair.strip().split('\t')
 
             line = f'chr{pair[0]}\t{pair[1]}\t{pair[2]}\tchr{pair[3]}\t{pair[4]}\t{pair[5]}\t0\t{pair[10]}\t{pair[11]}\t{self.__set_to_str(pair[7])}-{self.__set_to_str(pair[6])}\t{self.__set_to_str(pair[9])}-{self.__set_to_str(pair[8])}\n'
+
+            print(line)
 
             # All:
             file_all.write(line)
