@@ -1,5 +1,6 @@
 
 import os, gzip
+
 from . import common
 from .collect_valid_pairs import collect_valid_pairs, save_valid_pairs
 from .assign_to_te import map_pairs
@@ -64,11 +65,13 @@ class te_hic:
             Collect QC passing valid pairs
         '''
 
-        self.valid_pairs_tmp_file = collect_valid_pairs(bam1_filename, bam2_filename,
+        self.valid_pairs_tmp_file = collect_valid_pairs(
+            bam1_filename, bam2_filename,
             min_dist=5000, min_qual=min_qual,
             label=self.label,
             logger=self.logger,
-            _save_intermediate_files=self.__save_intermediate_files)
+            _save_intermediate_files=self.__save_intermediate_files
+            )
 
         return True
 
@@ -161,3 +164,4 @@ class te_hic:
             os.remove(self.mapped_pairs_temp_file) # not needed anymore
 
         return True
+

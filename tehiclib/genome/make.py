@@ -82,12 +82,7 @@ def make_index(genome, log):
     log.info(f'\nAdded {added:,} features')
     del repeats
 
-    gl_tes = genelist()
-    gl_tes.load_list(newl)
-    gl_tes.save(f'{script_path}/../../genome/{genome}_tes.glb')
-
     ###### Annotation table
-    '''
     gtf = {
         #"feature_type": 1,
         "feature": 2,
@@ -150,7 +145,10 @@ def make_index(genome, log):
     gl = genelist()
     gl.load_list(promoters)
     gl.save(f'{script_path}/../../genome/{genome}_promoters.glb')
-    '''
+
+    gl_tes = genelist()
+    gl_tes.load_list(newl)
+    gl_tes.save(f'{script_path}/../../genome/{genome}_tes.glb')
 
     # Count all the TE types
     tes = {}
