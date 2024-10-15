@@ -43,14 +43,19 @@ def main():
     log.info('Arguments:')
     log.info('  genome: "%s"' % args.genome[0])
 
-    log.info('Finding prepackaged Genome')
     genome = args.genome[0]
+
+    if genome not in tehiclib.common.valid_assemblies:
+        log.error(f'{genome} is not supported')
+        sys.exit()
+
+    log.info('Finding prepackaged Genome')
 
     if tehiclib.genome.check_genome_done(genome):
         log.error(f'{genome} genome already built')
         sys.exit()
 
-    log.info(f'{genome} genome not found, building')
+    log.info(f'{genome} genome not found, building...')
 
     tehiclib.genome.make_index(genome, log)
 
