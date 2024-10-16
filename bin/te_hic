@@ -12,6 +12,7 @@ import pysam
 script_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(script_path, '../'))
 import tehiclib
+import tehiclib.genome
 
 default_label = 'te_hic'
 default_q = 10
@@ -37,7 +38,7 @@ def prepare_parser():
 
     required = parser.add_argument_group('required arguments')
 
-    required.add_argument('-g', '--genome', nargs=1, required=True, help=f'Genome assembly to use, valid genomes: {tehiclib.common.valid_assemblies}')
+    required.add_argument('-g', '--genome', nargs=1, required=True, help=f'Genome assembly to use, valid genomes: {tehiclib.genome.valid_assemblies}')
     required.add_argument('-1', '--read1', nargs=1, required=True, help='the BAM alignment file containing the aligned reads pair 1')
     required.add_argument('-2', '--read2', nargs=1, required=True, help='the BAM alignment file containing the aligned reads pair 2')
 

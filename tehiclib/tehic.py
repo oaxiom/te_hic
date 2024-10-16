@@ -6,6 +6,7 @@ from .collect_valid_pairs import collect_valid_pairs, save_valid_pairs
 from .assign_to_te import map_pairs
 from .quantify_links import quantify
 from .build_matrices import build_matrices
+from .genome import valid_assemblies
 
 from . import miniglbase3
 
@@ -34,7 +35,7 @@ class te_hic:
                 Mainly for debugging purposes.
 
         '''
-        assert genome in common.valid_assemblies, f'{genome} not in one of the valid genomes {common.valid_assemblies}'
+        assert genome in valid_assemblies, f'{genome} not in one of the valid genomes {common.valid_assemblies}'
 
         self.label = label
         self.valid_pairs_tmp_file = None

@@ -50,6 +50,9 @@ def collect_valid_pairs(bam1_filename,
     bf1 = pysam.AlignmentFile(bam1_filename, 'rb')
     bf2 = pysam.AlignmentFile(bam2_filename, 'rb')
 
+    small_links_filename = f'stage1.{label}.{min_dist}.frags.bed'
+    small_links = open(small_links_filename, 'rt')
+    
     temp_filename = f'stage1.{str(int(time.time()))[5:]}{random.randint(10, 1e6):0>7}.{label}.tmp'
     temp_out = open(temp_filename, 'w')
 
@@ -113,6 +116,7 @@ def collect_valid_pairs(bam1_filename,
         dist = max([abs(read1.reference_start - read2.reference_end), abs(read1.reference_end - read2.reference_start)])
         if dist < min_dist:
             reject_too_close += 1
+            small_links.write(f'{read1.reference_name[3:]}\t{read1.reference_start}\t{read2.reference_name[3:]}\t{read2.reference_end}\t{loc_strand1}\t{loc_strand2}\n')
             continue
 
         if dist < 20000:
