@@ -63,7 +63,13 @@ For example:
 te_hic_genome -g hg38
 ```
 
-This assumes you have wget on your machine
+This assumes you have wget on your machine.
+
+Genome currently supported:
+
+hg38 - GRCh38.p14
+mm10 - NCBIm37
+rn7 - mRatBN7.2
 
 
 ### Step 1: Align to the genome
