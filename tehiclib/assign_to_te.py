@@ -37,8 +37,6 @@ def map_pairs(valid_pairs_temp_file, genome, label=None, logger=False):
 
     self_genome_linearData = genome.linearData
     self_genome_buckets = genome.buckets
-    print(genome)
-    print(self_genome_buckets)
 
     valid_pairs = open(valid_pairs_temp_file, 'r')
 
@@ -66,7 +64,7 @@ def map_pairs(valid_pairs_temp_file, genome, label=None, logger=False):
                     loc_ids.update(self_genome_buckets[chromA][buck]) # set = unique ids
 
             for index in loc_ids:
-                if riteA >= self_genome_linearData[index]["loc"].loc["left"] and leftA <= self_genome_linearData[index]["loc"].loc["right"]:
+                if riteA >= self_genome_linearData[index]["loc"].left and leftA <= self_genome_linearData[index]["loc"].right:
                     result.append(self_genome_linearData[index])
 
             read1_feat = []
@@ -94,7 +92,7 @@ def map_pairs(valid_pairs_temp_file, genome, label=None, logger=False):
                     loc_ids.update(self_genome_buckets[chromB][buck]) # set = unique ids
 
             for index in loc_ids:
-                if riteB >= self_genome_linearData[index]["loc"].loc["left"] and leftB <= self_genome_linearData[index]["loc"].loc["right"]:
+                if riteB >= self_genome_linearData[index]["loc"].left and leftB <= self_genome_linearData[index]["loc"].right:
                     result.append(self_genome_linearData[index])
 
             read2_feat = []
