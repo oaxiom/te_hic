@@ -59,7 +59,7 @@ def make_index(genome, log):
                 classes_seen.add(item['repClass'])
             continue
 
-        if str(item['loc']['chr']) not in chr_set:
+        if str(item['loc'].chrom) not in chr_set:
             continue
 
         name = f"{item['repClass']}:{item['repFamily']}:{item['repName']}"
