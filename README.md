@@ -30,7 +30,10 @@ are not great, so we omit).
 Installation:
 
 Stick te_hic/bin on your PATH:
+
+```
 export PATH=/path/to/te_hic/bin:$PATH
+```
 
 Requires:
 python3 (>3.7)
@@ -70,7 +73,6 @@ Genome currently supported:
 hg38 - GRCh38.p14
 mm10 - NCBIm37
 rn7 - mRatBN7.2
-
 
 ### Step 1: Align to the genome
 
