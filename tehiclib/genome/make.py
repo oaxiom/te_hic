@@ -106,7 +106,7 @@ def make_index(genome, log):
     for idx, item in enumerate(gencode):
         if item['feature'] != 'exon':
             continue
-        if item['loc'].loc['chr'] not in chr_set:
+        if item['loc'].chrom not in chr_set:
             continue
 
         # guess the gene_biotype and name;

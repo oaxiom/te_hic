@@ -37,8 +37,8 @@ def map_pairs(valid_pairs_temp_file, genome, label=None, logger=False):
 
     self_genome_linearData = genome.linearData
     self_genome_buckets = genome.buckets
-
-    #print(self_genome_buckets)
+    print(genome)
+    print(self_genome_buckets)
 
     valid_pairs = open(valid_pairs_temp_file, 'r')
 
@@ -46,6 +46,7 @@ def map_pairs(valid_pairs_temp_file, genome, label=None, logger=False):
     output_file = open(output_filename, 'w')
 
     for idx, pairs in enumerate(valid_pairs):
+
         # pairs format ('chr7', 150285954, 'chr4', 130529111, '-', '+');
         pairs = pairs.strip().split('\t')
         chromA = pairs[0]

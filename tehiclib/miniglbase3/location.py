@@ -175,19 +175,6 @@ class location:
         """
         return self.distance(loc)
 
-    '''
-    def offset(self, base_pairs):
-        """
-        get a new location offset from the 5' end by n base pairs
-        returns a point location.
-        """
-        new = copy.deepcopy(self)
-        new.loc["left"] += base_pairs
-        new.loc["right"] = new.loc["left"]
-        new.__update()
-        return location(chr=self.chrom, left=self.left + base_pairs right=self.left)
-    '''
-
     def keys(self):
         return ('chr', 'left', 'right')
 
