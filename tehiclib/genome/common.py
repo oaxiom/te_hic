@@ -10,6 +10,7 @@ valid_assemblies = {
     'hg38',
     'mm10',
     'mm39',
+    'danRer11', # GRCz11
     'rn7',
     'xenTro10',
     }
@@ -58,8 +59,16 @@ genome_options = {
         'download': 'https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M35/gencode.vM35.annotation.gtf.gz',
         'chrom_cleaner': clean_chroms_animal,
         },
+    'danRer11': {
+        'download': 'https://ftp.ensembl.org/pub/release-112/gtf/danio_rerio/Danio_rerio.GRCz11.112.gtf.gz',
+        'chrom_cleaner': clean_chroms_animal,
+        },
     'rn7': {
         'download': 'https://ftp.ensembl.org/pub/release-112/gtf/rattus_norvegicus/Rattus_norvegicus.mRatBN7.2.112.gtf.gz',
+        'chrom_cleaner': clean_chroms_animal,
+        },
+    'xenTro10': {
+        'download': 'https://ftp.ensembl.org/pub/release-112/gtf/xenopus_tropicalis/Xenopus_tropicalis.UCB_Xtro_10.0.112.gtf.gz',
         'chrom_cleaner': clean_chroms_animal,
         }
     }
