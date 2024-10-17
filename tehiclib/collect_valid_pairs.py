@@ -67,6 +67,7 @@ def collect_valid_pairs(
     stats_short_range = 0
     stats_long_range = 0
     stats_not_canonical_chromosome = 0
+    stats_trans = 0
     reject_diff_chrom = 0
     reject_too_close = 0
 
@@ -113,6 +114,14 @@ def collect_valid_pairs(
             stats_not_canonical_chromosome += 1
             continue
 
+        if read1.reference_name != read2.reference_name:
+            loc_strand1 = '-' if read1.is_reverse else '+'
+            loc_strand2 = '-' if read2.is_reverse else '+'
+            pairs_add(f'{read1.reference_name[3:]}\t{read1.reference_start}\t{read2.reference_name[3:]}\t{read2.reference_end}\t{loc_strand1}\t{loc_strand2}\n')
+            done += 1
+            stats_trans += 1
+            continue
+
         # criteria1: Check the distance between the two reads
         dist = max([abs(read1.reference_start - read2.reference_end), abs(read1.reference_end - read2.reference_start)])
         if dist < min_dist:
@@ -149,6 +158,7 @@ def collect_valid_pairs(
 
     logger.info('Sorting temp file')
 
+    #TODO: Perhaps dynamically select
     # It seems awk gets killed in the region of ~200M so just use sort | uniq
     subprocess.run(f'sort {temp_filename} | uniq > {temp_filename}.sorted', shell=True)    # Portable memory resilient, slower?
     #if done > 200e6: # We saw failures at 650M and 1300M
@@ -179,6 +189,7 @@ def collect_valid_pairs(
     logger.info('    Too close                 : {:,} ({:.2%})'.format(reject_too_close, reject_too_close/stats_total_reads))
     logger.info('  Final:')
     logger.info('    Kept reads                : {:,} ({:.2%})'.format(total_saved, (total_saved)/stats_total_reads))
+    logger.info(f'    Trans links               : {stats_trans:,} ({stats_trans/stats_total_reads:.2%})')
     logger.info('    [Note that these numbers below include PCR duplicates]')
     logger.info('    Kept short-range (<20kb)  : {:,} ({:.2%})'.format(stats_short_range, stats_short_range/stats_total_reads))
     logger.info('    Kept long-range (>20kb)   : {:,} ({:.2%})'.format(stats_long_range,  stats_long_range/stats_total_reads))

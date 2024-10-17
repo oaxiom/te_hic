@@ -9,7 +9,9 @@ import os, gzip
 valid_assemblies = {
     'hg38',
     'mm10',
+    'mm39',
     'rn7',
+    'xenTro10',
     }
 
 genome_sizes = dict(
@@ -49,6 +51,10 @@ genome_options = {
         'chrom_cleaner': clean_chroms_animal,
         },
     'mm10': {
+        'download': 'ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M20/gencode.vM20.annotation.gtf.gz',
+        'chrom_cleaner': clean_chroms_animal,
+        },
+    'mm39': {
         'download': 'ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M20/gencode.vM20.annotation.gtf.gz',
         'chrom_cleaner': clean_chroms_animal,
         },

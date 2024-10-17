@@ -155,7 +155,7 @@ INFO    : Stage 1: Collect valid read pairs
 INFO    : Started SRR1030718.2_1.100k.bam and SRR1030718.2_2.100k.bam
 [E::idx_find_and_load] Could not retrieve index file for 'SRR1030718.2_1.100k.bam'
 [E::idx_find_and_load] Could not retrieve index file for 'SRR1030718.2_2.100k.bam'
-INFO    : Processed: 99,970 reads in total, removed 47,360 (47.4%) reads by preduplicate removal
+INFO    : Processed: 99,970 reads in total, removed 47,357 (47.4%) reads by preduplicate removal
 INFO    : Sorting temp file
 INFO    : Stage 1 stats:
 INFO    :   Aligned:
@@ -167,26 +167,27 @@ INFO    :     One pair aligned          : 12,252 (12.26%)
 INFO    :     Not canonical chromosome  : 312 (0.31%)
 INFO    :     No pairs aligned          : 1,909 (1.91%)
 INFO    :   Rejected reads (by criteria):
-INFO    :     Too close                 : 28,649 (28.66%)
+INFO    :     Too close                 : 28,646 (28.65%)
 INFO    :   Final:
-INFO    :     Kept reads                : 52,610 (52.63%)
+INFO    :     Kept reads                : 52,613 (52.63%)
+INFO    :     Trans links               : 19,133 (19.14%)
 INFO    :     [Note that these numbers below include PCR duplicates]
-INFO    :     Kept short-range (<20kb)  : 2,421 (2.42%)
-INFO    :     Kept long-range (>20kb)   : 50,214 (50.23%)
+INFO    :     Kept short-range (<20kb)  : 2,418 (2.42%)
+INFO    :     Kept long-range (>20kb)   : 31,087 (31.10%)
 INFO    :     [Sorted, unique after full duplicate removal]
-INFO    :     Kept long-range (>20kb)   : 52,610 (52.63%)
-INFO    : Took 0.9s
+INFO    :     Kept long-range (>20kb)   : 52,613 (52.63%)
+INFO    : Took 0.8s
 INFO    : Stage 2: Assign to hg38 genome features
 INFO    : Loaded '/Users/andrew/Tools/te_hic/tehiclib/../genome/hg38_tes.glb' binary file with 5665930 items
 INFO    : Processed: 0
-INFO    : Processed: 52,609 reads in total
+INFO    : Processed: 52,612 reads in total
 INFO    : Saving BEDPE files
-INFO    : Took 33.2s
+INFO    : Took 29.4s
 INFO    : Stage 3: Quantify links
 INFO    : Measures anchors...
 INFO    :   TE <-> TE : 15,578 (29.61%)
-INFO    :   TE <-> -- : 25,297 (48.08%)
-INFO    :   -- <-> -- : 11,735 (22.31%)
+INFO    :   TE <-> -- : 25,300 (48.09%)
+INFO    :   -- <-> -- : 11,735 (22.30%)
 INFO    : Saved 'stage3.te_hic_te-nn_anchor_frequencies.tsv'
 INFO    : Took 1.0s
 INFO    : Stage 4: Build Matrices
@@ -209,7 +210,7 @@ INFO    : Saved TE <=> TE matrix: "matrices_te_hic/50000/te_hic_50000.tete.raw.m
 INFO    : Saved TE <=> non-TE matrix: "matrices_te_hic/50000/te_hic_50000.tenn.raw.matrix"
 INFO    : Saved non-TE <=> non-TE matrix: "matrices_te_hic/50000/te_hic_50000.nnnn.raw.matrix"
 INFO    : Took 1.0s
-INFO    : In total took 36.1s
+INFO    : In total took 32.2s
 
 HiC-analysis % ls -l
 total 16960
