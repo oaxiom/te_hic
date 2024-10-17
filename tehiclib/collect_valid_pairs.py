@@ -51,7 +51,7 @@ def collect_valid_pairs(
     bf1 = pysam.AlignmentFile(bam1_filename, 'rb')
     bf2 = pysam.AlignmentFile(bam2_filename, 'rb')
 
-    small_links_filename = f'stage1.{label}.{min_dist}.frags.bed'
+    small_links_filename = f'stage1.{label}.{min_dist}.frags.bed.gz'
     small_links = gzip.open(small_links_filename, 'wt')
 
     temp_filename = f'stage1.{str(int(time.time()))[5:]}{random.randint(10, 1e6):0>7}.{label}.tmp'

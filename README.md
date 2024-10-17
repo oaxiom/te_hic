@@ -149,17 +149,15 @@ INFO    :   Label: te_hic (default is te_hic)
 INFO    :   Quality thresold: 10 (default is 10)
 INFO    :   Minimum contact distance: 5000 (default is 5000)
 INFO    :   Matrix resolutions to build: [300, 150, 50] kbp (default is [300, 150, 50])
-INFO    : Loaded '/Users/andrew/Tools/te_hic/tehiclib/../genome/hg38_glb_gencode_tes.glb' binary file with 5665930 items
+INFO    : valid chromosome are: chr1, chr10, chr11, chr12, chr13, chr14, chr15, chr16, chr17, chr18, chr19, chr2, chr20, chr21, chr22, chr3, chr4, chr5, chr6, chr7, chr8, chr9, chrX, chrY
 INFO    : Loaded '/Users/andrew/Tools/te_hic/tehiclib/../genome/hg38_te_genome_freqs.glb' binary file with 1058 items
 INFO    : Stage 1: Collect valid read pairs
 INFO    : Started SRR1030718.2_1.100k.bam and SRR1030718.2_2.100k.bam
 [E::idx_find_and_load] Could not retrieve index file for 'SRR1030718.2_1.100k.bam'
 [E::idx_find_and_load] Could not retrieve index file for 'SRR1030718.2_2.100k.bam'
+INFO    : Processed: 99,970 reads in total, removed 47,360 (47.4%) reads by preduplicate removal
 INFO    : Sorting temp file
-INFO    : Reloading
-rm: stage1.0036117.te_hic.tmp: No such file or directory
-INFO    : 
-collect_valid_pairs() stats:
+INFO    : Stage 1 stats:
 INFO    :   Aligned:
 INFO    :     Reads processed           : 99,970
 INFO    :     Correctly paired          : 85,809 (85.83%)
@@ -171,24 +169,26 @@ INFO    :     No pairs aligned          : 1,909 (1.91%)
 INFO    :   Rejected reads (by criteria):
 INFO    :     Too close                 : 28,649 (28.66%)
 INFO    :   Final:
-INFO    :     [Note that these numbers below include PCR duplicates]
 INFO    :     Kept reads                : 52,610 (52.63%)
+INFO    :     [Note that these numbers below include PCR duplicates]
 INFO    :     Kept short-range (<20kb)  : 2,421 (2.42%)
 INFO    :     Kept long-range (>20kb)   : 50,214 (50.23%)
-INFO    :     [This number is after duplicate removal]
+INFO    :     [Sorted, unique after full duplicate removal]
 INFO    :     Kept long-range (>20kb)   : 52,610 (52.63%)
-INFO    : Took 1.0s
+INFO    : Took 0.9s
 INFO    : Stage 2: Assign to hg38 genome features
+INFO    : Loaded '/Users/andrew/Tools/te_hic/tehiclib/../genome/hg38_tes.glb' binary file with 5665930 items
 INFO    : Processed: 0
 INFO    : Processed: 52,609 reads in total
-INFO    : Took 3.2s
+INFO    : Saving BEDPE files
+INFO    : Took 33.2s
 INFO    : Stage 3: Quantify links
 INFO    : Measures anchors...
 INFO    :   TE <-> TE : 15,578 (29.61%)
 INFO    :   TE <-> -- : 25,297 (48.08%)
 INFO    :   -- <-> -- : 11,735 (22.31%)
 INFO    : Saved 'stage3.te_hic_te-nn_anchor_frequencies.tsv'
-INFO    : Took 0.3s
+INFO    : Took 1.0s
 INFO    : Stage 4: Build Matrices
 INFO    : Building in-memory matrices for resolution 300000 bp
 INFO    : Saved BED bins: "matrices_te_hic/300000/te_hic_300000_abs.bed"
@@ -209,17 +209,20 @@ INFO    : Saved TE <=> TE matrix: "matrices_te_hic/50000/te_hic_50000.tete.raw.m
 INFO    : Saved TE <=> non-TE matrix: "matrices_te_hic/50000/te_hic_50000.tenn.raw.matrix"
 INFO    : Saved non-TE <=> non-TE matrix: "matrices_te_hic/50000/te_hic_50000.nnnn.raw.matrix"
 INFO    : Took 1.0s
-INFO    : In total took 5.6s
+INFO    : In total took 36.1s
 
 HiC-analysis % ls -l
 total 16960
--rw-rw-r--  1 andrew  staff  4208603 Nov 23 10:56 SRR1030718.2_1.100k.bam
--rw-rw-r--  1 andrew  staff  4318275 Nov 23 11:03 SRR1030718.2_2.100k.bam
-drwxr-xr-x  5 andrew  staff      160 Dec 21 08:31 matrices_te_hic
--rw-r--r--  1 andrew  staff       93 Dec 21 08:31 stage3.te_hic_crude_measures.txt
--rw-r--r--  1 andrew  staff    79178 Dec 21 08:31 stage3.te_hic_te-nn_anchor_frequencies.tsv
--rw-r--r--  1 andrew  staff       59 Dec 21 08:31 stage3.te_hic_te-te_anchor_frequencies.tsv
--rw-r--r--  1 andrew  staff       71 Nov 28 13:14 test_script.sh
+drwxr-xr-x  5 andrew  staff      160 Dec 21  2022 matrices_te_hic
+-rw-r--r--  1 andrew  staff   281469 Oct 17 12:27 stage1.te_hic.5000.frags.bed.gz
+-rw-r--r--@ 1 andrew  staff  1234822 Oct 17 12:27 stage2.all.te_hic.bedpe.gz
+-rw-r--r--  1 andrew  staff   232363 Oct 17 12:27 stage2.nnnn.te_hic.bedpe.gz
+-rw-r--r--  1 andrew  staff   589225 Oct 17 12:27 stage2.tenn.te_hic.bedpe.gz
+-rw-r--r--  1 andrew  staff   401417 Oct 17 12:27 stage2.tete.te_hic.bedpe.gz
+-rw-r--r--  1 andrew  staff       93 Oct 17 12:27 stage3.te_hic_crude_measures.txt
+-rw-r--r--  1 andrew  staff    79178 Oct 17 12:27 stage3.te_hic_te-nn_anchor_frequencies.tsv
+-rw-r--r--  1 andrew  staff  1357255 Oct 17 12:27 stage3.te_hic_te-te_anchor_frequencies.tsv
+
 
 HiC-analysis % ll matrices_te_hic 
 total 0
