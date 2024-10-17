@@ -7,19 +7,19 @@ Pair up all valid reads from a pair of bams
 import sys, os, gzip, random, subprocess, time
 import pysam
 
-valid_chroms = set(['chrX', 'chrY'] + [f'chr{i}' for i in range(1, 30)]) # cut scaffolds
-
 def dump_to_file(pairs, filehandle):
     [filehandle.write(p) for p in sorted(pairs)]
     num_saved = len(pairs)
     del pairs
     return num_saved
 
-def collect_valid_pairs(bam1_filename,
+def collect_valid_pairs(
+    bam1_filename,
     bam2_filename,
     min_dist=5000,
     label=None,
     logger=None,
+    valid_chroms=None, # Comes from tehiclib.genome.get_chroms() and ultimately from {genome}.chromSizes.clean
     _save_intermediate_files=False,
     min_qual=None):
     '''
@@ -32,7 +32,8 @@ def collect_valid_pairs(bam1_filename,
 
         Criteria implemented:
             min_dist (default=5000)
-                minimum distance for a valid pair
+                minimum distance for a valid pair.
+                Reads under this distance will be saved to a BED file;
 
             min_qual (default=10)
                 minimum quality score
@@ -51,7 +52,7 @@ def collect_valid_pairs(bam1_filename,
     bf2 = pysam.AlignmentFile(bam2_filename, 'rb')
 
     small_links_filename = f'stage1.{label}.{min_dist}.frags.bed'
-    small_links = open(small_links_filename, 'wt')
+    small_links = gzip.open(small_links_filename, 'wt')
 
     temp_filename = f'stage1.{str(int(time.time()))[5:]}{random.randint(10, 1e6):0>7}.{label}.tmp'
     temp_out = open(temp_filename, 'w')
@@ -116,7 +117,7 @@ def collect_valid_pairs(bam1_filename,
         dist = max([abs(read1.reference_start - read2.reference_end), abs(read1.reference_end - read2.reference_start)])
         if dist < min_dist:
             reject_too_close += 1
-            small_links.write(f'{read1.reference_name}\t{read1.reference_start}\t{read2.reference_name}\t{read2.reference_end}\t{loc_strand1}\t{loc_strand2}\n')
+            small_links.write(f'{read1.reference_name}\t{read1.reference_start}\t{read2.reference_end}\t{loc_strand1}\t{loc_strand2}\n')
             continue
 
         if dist < 20000:

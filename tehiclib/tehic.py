@@ -51,6 +51,10 @@ class te_hic:
             self.chrom_sizes[line[0]] = int(line[1])
         oh.close()
 
+        self.valid_chroms = sorted(self.chrom_sizes.keys())
+        self.logger.info(f'valid chromosome are: {", ".join(self.valid_chroms)}')
+        self.valid_chroms = set(self.valid_chroms)
+
         # Check they exist, but don't load until stage2 to save memory
         self.genome = os.path.join(self.__script_path, f'../genome/{genome}_tes.glb')
         assert os.path.exists(self.genome), f'{genome} not found'
@@ -71,6 +75,7 @@ class te_hic:
             min_dist=5000, min_qual=min_qual,
             label=self.label,
             logger=self.logger,
+            valid_chroms=self.valid_chroms,
             _save_intermediate_files=self.__save_intermediate_files
             )
 
