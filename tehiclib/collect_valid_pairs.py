@@ -117,7 +117,9 @@ def collect_valid_pairs(
         dist = max([abs(read1.reference_start - read2.reference_end), abs(read1.reference_end - read2.reference_start)])
         if dist < min_dist:
             reject_too_close += 1
-            small_links.write(f'{read1.reference_name}\t{read1.reference_start}\t{read2.reference_end}\t{loc_strand1}\t{loc_strand2}\n')
+            left_min = min(read1.reference_start, read2.reference_end)
+            rite_max = max(read1.reference_start, read2.reference_end)
+            small_links.write(f'{read1.reference_name}\t{left_min}\t{rite_max}\t{loc_strand1}\t{loc_strand2}\n')
             continue
 
         if dist < 20000:
