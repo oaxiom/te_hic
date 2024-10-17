@@ -55,7 +55,7 @@ genome_options = {
         'chrom_cleaner': clean_chroms_animal,
         },
     'mm39': {
-        'download': 'ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M20/gencode.vM20.annotation.gtf.gz',
+        'download': 'https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M35/gencode.vM35.annotation.gtf.gz',
         'chrom_cleaner': clean_chroms_animal,
         },
     'rn7': {
