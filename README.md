@@ -71,13 +71,14 @@ This assumes you have wget on your machine.
 
 Genome currently supported:
 
+```
 Human: hg38 - GRCh38.p14 
 Mouse: mm10 - NCBIm38
 Mouse: mm39 - NCBIm39
 Rat: rn7 - mRatBN7.2
 Zebrafish: danRer11
 Xenopus: xenTro10
-
+```
 
 ### Step 1: Align to the genome
 

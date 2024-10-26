@@ -13,6 +13,7 @@ valid_assemblies = {
     'danRer11', # GRCz11
     'rn7',
     'xenTro10',
+    'dm6',
     }
 
 genome_sizes = dict(
@@ -33,7 +34,8 @@ def clean_chroms_animal(genome):
     script_path = os.path.dirname(os.path.realpath(__file__))
 
     out = open(f'{script_path}/../../genome/{genome}.chromSizes.clean', 'wt')
-
+    valid_chroms = set([])
+    
     with gzip.open(f'{script_path}/../../genome/{genome}.chromSizes.gz', 'rt') as inp:
         for chrom in inp:
             if '_alt' in chrom: continue
@@ -44,7 +46,10 @@ def clean_chroms_animal(genome):
             if chrom.startswith('chrM'): continue
 
             out.write(f'{chrom}')
+            valid_chroms.add(chrom.split('\t')[0].replace('chr', ''))
     out.close()
+    
+    return valid_chroms
 
 genome_options = {
     'hg38': {
@@ -70,7 +75,12 @@ genome_options = {
     'xenTro10': {
         'download': 'https://ftp.ensembl.org/pub/release-112/gtf/xenopus_tropicalis/Xenopus_tropicalis.UCB_Xtro_10.0.112.gtf.gz',
         'chrom_cleaner': clean_chroms_animal,
-        }
+        },
+    'dm6': {
+        'download': 'https://ftp.ensembl.org/pub/release-113/gtf/drosophila_melanogaster/Drosophila_melanogaster.BDGP6.46.113.gtf.gz',
+        'chrom_cleaner': clean_chroms_animal,
+        },
+    
     }
 
 

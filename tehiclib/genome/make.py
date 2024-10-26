@@ -30,21 +30,18 @@ def make_index(genome, log):
     subprocess.run(f"wget -c {genome_options[genome]['download']} -O {annotation_path}", shell=True)
 
     if genome_options[genome]['chrom_cleaner']:
-        genome_options[genome]['chrom_cleaner'](genome)
+        valid_chroms = genome_options[genome]['chrom_cleaner'](genome)
 
     rmsk_track_form = {"force_tsv": True, 'loc': 'location(chr=column[5], left=column[6], right=column[7])',
         'repName': 10, 'repClass': 11, 'repFamily': 12}
-
-    # TODO: Fix for other species?
-    chr_set = frozenset(['X', 'Y'] + [str(i) for i in range(1, 23)])
 
     ###### Repeats table;
     repeats = delayedlist(filename=rmsk_path, gzip=True, format=rmsk_track_form)
 
     # TODO: Needs to be expanded for other species?
-    keep_classes = frozenset(['LINE', 'LTR', 'SINE', 'DNA', 'Retroposon'])
-    classes_seen = set()
-    gene_types_seen = set()
+    keep_classes = frozenset(['LINE', 'LTR', 'SINE', 'DNA', 'RNA', 'Retroposon'])
+    classes_seen = {}
+    chromosomes_seen_but_not_used = set()
 
     added = 0
 
@@ -56,10 +53,13 @@ def make_index(genome, log):
     for idx, item in enumerate(repeats):
         if item['repClass'] not in keep_classes:
             if '?' not in item['repClass']:
-                classes_seen.add(item['repClass'])
+                if item['repClass'] not in classes_seen: 
+                    classes_seen[item['repClass']] = 0
+                classes_seen[item['repClass']] += 1
             continue
 
-        if str(item['loc'].chrom) not in chr_set:
+        if str(item['loc'].chrom) not in valid_chroms:
+            chromosomes_seen_but_not_used.add(item['loc'].chrom)
             continue
 
         name = f"{item['repClass']}:{item['repFamily']}:{item['repName']}"
@@ -75,10 +75,13 @@ def make_index(genome, log):
 
         p.update(idx)
 
-    print() # tidy up after progressbar
+    print() # tidy up after progress bar
+    log.info('Chromsomes seen but not used (Scaffolds with "_" are not included):')
+    log.info(', '.join([c for c in chromosomes_seen_but_not_used if '_' not in c]))
+    
     log.info('TE types seen but not added:')
     for seen_te in classes_seen:
-        log.info(f'    {seen_te}')
+        log.info(f'    {seen_te} ({classes_seen[seen_te]:,} TE loci)')
 
     log.info(f'Added {added:,} features')
     del repeats
@@ -96,7 +99,8 @@ def make_index(genome, log):
         }
 
     gencode = delayedlist(annotation_path, gzip=True, format=gtf)
-    keep_gene_types = set(('protein_coding', 'lincRNA', 'lncRNA'))
+    keep_gene_types = set(('protein_coding', 'lincRNA', 'lncRNA', 'ncRNA'))
+    gene_types_seen = {}
 
     key_gene_type = None
     key_gene_name = None
@@ -106,7 +110,7 @@ def make_index(genome, log):
     for idx, item in enumerate(gencode):
         if item['feature'] != 'exon':
             continue
-        if item['loc'].chrom not in chr_set:
+        if item['loc'].chrom not in valid_chroms:
             continue
 
         # guess the gene_biotype and name;
@@ -117,7 +121,9 @@ def make_index(genome, log):
             if 'gene_name' in item: key_gene_name = 'gene_name'
 
         if item[key_gene_type] not in keep_gene_types:
-            gene_types_seen.add(item[key_gene_type])
+            if item[key_gene_type] not in gene_types_seen:
+                gene_types_seen[item[key_gene_type]] = 1  
+            gene_types_seen[item[key_gene_type]] += 1
             continue
 
         # type is always valid (right?) but gene name might not be.
@@ -162,7 +168,7 @@ def make_index(genome, log):
     print() # tidy up after progressbar
     log.info('gene_types seen but not added:')
     for seen_gene in gene_types_seen:
-        log.info(f'    {seen_gene}')
+        log.info(f'    {seen_gene} ({gene_types_seen[seen_gene]} genes)')
 
     log.info(f'Added {added:,} features')
 
