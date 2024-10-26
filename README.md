@@ -44,7 +44,7 @@ pysam
 Build the genome annotations.
 
 ```
-te_hic_genome -h
+% te_hic_genome -h
 usage: te_hic_genome [-h] -g GENOME
 
 Builds the indices for te_hic
@@ -54,9 +54,10 @@ options:
 
 required arguments:
   -g GENOME, --genome GENOME
-                        Genome assembly to use, valid genomes: {'hg38', 'mm10'}
+                        Genome assembly to use, valid genomes: {'mm10', 'rn7', 'mm39', 'xenTro10', 'hg38', 'danRer11'}
 
 Example usage: te_hic_genome -g hg38
+
 
 ```
 
@@ -70,9 +71,13 @@ This assumes you have wget on your machine.
 
 Genome currently supported:
 
-hg38 - GRCh38.p14
-mm10 - NCBIm37
-rn7 - mRatBN7.2
+Human: hg38 - GRCh38.p14 
+Mouse: mm10 - NCBIm38
+Mouse: mm39 - NCBIm39
+Rat: rn7 - mRatBN7.2
+Zebrafish: danRer11
+Xenopus: xenTro10
+
 
 ### Step 1: Align to the genome
 
@@ -105,20 +110,19 @@ These are the full options for te_hic:
 ```
 
 % te_hic -h
-
 usage: te_hic [-h] [-l LABEL] [-q QUAL] [-d MINDIST] [-r RESOLUTIONS [RESOLUTIONS ...]] [--keep-intermediate-files] -g GENOME -1 READ1 -2 READ2
 
 HiC data analysis, preserving TE information
 
 required arguments:
   -g GENOME, --genome GENOME
-                        Genome assembly to use, valid genomes: {'hg38', 'mm10'}
+                        Genome assembly to use, valid genomes: {'mm10', 'danRer11', 'rn7', 'hg38', 'xenTro10', 'mm39'}
   -1 READ1, --read1 READ1
                         the BAM alignment file containing the aligned reads pair 1
   -2 READ2, --read2 READ2
                         the BAM alignment file containing the aligned reads pair 2
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -l LABEL, --label LABEL
                         label for the sample name and output files, default=te_hic
@@ -130,8 +134,7 @@ optional arguments:
   --keep-intermediate-files
                         Keep intermediate files from each stage
 
-Minimal usage usage: te_hic -a read1.bam -b read2.bam -g genome
-
+Minimal usage example: te_hic -a read1.bam -b read2.bam -g genome
 ```
 
 ## HiC example
