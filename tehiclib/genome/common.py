@@ -14,6 +14,7 @@ valid_assemblies = {
     'rn7',
     'xenTro10',
     'dm6',
+    #'TAIR10', # Where's the rmsk and chrom sizes tables?
     }
 
 genome_sizes = dict(
@@ -24,6 +25,7 @@ genome_sizes = dict(
     dm6       =  143726002, # BDGP6_32
     rn7       = 2647915728, # RGSC 6.0
     xenTro10  = 1451301209, # UCB_Xtro_10
+    TAIR10    = 119667750, 
     )
 
 # Cleaners for chromsome names to define canonical;
@@ -80,7 +82,12 @@ genome_options = {
         'download': 'https://ftp.ensembl.org/pub/release-113/gtf/drosophila_melanogaster/Drosophila_melanogaster.BDGP6.46.113.gtf.gz',
         'chrom_cleaner': clean_chroms_animal,
         },
-    
+    'TAIR10': {
+        'download': 'https://ftp.ensembl.org/pub/release-113/gtf/drosophila_melanogaster/Drosophila_melanogaster.BDGP6.46.113.gtf.gz',
+        'chroms_override': '',
+        'rmsk_override': '',
+        'chrom_cleaner': clean_chroms_animal,
+        },
     }
 
 

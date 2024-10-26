@@ -24,13 +24,19 @@ def make_index(genome, log):
     chrom_sizes_path = f'{script_path}/../../genome/{genome}.chromSizes.gz'
     rmsk_path = f'{script_path}/../../genome/{genome}.rmsk.txt.gz'
     annotation_path = f'{script_path}/../../genome/{genome}.annotation.txt.gz'
+    
+    chrom_html = f'http://hgdownload.soe.ucsc.edu/goldenPath/{genome}/database/chromInfo.txt.gz'
+    rmsk_html = f'http://hgdownload.soe.ucsc.edu/goldenPath/{genome}/database/rmsk.txt.gz'
+    gene_html = genome_options[genome]['download']
+    
+    if 'chroms_override' in genome_options[genome]: annotation_path = genome_options[genome]['chroms_override']
+    if 'rmsk_override' in genome_options[genome]: rmsk_html = genome_options[genome]['rmsk_override']
 
-    subprocess.run(f'wget -c http://hgdownload.soe.ucsc.edu/goldenPath/{genome}/database/chromInfo.txt.gz -O {chrom_sizes_path}', shell=True)
-    subprocess.run(f'wget -c http://hgdownload.soe.ucsc.edu/goldenPath/{genome}/database/rmsk.txt.gz -O {rmsk_path}', shell=True)
-    subprocess.run(f"wget -c {genome_options[genome]['download']} -O {annotation_path}", shell=True)
+    subprocess.run(f'wget -c {chrom_html} -O {chrom_sizes_path}', shell=True)
+    subprocess.run(f'wget -c {rmsk_html} -O {rmsk_path}', shell=True)
+    subprocess.run(f"wget -c {gene_html} -O {annotation_path}", shell=True)
 
-    if genome_options[genome]['chrom_cleaner']:
-        valid_chroms = genome_options[genome]['chrom_cleaner'](genome)
+    valid_chroms = genome_options[genome]['chrom_cleaner'](genome)
 
     rmsk_track_form = {"force_tsv": True, 'loc': 'location(chr=column[5], left=column[6], right=column[7])',
         'repName': 10, 'repClass': 11, 'repFamily': 12}
@@ -76,7 +82,9 @@ def make_index(genome, log):
         p.update(idx)
 
     print() # tidy up after progress bar
-    log.info('Chromsomes seen but not used (Scaffolds with "_" are not included):')
+    log.info('Chromosomes seen and used:')
+    log.info(', '.join([c for c in valid_chroms if '_' not in c]))
+    log.info('Chromosomes seen but not used (Scaffolds with "_" are not included):')
     log.info(', '.join([c for c in chromosomes_seen_but_not_used if '_' not in c]))
     
     log.info('TE types seen but not added:')
@@ -99,7 +107,7 @@ def make_index(genome, log):
         }
 
     gencode = delayedlist(annotation_path, gzip=True, format=gtf)
-    keep_gene_types = set(('protein_coding', 'lincRNA', 'lncRNA', 'ncRNA'))
+    keep_gene_types = set(['protein_coding', 'lincRNA', 'lncRNA', 'ncRNA', 'ncRNA_gene'])
     gene_types_seen = {}
 
     key_gene_type = None
