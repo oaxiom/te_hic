@@ -191,8 +191,8 @@ def collect_valid_pairs(
     logger.info('    Too close                 : {:,} ({:.2%})'.format(reject_too_close, reject_too_close/stats_total_reads))
     logger.info('  Final:')
     logger.info('    Kept reads                : {:,} ({:.2%})'.format(total_saved, (total_saved)/stats_total_reads))
-    logger.info(f'    Trans links               : {stats_trans:,} ({stats_trans/stats_total_reads:.2%})')
     logger.info('    [Note that these numbers below include PCR duplicates]')
+    logger.info(f'    Trans links               : {stats_trans:,} ({stats_trans/stats_total_reads:.2%})')
     logger.info('    Kept short-range (<20kb)  : {:,} ({:.2%})'.format(stats_short_range, stats_short_range/stats_total_reads))
     logger.info('    Kept long-range (>20kb)   : {:,} ({:.2%})'.format(stats_long_range,  stats_long_range/stats_total_reads))
 
