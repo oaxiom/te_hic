@@ -102,7 +102,7 @@ def collect_valid_pairs(
         stats_aligned += 1
 
         # Check both reads have reasonable quality
-        if read1.mapping_quality < min_qual and read2.mapping_quality < min_qual:
+        if read1.mapping_quality < min_qual or read2.mapping_quality < min_qual: # and!?
             stats_lowq += 1
             continue
 
@@ -122,6 +122,9 @@ def collect_valid_pairs(
             stats_trans += 1
             continue
 
+        loc_strand1 = '-' if read1.is_reverse else '+'
+        loc_strand2 = '-' if read2.is_reverse else '+'
+
         # criteria1: Check the distance between the two reads
         dist = max([abs(read1.reference_start - read2.reference_end), abs(read1.reference_end - read2.reference_start)])
         if dist < min_dist:
@@ -135,9 +138,6 @@ def collect_valid_pairs(
             stats_short_range += 1
         elif dist > 20000:
             stats_long_range += 1
-
-        loc_strand1 = '-' if read1.is_reverse else '+'
-        loc_strand2 = '-' if read2.is_reverse else '+'
 
         # This does duplicate removal in one go.
         # Only use the starts, it saves memory, and anyway the 3' ends are unreliable for duplicate removal if the input has been quality/adapter trimmed
