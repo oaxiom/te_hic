@@ -127,6 +127,8 @@ def collect_valid_pairs(
 
         # criteria1: Check the distance between the two reads
         dist = max([abs(read1.reference_start - read2.reference_end), abs(read1.reference_end - read2.reference_start)])
+
+        # save the < minimum distance reads in case the user is interested in them.
         if dist < min_dist:
             reject_too_close += 1
             left_min = min(read1.reference_start, read2.reference_end)
@@ -197,7 +199,7 @@ def collect_valid_pairs(
     ret = subprocess.run(f"wc {temp_filename}.sorted", shell=True, capture_output=True).stdout.decode()
     ret = int(str(ret).strip().split(' ')[0])
     logger.info('    [Sorted, unique after full duplicate removal]')
-    logger.info('    Kept long-range (>20kb)   : {:,} ({:.2%})'.format(ret,  ret/stats_total_reads))
+    logger.info('    Kept reads                : {:,} ({:.2%})'.format(ret,  ret/stats_total_reads))
 
     return f"{temp_filename}.sorted"
 
