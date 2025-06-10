@@ -10,7 +10,7 @@ class measure_contacts:
         bed,
         window,
         outfile,
-        threshold=1, # in reads;
+        threshold: int = 1, # in reads;
         **kargs):
         '''
         Measure the contacts between a BED file
@@ -86,6 +86,7 @@ class measure_contacts:
         self.logger.info('Histogram of contacts:')
         tot = sum(i for i in h[0])
         perc = [i/tot*100 for i in h[0]]
+
         for v, b, p in zip(h[0], h[1], perc):
             if int(b) == hist_max-1:
                 if int(b) == 1:
@@ -107,7 +108,8 @@ class measure_contacts:
 
         oh.close()
 
-        return
+        # output for contact_zscore_cov
+        return zip(h[0], h[1])
 
     def bed_to_genespromoter(self,
         reads,
