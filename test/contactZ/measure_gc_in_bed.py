@@ -35,8 +35,8 @@ for line in input:
     perc_gc = int(perc_gc * 10)
     perc_gc *= 10
 
-    print(f'chr{chrom}:{l}-{r}', perc_gc)
-    print(seq)
+    #print(f'chr{chrom}:{l}-{r}', perc_gc)
+    #print(seq)
 
     output.write(f'{chrom}\t{l}\t{r}\t-\t{perc_gc}\n')
 
