@@ -35,6 +35,8 @@ def prepare_parser():
     # Optional:
     optional = parser._action_groups.pop()
     optional.add_argument('-w', '--window', action='store', type=int, default=defaults['-w'], required=False, help='Window size (in base pairs) to look around the BED, default={}'.format(defaults['-w']))
+    optional.add_argument('--gc', action='store_true', default=False, required=False, help='Enforce GC normalisation of the background')
+
 
     required = parser.add_argument_group('required arguments')
 
@@ -88,7 +90,7 @@ def main():
     log.info('Getting a shuffled background')
     shuffled_contacts, shuffled_peak_len_in_bp, shuffled_len_peaks = te_hic.bed_to_bed(
         reads=args.inreadsbedpe,
-        bed=cZ.generate_matched_random(args.inpeaksbed[0]),
+        bed=cZ.generate_matched_random(args.inpeaksbed[0], GC=args.gc),
         window=args.window,
         outfile=None,
         threshold=1,

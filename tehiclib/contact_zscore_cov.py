@@ -136,11 +136,50 @@ class contact_z_score_cov:
 
         return peaks, peaklen, len_peaks
 
-    def generate_matched_random(self, bed_file) -> dict:
+    def __generate_matched_random_GC(self, peaks, peak_len_in_bp, len_peaks, GC=False) -> dict:
         """
         **Emulate bedtools shuf, but without a genome file;
         """
         peaks, peak_len_in_bp, len_peaks = self.__load_bed(bed_file)
+
+        rand_peaks = {}
+        for chrom in peaks:
+            rand_peaks[chrom] = []
+
+            for peak in peaks[chrom]:
+                # get a peak from the background randon;
+                rand_peak = random.choice(self.data['randoms'][chrom])
+                # resize to same size
+                psz = peak[1] - peak[0]
+                if GC: # Will give an error for a BED file with no GC.
+                    gc = float(peak[4])
+
+                rand_peak = (rand_peak, rand_peak + psz)
+                rand_peaks[chrom].append((rand_peak, gc))
+
+        # check the new_peak_len_in_bp
+        new_peak_len_in_bp = 0
+        new_len_peaks = 0
+        for chrom in rand_peaks:
+            for peak in rand_peaks[chrom]:
+                new_peak_len_in_bp += peak[1] - peak[0]
+
+            new_len_peaks += len(rand_peaks[chrom])
+
+        self.logger.info('Shuffled BED, sanity check:')
+        self.logger.info(f'Number of bp in peaks: {peak_len_in_bp} = {new_peak_len_in_bp}')
+        self.logger.info(f'Number of peaks: {len_peaks} = {new_len_peaks}')
+
+        return dict(peaks=rand_peaks, peak_len_in_bp=new_peak_len_in_bp, len_peaks=new_len_peaks)
+
+    def generate_matched_random(self, bed_file, GC=False) -> dict:
+        """
+        **Emulate bedtools shuf, but without a genome file;
+        """
+        peaks, peak_len_in_bp, len_peaks = self.__load_bed(bed_file)
+
+        if GC:
+            return self.__generate_matched_random_GC(peaks, peak_len_in_bp, len_peaks)
 
         rand_peaks = {}
         for chrom in peaks:
