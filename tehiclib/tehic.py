@@ -169,10 +169,3 @@ class te_hic:
             os.remove(self.mapped_pairs_temp_file) # not needed anymore
 
         return True
-
-    def shuffle_bed(self, bed_file):
-        """
-        **Emulate bedtools shuf, but without a genome file;
-        """
-        # load the bed;
-        with open ()

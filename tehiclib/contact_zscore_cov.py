@@ -9,14 +9,17 @@ import os
 import sys
 import glob
 import pickle
+import gzip
 import numpy
+import random
 from scipy.stats import zscore
 #import pandas as pd
 from matplotlib import pyplot as plot
 
 class contact_z_score_cov:
-    def __init__(self):
+    def __init__(self, logger):
         self.data = self.load_data()
+        self.logger = logger
 
     def load_data(self) -> dict:
         data_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/all_data.pkl')
@@ -29,7 +32,8 @@ class contact_z_score_cov:
                         bed_contact_list,
                         number_of_peaks,
                         peaklen,
-                        label
+                        label,
+                        random_background,
                         ):
         """
         **Purpose**
@@ -37,20 +41,14 @@ class contact_z_score_cov:
 
             This can be called multiple times to add multiple BED files;
         """
-        # get the
+        # convert the dict to list;
         real = [bed_contact_list[i] for i in sorted(bed_contact_list.keys())]
-
-        print(real)
-        print(peaklen)
+        rand = [random_background[i] for i in sorted(random_background.keys())]
 
         # simulate background...
-        self.data['reals'][f'{label} (User)'] = real
-        self.data['peaklens'][f'{label} (User)'] = peaklen
-
-        # How to estiamte this?
-        self.data['bkgds'][f'{label} (User)'] = real
-
-        print(self.data['reals'])
+        self.data['reals'][f'{label} (Insert)'] = real
+        self.data['peaklens'][f'{label} (Insert)'] = peaklen
+        self.data['bkgds'][f'{label} (Insert)'] = rand
 
     def _plot_peak_length_histo(self):
         import seaborn as sns
@@ -69,11 +67,12 @@ class contact_z_score_cov:
         Calculate contact_Z versus peak length data, for background comparison versus your
         BED file;
         """
-        self.chip_data_names = sorted(self.data['bkgds'].keys())
+        self.chip_data_names = sorted(self.data['reals'].keys())
         self.peaklens = [self.data['peaklens'][chip] for chip in self.chip_data_names]
         ## mean of the background
-        t_backgrnd = numpy.array([self.data['bkgds'][chip][10:15] for chip in self.chip_data_names])
-        t_contacts = numpy.array([self.data['reals'][chip][10:15] for chip in self.chip_data_names])
+        t_backgrnd = numpy.array([self.data['bkgds'][chip][10:18] for chip in self.chip_data_names])
+        t_contacts = numpy.array([self.data['reals'][chip][10:18] for chip in self.chip_data_names])
+        #print(t_backgrnd, t_contacts)
         # normalization, (real-pseudo)/total length
         normed = t_contacts - t_backgrnd
         peaklens = numpy.array([self.data['peaklens'][chip] for chip in self.chip_data_names])
@@ -97,22 +96,94 @@ class contact_z_score_cov:
         #print(len(self.peaklens), self.peaklens)
         #print(len(self.zscore), self.zscore)
 
-        ax.scatter(self.peaklens, self.zscore, alpha=0.3, color='lightgrey')
+        spot_cols = []
+        for n, x, y in zip(self.chip_data_names, self.peaklens, self.zscore):
+            if '(Insert)' in n:
+                spot_cols.append('tab:red')
+                self.logger.info(f'The predicted contact Z-score for {n} is {y:.2f}')
+            elif y >= 0.6: spot_cols.append('tab:green')
+            elif y <= -0.7: spot_cols.append('tab:blue')
+            else: spot_cols.append('lightgrey')
+
+        ax.scatter(self.peaklens, self.zscore, alpha=0.3, color=spot_cols)
 
         # plot a few landmarks:
-        lands = set(['SMARCA4', 'MAFK', 'EZH2', 'KDM4A', 'CTCF', 'RAD21'])
+        lands = set(['SMARCA4', 'MAFK', 'KDM4A', 'CTCF', 'RAD21'])
         for n, x, y in zip(self.chip_data_names, self.peaklens, self.zscore):
             n = n.split('_')[0]
             if n in lands:
                 ax.text(x, y, n, ha='center', va='center', fontsize=6)
-            elif '(User)' in n:
+            elif '(Insert)' in n:
                 ax.text(x, y, n, ha='center', va='center', fontsize=6)
 
         ax.axhline(0, lw=0.5, color='grey')
         ax.axhline(0.6, ls=':', lw=0.5, color='grey')
-        ax.axhline(-0.5, ls=':', lw=0.5, color='grey')
+        ax.axhline(-0.7, ls=':', lw=0.5, color='grey')
+
+        ax.set_xlabel('Contact Z-score')
+        ax.set_ylabel('Number of bp in peaks')
 
         fig.savefig(filename)
+
+    def __load_bed(self, filename):
+        # Not the same as measure_contacs.__load_bed
+        if '.gz' in filename:
+            bedin = gzip.open(filename, 'rt')
+        else:
+            bedin = open(filename, 'rt')
+
+        # read all the BED peaks in, and set up the storage container
+        peaklen = 0 # number of base pairs occupied by the peaks;
+        peaks = {}
+        for len_peaks, peak in enumerate(bedin):
+            peak = peak.strip().split('\t')
+
+            chrom = peak[0]
+
+            if chrom not in peaks:
+                peaks[chrom] = []
+
+            l = int(peak[1])
+            r = int(peak[2])
+            peaklen += r - l
+
+            peaks[chrom].append((l, r))
+        bedin.close()
+
+        return peaks, peaklen, len_peaks
+
+    def generate_matched_random(self, bed_file) -> dict:
+        """
+        **Emulate bedtools shuf, but without a genome file;
+        """
+        peaks, peak_len_in_bp, len_peaks = self.__load_bed(bed_file)
+
+        rand_peaks = {}
+        for chrom in peaks:
+            rand_peaks[chrom] = []
+
+            for peak in peaks[chrom]:
+                # get a peak from the background randon;
+                rand_peak = random.choice(self.data['randoms'][chrom])
+                # resize to same size
+                psz = peak[1] - peak[0]
+                rand_peak = (rand_peak, rand_peak + psz)
+                rand_peaks[chrom].append(rand_peak)
+
+        # check the new_peak_len_in_bp
+        new_peak_len_in_bp = 0
+        new_len_peaks = 0
+        for chrom in rand_peaks:
+            for peak in rand_peaks[chrom]:
+                new_peak_len_in_bp += peak[1] - peak[0]
+
+            new_len_peaks += len(rand_peaks[chrom])
+
+        self.logger.info('Shuffled BED, sanity check:')
+        self.logger.info(f'Number of bp in peaks: {peak_len_in_bp} = {new_peak_len_in_bp}')
+        self.logger.info(f'Number of peaks: {len_peaks} = {new_len_peaks}')
+
+        return dict(peaks=rand_peaks, peak_len_in_bp=new_peak_len_in_bp, len_peaks=new_len_peaks)
 
 if __name__ == '__main__':
     # tester.

@@ -35,9 +35,6 @@ def prepare_parser():
     # Optional:
     optional = parser._action_groups.pop()
     optional.add_argument('-w', '--window', action='store', type=int, default=defaults['-w'], required=False, help='Window size (in base pairs) to look around the BED, default={}'.format(defaults['-w']))
-    optional.add_argument('-t', '--threshold', action='store', type=int, default=defaults['-t'], required=False, help='Thresold (in reads) to call a contact default={}'.format(defaults['-t']))
-
-    #optional.add_argument('-g', '--genome', nargs=1, required=False, help='Optional, but requried if "tes" or "genes" in --mode. Genome assembly to use, valid genomes: {}'.format(tehiclib.common.valid_assemblies))
 
     required = parser.add_argument_group('required arguments')
 
@@ -74,7 +71,6 @@ def main():
     log.info('  inpeaksbed: %s' % args.inpeaksbed)
     log.info('  label: %s' % args.label)
     log.info('  window: %s' % args.window)
-    log.info('  threshold: {0} reads'.format(args.threshold))
 
     te_hic = tehiclib.measure_contacts(logger=log)
     contacts, peaklen, len_peaks = te_hic.bed_to_bed(
@@ -82,23 +78,24 @@ def main():
         bed=args.inpeaksbed[0],
         window=args.window,
         outfile=f'{args.label}.out.tsv',
-        threshold=args.threshold,
+        threshold=1,
         )
+
+    cZ = tehiclib.contact_z_score_cov(logger=log)
 
     # I need a few randoms here;
     log.info('Getting a shuffled background')
-    shuffled_bed = te_hic.shuffle_bed(args.inreadsbedpe[0])
-    contacts, peaklen, len_peaks = te_hic.bed_to_bed(
+
+    shuffled_contacts, shuffled_peak_len_in_bp, shuffled_len_peaks = te_hic.bed_to_bed(
         reads=args.inreadsbedpe[0],
-        bed=shuffled_bed,
+        bed=cZ.generate_matched_random(args.inpeaksbed[0]),
         window=args.window,
         outfile=None,
-        threshold=args.threshold,
+        threshold=1,
         __silent=True,
         )
 
-    cZ = tehiclib.contact_z_score_cov()
-    cZ.insert_contacts(contacts, len_peaks, peaklen, args.label)
+    cZ.insert_contacts(contacts, len_peaks, peaklen, args.label, shuffled_contacts)
     cZ.calc_contact_Z()
 
     # plots;

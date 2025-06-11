@@ -5,28 +5,11 @@ class measure_contacts:
     def __init__(self, logger):
         self.logger = logger
 
-    def bed_to_bed(self,
-        reads,
-        bed,
-        window,
-        outfile,
-        threshold: int = 1, # in reads;
-        __silent:bool = False,
-        **kargs):
-        '''
-        Measure the contacts between a BED file
-
-        '''
-
-        if '.gz' in reads:
-            readsin = gzip.open(reads, 'rt')
+    def __load_bed(self, filename, window):
+        if '.gz' in filename:
+            bedin = gzip.open(filename, 'rt')
         else:
-            readsin = open(reads, 'rt')
-
-        if '.gz' in bed:
-            bedin = gzip.open(bed, 'rt')
-        else:
-            bedin = open(bed, 'rt')
+            bedin = open(filename, 'rt')
 
         # read all the BED peaks in, and set up the storage container
         peaklen = 0 # number of base pairs occupied by the peaks;
@@ -52,7 +35,35 @@ class measure_contacts:
             peaks[chrom].append(loc)
         bedin.close()
 
+        return peaks, peaklen, len_peaks
+
+    def bed_to_bed(self,
+        reads,
+        bed,
+        window,
+        outfile,
+        threshold: int = 1, # in reads;
+        __silent:bool = False,
+        **kargs):
+        '''
+        Measure the contacts between a BED file
+
+        '''
+        if isinstance(bed, str):
+            peaks, peaklen, len_peaks = self.__load_bed(bed, window)
+        elif isinstance(bed, dict):
+            peaks = bed['peaks']
+            peaklen = bed['peak_len_in_bp']
+            len_peaks = bed['len_peaks']
+        else:
+            raise AssertionError('bed is not a filename or a dict')
+
         if not __silent: self.logger.info('Found {0:,} BED peaks'.format(len_peaks))
+
+        if '.gz' in reads:
+            readsin = gzip.open(reads, 'rt')
+        else:
+            readsin = open(reads, 'rt')
 
         store = {}
 
@@ -80,8 +91,7 @@ class measure_contacts:
                 pass # chrom is not in peaks, but is in reads
 
             if (idx+1) % 1e6 == 0:
-                self.logger.info('{0:,} reads processed'.format(idx+1))
-                #break
+                if not __silent: self.logger.info('{0:,} reads processed'.format(idx+1))
 
         readsin.close()
 
@@ -96,11 +106,11 @@ class measure_contacts:
         for v, b, p in zip(h[0], h[1], perc):
             if int(b) == hist_max-1:
                 if int(b) == 1:
-                    self.logger.info('  {1} ({2:.1f}%) contacts have {0}+ read'.format(int(b), v, p))
+                    if not __silent: self.logger.info('  {1} ({2:.1f}%) contacts have {0}+ read'.format(int(b), v, p))
                 else:
-                    self.logger.info('  {1} ({2:.1f}%) contacts have {0}+ reads'.format(int(b), v, p))
+                    if not __silent: self.logger.info('  {1} ({2:.1f}%) contacts have {0}+ reads'.format(int(b), v, p))
             else:
-                self.logger.info('  {1} ({2:.1f}%) contacts have {0} reads'.format(int(b), v, p))
+                if not __silent: self.logger.info('  {1} ({2:.1f}%) contacts have {0} reads'.format(int(b), v, p))
 
         if outfile:
             oh = gzip.open(outfile, 'wt')
@@ -110,10 +120,9 @@ class measure_contacts:
                     oh.write('{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n'.format(contact[0], contact[1], contact[1]+window,
                         contact[2], contact[3], contact[3]+window,
                         store[contact]))
+            oh.close()
 
-        if not __silent: self.logger.info('Saved {0}'.format(outfile))
-
-        oh.close()
+            if not __silent: self.logger.info('Saved {0}'.format(outfile))
 
         # output for contact_zscore_cov
         return dict(zip([int(i) for i in h[1]], h[0])), peaklen, len_peaks
