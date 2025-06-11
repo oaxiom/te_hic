@@ -86,7 +86,7 @@ def main():
     args.label = args.label[0]
     args.inreadsbedpe = args.inreadsbedpe[0]
 
-    log.info('getContacts')
+    log.info('contactZ')
     log.info('Arguments:')
     log.info('  inreadsbedpe: %s' % args.inreadsbedpe)
     log.info('  inpeaksbed: %s' % args.inpeaksbed)
