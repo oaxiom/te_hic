@@ -4,6 +4,7 @@ import sys
 import os
 import argparse
 import logging
+import gzip
 
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
@@ -18,7 +19,7 @@ def prepare_parser():
         '-t': 1
     }
 
-    exmp = 'Example usage: generateMatchingGC -c peaks.bed -o peaks.gc.bed.gz'
+    exmp = 'Example usage: generateMatchingGC -p peaks.bed[.gz] -o peaks.gc.bed.gz'
 
     description = '''
     Generate a BED peak file wityh a (roughly) matching GC content.
@@ -60,17 +61,21 @@ def main():
     args = parser.parse_args()
 
     log = parser.log
-    args.label = args.label[0]
-    args.inreadsbedpe = args.inreadsbedpe[0]
+    args.inpeaksbed = args.inpeaksbed[0] # There's an easier way to do this.. I can't remember though.
+    args.outpeaksbed = args.outpeaksbed[0]
 
     log.info('generateMatchingGC')
     log.info('Arguments:')
     log.info('  inpeaksbed: %s' % args.inpeaksbed)
 
-    coords = cZ.generate_matched_random(args.inpeaksbed[0], GC=args.gc)
+    cZ = tehiclib.contact_z_score_cov(logger=log)
+    coords = cZ.generate_matched_random(args.inpeaksbed, GC=True)
 
-
-
+    # save out as a BED;
+    with gzip.open(args.outpeaksbed, 'wt') as oh:
+        for chrom in coords['peaks']:
+            for peak in coords['peaks'][chrom]:
+                oh.write(f'{chrom}\t{peak[0]}\t{peak[1]}\n')
     return
 
 
