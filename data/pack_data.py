@@ -18,6 +18,7 @@ def open_intracon_file(filename):
 def load_intercons(path):
     con = {}
     for f in glob.glob(path):
+        # I use 1 random here, whereas Liyang used 10 randoms in the paper.
         name = os.path.split(f)[1].replace('hesc_primed_', '').replace('.intracon_num.txt', '').split('.')[0]
         dat = open_intracon_file(f)
         con[name] = dat
