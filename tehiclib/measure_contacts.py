@@ -97,21 +97,42 @@ class measure_contacts:
         readsin.close()
 
         # Work out histogram;
-        hist_max = 21
+        # And save to _intraconv.txt format;
+        hist_max = 101
         all_scores = list(store.values())
         h = numpy.histogram(all_scores, range=[1,hist_max], bins=hist_max-1)
         if not _silent: self.logger.info('Histogram of contacts:')
         tot = sum(i for i in h[0])
         perc = [i/tot*100 for i in h[0]]
 
+        if outfile:
+            if outfile.endswith('.tsv.gz'):
+                intracon_file = outfile.replace('.tsv.gz', '.intracon_num.txt')
+                intracon_out = open(intracon_file, 'wt')
+            else:
+                intracon_file = outfile.replace('.tsv', '.intracon_num.txt')
+                intracon_out = open(intracon_file, 'wt')
+            intracon_out.write(f'# {outfile}\n')
+            intracon_out.write(f'# number of intra-chromosomal loops, threshold 3 read to 101 reads\n')
+
         for v, b, p in zip(h[0], h[1], perc):
-            if int(b) == hist_max-1:
+            if int(b) >= 3 and outfile:
+                intracon_out.write(f'{int(b)}\t{v}\n')
+
+            if int(b) == 21: # Just show the first 21, but save 100 out.
                 if int(b) == 1:
                     if not _silent: self.logger.info('  {1} ({2:.1f}%) contacts have {0}+ read'.format(int(b), v, p))
                 else:
                     if not _silent: self.logger.info('  {1} ({2:.1f}%) contacts have {0}+ reads'.format(int(b), v, p))
+            elif int(b) > 21:
+                pass
             else:
                 if not _silent: self.logger.info('  {1} ({2:.1f}%) contacts have {0} reads'.format(int(b), v, p))
+
+        if outfile:
+            intracon_out.close()
+
+        if not _silent: self.logger.info(f'Saved {intracon_file}')
 
         if outfile:
             oh = gzip.open(outfile, 'wt')
@@ -241,6 +262,7 @@ class measure_contacts:
         readsin.close()
 
         # Work out histogram;
+
         hist_max = 21
         all_scores = list(store.values())
         h = numpy.histogram(all_scores, range=[1,hist_max], bins=hist_max-1)
