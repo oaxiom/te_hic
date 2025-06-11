@@ -4,3 +4,9 @@ testout.tsv.gz
 *.annotation.gtf.gz
 *_rmsk.txt.gz
 *.glb
+*.pdf
+*.clean
+*_te_genome_freqs.tsv
+*.annotation.txt.gz
+*.rmsk.txt.gz
+*.chromSizes.gz

@@ -50,17 +50,6 @@ class contact_z_score_cov:
         self.data['peaklens'][f'{label} (Insert)'] = peaklen
         self.data['bkgds'][f'{label} (Insert)'] = rand
 
-    def _plot_peak_length_histo(self):
-        import seaborn as sns
-
-        ## distribution of peak length
-        plt.figure(figsize=(9,4), dpi=300)
-        sns.displot(data=peaklen,bins=40,alpha=0.5,kde=True)
-        plt.xlabel('Total peak length')
-        plt.tight_layout()
-        plt.savefig('human_peaklen_hist.pdf')
-        plt.close()
-
     def calc_contact_Z(self):
         """
         **Purpose**
@@ -102,7 +91,7 @@ class contact_z_score_cov:
         ax.scatter(self.peaklens, self.zscore, alpha=0.3, color=spot_cols)
 
         # plot a few landmarks:
-        lands = set(['SMARCA4', 'MAFK', 'KDM4A', 'CTCF', 'RAD21'])
+        lands = set(['SMARCA4', 'KDM4A', 'CTCF', 'RAD21'])
         for n, x, y in zip(self.chip_data_names, self.peaklens, self.zscore):
             n = n.split('_')[0]
             if n in lands:
