@@ -64,6 +64,7 @@ def main():
 
     log = parser.log
     args.label = args.label[0]
+    args.inreadsbedpe = args.inreadsbedpe[0]
 
     log.info('getContacts')
     log.info('Arguments:')
@@ -74,7 +75,7 @@ def main():
 
     te_hic = tehiclib.measure_contacts(logger=log)
     contacts, peaklen, len_peaks = te_hic.bed_to_bed(
-        reads=args.inreadsbedpe[0],
+        reads=args.inreadsbedpe,
         bed=args.inpeaksbed[0],
         window=args.window,
         outfile=f'{args.label}.out.tsv',
@@ -85,14 +86,13 @@ def main():
 
     # I need a few randoms here;
     log.info('Getting a shuffled background')
-
     shuffled_contacts, shuffled_peak_len_in_bp, shuffled_len_peaks = te_hic.bed_to_bed(
-        reads=args.inreadsbedpe[0],
+        reads=args.inreadsbedpe,
         bed=cZ.generate_matched_random(args.inpeaksbed[0]),
         window=args.window,
         outfile=None,
         threshold=1,
-        __silent=True,
+        _silent=True,
         )
 
     cZ.insert_contacts(contacts, len_peaks, peaklen, args.label, shuffled_contacts)

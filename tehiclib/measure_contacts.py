@@ -43,7 +43,7 @@ class measure_contacts:
         window,
         outfile,
         threshold: int = 1, # in reads;
-        __silent:bool = False,
+        _silent:bool = False,
         **kargs):
         '''
         Measure the contacts between a BED file
@@ -58,7 +58,7 @@ class measure_contacts:
         else:
             raise AssertionError('bed is not a filename or a dict')
 
-        if not __silent: self.logger.info('Found {0:,} BED peaks'.format(len_peaks))
+        if not _silent: self.logger.info('Found {0:,} BED peaks'.format(len_peaks))
 
         if '.gz' in reads:
             readsin = gzip.open(reads, 'rt')
@@ -91,7 +91,7 @@ class measure_contacts:
                 pass # chrom is not in peaks, but is in reads
 
             if (idx+1) % 1e6 == 0:
-                if not __silent: self.logger.info('{0:,} reads processed'.format(idx+1))
+                if not _silent: self.logger.info('{0:,} reads processed'.format(idx+1))
 
         readsin.close()
 
@@ -99,18 +99,18 @@ class measure_contacts:
         hist_max = 21
         all_scores = list(store.values())
         h = numpy.histogram(all_scores, range=[1,hist_max], bins=hist_max-1)
-        if not __silent: self.logger.info('Histogram of contacts:')
+        if not _silent: self.logger.info('Histogram of contacts:')
         tot = sum(i for i in h[0])
         perc = [i/tot*100 for i in h[0]]
 
         for v, b, p in zip(h[0], h[1], perc):
             if int(b) == hist_max-1:
                 if int(b) == 1:
-                    if not __silent: self.logger.info('  {1} ({2:.1f}%) contacts have {0}+ read'.format(int(b), v, p))
+                    if not _silent: self.logger.info('  {1} ({2:.1f}%) contacts have {0}+ read'.format(int(b), v, p))
                 else:
-                    if not __silent: self.logger.info('  {1} ({2:.1f}%) contacts have {0}+ reads'.format(int(b), v, p))
+                    if not _silent: self.logger.info('  {1} ({2:.1f}%) contacts have {0}+ reads'.format(int(b), v, p))
             else:
-                if not __silent: self.logger.info('  {1} ({2:.1f}%) contacts have {0} reads'.format(int(b), v, p))
+                if not _silent: self.logger.info('  {1} ({2:.1f}%) contacts have {0} reads'.format(int(b), v, p))
 
         if outfile:
             oh = gzip.open(outfile, 'wt')
@@ -122,7 +122,7 @@ class measure_contacts:
                         store[contact]))
             oh.close()
 
-            if not __silent: self.logger.info('Saved {0}'.format(outfile))
+            if not _silent: self.logger.info('Saved {0}'.format(outfile))
 
         # output for contact_zscore_cov
         return dict(zip([int(i) for i in h[1]], h[0])), peaklen, len_peaks
