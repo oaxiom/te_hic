@@ -136,11 +136,39 @@ class contact_z_score_cov:
 
         return peaks, peaklen, len_peaks
 
-    def __generate_matched_random_GC(self, peaks, peak_len_in_bp, len_peaks, GC=False) -> dict:
+    def __load_bed_GC(self, filename):
+        # Not the same as measure_contacs.__load_bed
+        if '.gz' in filename:
+            bedin = gzip.open(filename, 'rt')
+        else:
+            bedin = open(filename, 'rt')
+
+        # read all the BED peaks in, and set up the storage container
+        peaklen = 0 # number of base pairs occupied by the peaks;
+        peaks = {}
+        for len_peaks, peak in enumerate(bedin):
+            peak = peak.strip().split('\t')
+
+            chrom = peak[0]
+
+            if chrom not in peaks:
+                peaks[chrom] = []
+
+            l = int(peak[1])
+            r = int(peak[2])
+            gc = int(peak[4])
+            peaklen += r - l
+
+            peaks[chrom].append((l, r, gc))
+        bedin.close()
+
+        return peaks, peaklen, len_peaks
+
+    def __generate_matched_random_GC(self, bed_file) -> dict:
         """
         **Emulate bedtools shuf, but without a genome file;
         """
-        peaks, peak_len_in_bp, len_peaks = self.__load_bed(bed_file)
+        peaks, peak_len_in_bp, len_peaks = self.__load_bed_GC(bed_file)
 
         rand_peaks = {}
         for chrom in peaks:
@@ -148,14 +176,13 @@ class contact_z_score_cov:
 
             for peak in peaks[chrom]:
                 # get a peak from the background randon;
-                rand_peak = random.choice(self.data['randoms'][chrom])
+                gc = peak[2]
+                rand_peak = random.choice(self.data['randoms_gc'][gc][chrom])
                 # resize to same size
                 psz = peak[1] - peak[0]
-                if GC: # Will give an error for a BED file with no GC.
-                    gc = float(peak[4])
 
                 rand_peak = (rand_peak, rand_peak + psz)
-                rand_peaks[chrom].append((rand_peak, gc))
+                rand_peaks[chrom].append(rand_peak)
 
         # check the new_peak_len_in_bp
         new_peak_len_in_bp = 0
@@ -176,10 +203,10 @@ class contact_z_score_cov:
         """
         **Emulate bedtools shuf, but without a genome file;
         """
-        peaks, peak_len_in_bp, len_peaks = self.__load_bed(bed_file)
-
         if GC:
-            return self.__generate_matched_random_GC(peaks, peak_len_in_bp, len_peaks)
+            return self.__generate_matched_random_GC(bed_file)
+
+        peaks, peak_len_in_bp, len_peaks = self.__load_bed(bed_file)
 
         rand_peaks = {}
         for chrom in peaks:

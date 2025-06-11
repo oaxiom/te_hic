@@ -1,5 +1,6 @@
 
-import os, gzip
+import os
+import gzip
 
 from . import common
 from .collect_valid_pairs import collect_valid_pairs, save_valid_pairs

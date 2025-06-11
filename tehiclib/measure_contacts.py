@@ -1,5 +1,6 @@
 
-import gzip, numpy
+import gzip
+import numpy
 
 class measure_contacts:
     def __init__(self, logger):
