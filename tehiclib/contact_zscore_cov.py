@@ -87,14 +87,8 @@ class contact_z_score_cov:
         **Purpose**
 
         """
-        #if not self.done:
-        #    print('No added BED file. Analysis is incomplete')
-
         fig = plot.figure()
         ax = fig.add_subplot(111)
-
-        #print(len(self.peaklens), self.peaklens)
-        #print(len(self.zscore), self.zscore)
 
         spot_cols = []
         for n, x, y in zip(self.chip_data_names, self.peaklens, self.zscore):
@@ -120,8 +114,8 @@ class contact_z_score_cov:
         ax.axhline(0.6, ls=':', lw=0.5, color='grey')
         ax.axhline(-0.7, ls=':', lw=0.5, color='grey')
 
-        ax.set_xlabel('Contact Z-score')
-        ax.set_ylabel('Number of bp in peaks')
+        ax.set_ylabel('Contact Z-score')
+        ax.set_xlabel('Number of bp in peaks')
 
         fig.savefig(filename)
 
