@@ -6,11 +6,11 @@ import os
 
 from glbase3 import genome
 
-if len(sys.argv) != 1:
-    print('measure_gc_in_bed.py BEDFILE')
+if len(sys.argv) != 2:
+    print('measure_gc_in_bed BEDFILE SEQPATH')
 
 hg38 = genome()
-hg38.bindSequence(os.path.expanduser('~/hg38/seq/'), memorymap=True)
+hg38.bindSequence(os.path.expanduser(sys.argv[2]))
 
 filename = sys.argv[1]
 
