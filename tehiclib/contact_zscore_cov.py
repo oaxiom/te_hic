@@ -84,7 +84,7 @@ class contact_z_score_cov:
             if '(Insert)' in n:
                 spot_cols.append('tab:red')
                 self.logger.info(f'The predicted contact Z-score for {n} is {y:.2f}')
-                ax.set_title(f'The predicted contact Z-score for {n} is {y:.2f}')
+                ax.set_title(f'The predicted contact Z-score for {n.replace("(Insert)", "")} is {y:.2f}')
             elif y >= 0.6: spot_cols.append('tab:green')
             elif y <= -0.7: spot_cols.append('tab:blue')
             else: spot_cols.append('lightgrey')
