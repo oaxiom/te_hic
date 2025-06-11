@@ -17,10 +17,8 @@ def open_intracon_file(filename):
     return cons
 
 def load_intercons(path):
-    files = glob.glob(path)
-
     con = {}
-    for f in files:
+    for f in glob.glob(path):
         name = os.path.split(f)[1].replace('hesc_primed_', '').replace('.intracon_num.txt', '').split('.')[0]
         dat = open_intracon_file(f)
         con[name] = dat
@@ -44,11 +42,16 @@ def load_peaklens(filename):
     #peaklen = dict(pd.read_csv('./cov_ctcf.txt', header=0, sep=' ')[['tf','len']].values)
     return peaklens
 
+def load_randoms(filename):
+    for
+
+
 if __name__ == '__main__':
     all_data = dict(
         reals = load_intercons('./real_con/*.intracon_num.txt'),
-        bkgds = load_intercons('./random_con/*.intracon_num.txt'),
+        bkgds = load_intercons('./random_con/*.intracon_num.txt'), # Liyang's background
         peaklens = load_peaklens('./cov_ctcf.txt'),
+        randoms = load_randoms('./random/*.bed')
     )
 
     with open('./all_data.pkl', 'wb') as oh:

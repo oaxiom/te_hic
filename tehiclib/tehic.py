@@ -43,7 +43,6 @@ class te_hic:
         self.__save_intermediate_files = save_intermediate_files
         self.__script_path = os.path.dirname(os.path.realpath(__file__))
 
-
         oh = open(os.path.join(self.__script_path, f'../genome/{genome}.chromSizes.clean'), 'r')
         self.chrom_sizes = {}
         for line in oh:
@@ -171,3 +170,9 @@ class te_hic:
 
         return True
 
+    def shuffle_bed(self, bed_file):
+        """
+        **Emulate bedtools shuf, but without a genome file;
+        """
+        # load the bed;
+        with open ()

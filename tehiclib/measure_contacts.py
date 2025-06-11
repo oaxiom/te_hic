@@ -11,6 +11,7 @@ class measure_contacts:
         window,
         outfile,
         threshold: int = 1, # in reads;
+        __silent:bool = False,
         **kargs):
         '''
         Measure the contacts between a BED file
@@ -28,6 +29,7 @@ class measure_contacts:
             bedin = open(bed, 'rt')
 
         # read all the BED peaks in, and set up the storage container
+        peaklen = 0 # number of base pairs occupied by the peaks;
         peaks = {}
         for len_peaks, peak in enumerate(bedin):
             peak = peak.strip().split('\t')
@@ -38,15 +40,19 @@ class measure_contacts:
                 peaks[chrom] = []
 
             # We bin the peak to the nearest window
-            cpt = (int(peak[1]) + int(peak[2])) // 2
+            l = int(peak[1])
+            r = int(peak[2])
+            cpt = (l + r) // 2
             bin_left = (cpt // window) * window
+
+            peaklen += r - l
 
             loc = bin_left
 
             peaks[chrom].append(loc)
         bedin.close()
 
-        self.logger.info('Found {0:,} BED peaks'.format(len_peaks))
+        if not __silent: self.logger.info('Found {0:,} BED peaks'.format(len_peaks))
 
         store = {}
 
@@ -83,7 +89,7 @@ class measure_contacts:
         hist_max = 21
         all_scores = list(store.values())
         h = numpy.histogram(all_scores, range=[1,hist_max], bins=hist_max-1)
-        self.logger.info('Histogram of contacts:')
+        if not __silent: self.logger.info('Histogram of contacts:')
         tot = sum(i for i in h[0])
         perc = [i/tot*100 for i in h[0]]
 
@@ -96,20 +102,21 @@ class measure_contacts:
             else:
                 self.logger.info('  {1} ({2:.1f}%) contacts have {0} reads'.format(int(b), v, p))
 
-        oh = gzip.open(outfile, 'wt')
-        oh.write('{0}\n'.format('\t'.join(['chrom1', 'left1', 'right1', 'chrom2', 'left1', 'right2', 'read_count'])))
-        for contact in store:
-            if store[contact] >= threshold:
-                oh.write('{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n'.format(contact[0], contact[1], contact[1]+window,
-                    contact[2], contact[3], contact[3]+window,
-                    store[contact]))
+        if outfile:
+            oh = gzip.open(outfile, 'wt')
+            oh.write('{0}\n'.format('\t'.join(['chrom1', 'left1', 'right1', 'chrom2', 'left1', 'right2', 'read_count'])))
+            for contact in store:
+                if store[contact] >= threshold:
+                    oh.write('{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n'.format(contact[0], contact[1], contact[1]+window,
+                        contact[2], contact[3], contact[3]+window,
+                        store[contact]))
 
-        self.logger.info('Saved {0}'.format(outfile))
+        if not __silent: self.logger.info('Saved {0}'.format(outfile))
 
         oh.close()
 
         # output for contact_zscore_cov
-        return zip(h[0], h[1])
+        return dict(zip([int(i) for i in h[1]], h[0])), peaklen, len_peaks
 
     def bed_to_genespromoter(self,
         reads,

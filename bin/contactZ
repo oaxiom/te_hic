@@ -23,7 +23,7 @@ from miniglbase3 import glload
 def prepare_parser():
     defaults = {
         '-w': 5000,
-        '-t': 3
+        '-t': 1
         }
 
     exmp = 'Example usage: contactZ -c peaks.bed -i reads.bedpe -n sample_label -g genome'
@@ -47,6 +47,9 @@ def prepare_parser():
 
     parser._action_groups.append(optional)
 
+    logger = logging.getLogger()
+    logger.setLevel(level=logging.INFO)
+
     logging.basicConfig(level=logging.INFO,
                     format='%(levelname)-8s: %(message)s',
                     datefmt='%m-%d %H:%M')
@@ -63,7 +66,7 @@ def main():
     args = parser.parse_args()
 
     log = parser.log
-    args.mode = args.mode[0]
+    args.label = args.label[0]
 
     log.info('getContacts')
     log.info('Arguments:')
@@ -74,16 +77,32 @@ def main():
     log.info('  threshold: {0} reads'.format(args.threshold))
 
     te_hic = tehiclib.measure_contacts(logger=log)
-    contacts = te_hic.bed_to_bed(
+    contacts, peaklen, len_peaks = te_hic.bed_to_bed(
         reads=args.inreadsbedpe[0],
         bed=args.inpeaksbed[0],
         window=args.window,
-        outfile=args.outtsv[0],
+        outfile=f'{args.label}.out.tsv',
         threshold=args.threshold,
         )
 
-    print(contacts)
-    #cZ = tehiclib.
+    # I need a few randoms here;
+    log.info('Getting a shuffled background')
+    shuffled_bed = te_hic.shuffle_bed(args.inreadsbedpe[0])
+    contacts, peaklen, len_peaks = te_hic.bed_to_bed(
+        reads=args.inreadsbedpe[0],
+        bed=shuffled_bed,
+        window=args.window,
+        outfile=None,
+        threshold=args.threshold,
+        __silent=True,
+        )
+
+    cZ = tehiclib.contact_z_score_cov()
+    cZ.insert_contacts(contacts, len_peaks, peaklen, args.label)
+    cZ.calc_contact_Z()
+
+    # plots;
+    cZ.plot_contact_Z_scatter(f'{args.label}.pdf')
 
     return
 

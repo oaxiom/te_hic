@@ -18,29 +18,39 @@ class contact_z_score_cov:
     def __init__(self):
         self.data = self.load_data()
 
-    def load_bed(self,
-                 bed_filename:str,
-                 hic_data_BEDPE:str
-                 ):
+    def load_data(self) -> dict:
+        data_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/all_data.pkl')
+
+        with open(data_filename, 'rb') as data_file:
+            data = pickle.load(data_file)
+        return data
+
+    def insert_contacts(self,
+                        bed_contact_list,
+                        number_of_peaks,
+                        peaklen,
+                        label
+                        ):
         """
         **Purpose**
-            Main entry point. Provide your BED file of genome locations here;
+            insert your custom peak list here;
 
             This can be called multiple times to add multiple BED files;
-
-        **Arguments**
-            bed_filename (Required)
-                The name of the BED file to be loaded.the BED file containing the locations of your peaks;
-
-            hic_data_BEDPE (Required)
-                The BEDPE file containing your list 
         """
-        pass
+        # get the
+        real = [bed_contact_list[i] for i in sorted(bed_contact_list.keys())]
 
-    def load_data(self) -> dict:
-        with open('../data/all_data.pkl', 'rb') as data_filename:
-            data = pickle.load(data_filename)
-        return data
+        print(real)
+        print(peaklen)
+
+        # simulate background...
+        self.data['reals'][f'{label} (User)'] = real
+        self.data['peaklens'][f'{label} (User)'] = peaklen
+
+        # How to estiamte this?
+        self.data['bkgds'][f'{label} (User)'] = real
+
+        print(self.data['reals'])
 
     def _plot_peak_length_histo(self):
         import seaborn as sns
@@ -95,6 +105,12 @@ class contact_z_score_cov:
             n = n.split('_')[0]
             if n in lands:
                 ax.text(x, y, n, ha='center', va='center', fontsize=6)
+            elif '(User)' in n:
+                ax.text(x, y, n, ha='center', va='center', fontsize=6)
+
+        ax.axhline(0, lw=0.5, color='grey')
+        ax.axhline(0.6, ls=':', lw=0.5, color='grey')
+        ax.axhline(-0.5, ls=':', lw=0.5, color='grey')
 
         fig.savefig(filename)
 
