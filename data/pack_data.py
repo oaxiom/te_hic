@@ -56,12 +56,51 @@ def load_randoms(files):
     print(f'Found {loci_loaded} random loci')
     return randoms
 
+def load_randoms_gc(files, fasta):
+    from glbase3 import genome # Need to manipulate FASTA;
+
+    hg38 = genome()
+    hg38.bindSequence(fasta, memorymap=True)
+
+    randoms_by_gc_percent = {0: {}, 10: {}, 20: {}, 30: {}, 40: {}, 50: {}, 60: {}, 70: {}, 80: {}, 90: {}, 100: {}}
+
+    loci_loaded = 0
+    for file in glob.glob(files):
+        with gzip.open(file, 'rt') as oh:
+            for line in oh:
+                line = line.strip().split('\t')
+                chrom = line[0]
+
+                l = int(line[1])
+                r = l + 400
+
+                seq = hg38.getSequence(f'chr{chrom}:{l}-{r}').upper()
+                perc_gc = (seq.count('G') + seq.count('C')) / 400
+                perc_gc = int(perc_gc * 10)
+                perc_gc *= 10
+
+                if chrom not in randoms_by_gc_percent[perc_gc]:
+                    randoms_by_gc_percent[perc_gc][chrom] = []
+                randoms_by_gc_percent[perc_gc][chrom].append(int(line[1])) # I only need one point;
+                loci_loaded += 1
+                if (loci_loaded+1) % 1e4 == 0:
+                    print('{0:,} peaks processed'.format(loci_loaded+1))
+
+    for perc in randoms_by_gc_percent:
+        num_loci_this_perc = 0
+        for chrom in randoms_by_gc_percent[perc]:
+            num_loci_this_perc += len(randoms_by_gc_percent[perc][chrom])
+        print(f'Found {num_loci_this_perc} random loci with GC% {perc}%')
+
+    return randoms_by_gc_percent
+
 if __name__ == '__main__':
     all_data = dict(
         reals = load_intercons('./real_con/*.intracon_num.txt'),
         bkgds = load_intercons('./random_con/*.intracon_num.txt'), # Liyang's background
         peaklens = load_peaklens('./cov_ctcf.txt'),
-        randoms = load_randoms('./randoms/*.bed.gz')
+        randoms = load_randoms('./randoms/*.bed.gz'),
+        randoms_gc = load_randoms_gc('./randoms/*.bed.gz', os.path.expanduser('~/hg38/seq/'))
     )
 
     with open('./all_data.pkl', 'wb') as oh:
