@@ -6,8 +6,13 @@ A very simple counter for
 
 '''
 
-import sys, os, argparse, logging, time
+import sys
+import os
+import argparse
+import logging
+import time
 import pysam
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(script_path, '../'))

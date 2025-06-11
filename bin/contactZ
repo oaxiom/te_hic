@@ -11,13 +11,11 @@ import os
 import argparse
 import logging
 
-script_path = os.path.dirname(os.path.realpath(__file__))
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
+script_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(script_path, '../'))
 import tehiclib
-
-sys.path.append(os.path.join(script_path, '../tehiclib'))
-from miniglbase3 import glload
 
 # Command-line options;
 def prepare_parser():
@@ -46,14 +44,17 @@ def prepare_parser():
 
     parser._action_groups.append(optional)
 
-    logger = logging.getLogger()
-    logger.setLevel(level=logging.INFO)
+    other_logs = logging.getLogger()
+    other_logs.setLevel(logging.CRITICAL)
 
     logging.basicConfig(level=logging.INFO,
                     format='%(levelname)-8s: %(message)s',
                     datefmt='%m-%d %H:%M')
 
-    parser.log = logging.getLogger('contactZ')
+    logger = logging.getLogger('contactZ')
+    logger.setLevel(level=logging.INFO)
+
+    parser.log = logger
 
     return parser
 
