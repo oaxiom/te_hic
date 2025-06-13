@@ -167,16 +167,24 @@ class contact_z_score_cov:
     def __generate_matched_random_GC(self, bed_file) -> dict:
         """
         **Emulate bedtools shuf, but without a genome file;
+        and match GC content
         """
         peaks, peak_len_in_bp, len_peaks = self.__load_bed_GC(bed_file)
 
         rand_peaks = {}
         for chrom in peaks:
             rand_peaks[chrom] = []
+            #chrom = chrom.lstrip('chr')
+            #print(chrom)
 
             for peak in peaks[chrom]:
                 # get a peak from the background randon;
                 gc = peak[2]
+
+                # There are too few loci to get full coverage at these extreme GC contents, so bracket them.
+                if gc < 20: gc = 20
+                if gc > 70: gc = 70
+
                 rand_peak = random.choice(self.data['randoms_gc'][gc][chrom])
                 # resize to same size
                 psz = peak[1] - peak[0]
@@ -195,7 +203,7 @@ class contact_z_score_cov:
 
         self.logger.info('Shuffled BED, sanity check:')
         self.logger.info(f'Number of bp in peaks: {peak_len_in_bp} = {new_peak_len_in_bp}')
-        self.logger.info(f'Number of peaks: {len_peaks} = {new_len_peaks}')
+        self.logger.info(f'Number of peaks: {len_peaks} = {new_len_peaks-1}')
 
         return dict(peaks=rand_peaks, peak_len_in_bp=new_peak_len_in_bp, len_peaks=new_len_peaks)
 

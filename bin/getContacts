@@ -22,7 +22,7 @@ def prepare_parser():
         '-t': 1
         }
 
-    exmp = 'Example usage: [te_hic] getContacts -i in.bam -o out.bam -g genome -m genes_tes'
+    exmp = 'Example usage: [te_hic] getContacts -i in.bedpe -o out.tsv -m mode'
 
     description = ''
 
@@ -39,7 +39,7 @@ def prepare_parser():
     required = parser.add_argument_group('required arguments')
 
     required.add_argument('-i', '--inreadsbedpe', nargs=1, required=True, help='A BEDPE file containing the HiC reads, from one side to the other')
-    required.add_argument('-o', '--outtsv', nargs=1, required=True, help='the TSV file to save the genes and count data to')
+    required.add_argument('-o', '--outtsv', nargs=1, required=True, help='the TSV file to save the output')
     required.add_argument('-m', '--mode', nargs=1, required=True, help='Type of annotation to use, valid modes: {}'.format(tehiclib.common.valid_modes))
 
     parser._action_groups.append(optional)

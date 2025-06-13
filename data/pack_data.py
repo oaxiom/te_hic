@@ -60,6 +60,8 @@ def load_randoms(files):
 def load_randoms_gc(files, fasta):
     from glbase3 import genome # Need to manipulate FASTA;
 
+    peak_size = 200
+
     hg38 = genome()
     hg38.bindSequence(fasta, memorymap=True)
 
@@ -73,12 +75,21 @@ def load_randoms_gc(files, fasta):
                 chrom = line[0]
 
                 l = int(line[1])
-                r = l + 400
+                r = l + peak_size # ~Average peak size for narrow peaks;
 
                 seq = hg38.getSequence(f'chr{chrom}:{l}-{r}').upper()
-                perc_gc = (seq.count('G') + seq.count('C')) / 400
+                perc_gc = (seq.count('G') + seq.count('C')) / peak_size
                 perc_gc = int(perc_gc * 10)
                 perc_gc *= 10
+
+                # There are too few loci to get full coverage at these extreme GC contents, so bracket them.
+
+                if perc_gc < 20: perc_gc = 20
+                if perc_gc > 70: perc_gc = 70
+
+                #if perc_gc == 10:
+                #    print(perc_gc, chrom, l)
+                #    print(seq)
 
                 if chrom not in randoms_by_gc_percent[perc_gc]:
                     randoms_by_gc_percent[perc_gc][chrom] = []
