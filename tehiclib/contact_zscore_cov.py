@@ -34,6 +34,7 @@ class contact_z_score_cov:
                         peaklen,
                         label,
                         random_background,
+                        GC=False,
                         ):
         """
         **Purpose**
@@ -50,6 +51,8 @@ class contact_z_score_cov:
         self.data['peaklens'][f'{label} (Insert)'] = peaklen
         self.data['bkgds'][f'{label} (Insert)'] = rand
 
+        self.GC = GC
+
     def calc_contact_Z(self):
         """
         **Purpose**
@@ -59,7 +62,10 @@ class contact_z_score_cov:
         self.chip_data_names = sorted(self.data['reals'].keys())
         self.peaklens = [self.data['peaklens'][chip] for chip in self.chip_data_names]
         ## mean of the background
-        t_backgrnd = numpy.array([self.data['bkgds'][chip][10:18] for chip in self.chip_data_names])
+        if self.GC:
+            t_backgrnd = numpy.array([self.data['gc_bkgds'][chip][10:18] for chip in self.chip_data_names])
+        else:
+            t_backgrnd = numpy.array([self.data['bkgds'][chip][10:18] for chip in self.chip_data_names])
         t_contacts = numpy.array([self.data['reals'][chip][10:18] for chip in self.chip_data_names])
         #print(t_backgrnd, t_contacts)
         # normalization, (real-pseudo)/total length

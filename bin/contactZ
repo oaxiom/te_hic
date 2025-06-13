@@ -115,7 +115,7 @@ def main():
         _silent=True,
         )
 
-    cZ.insert_contacts(contacts, len_peaks, peaklen, args.label, shuffled_contacts)
+    cZ.insert_contacts(contacts, len_peaks, peaklen, args.label, shuffled_contacts, GC=args.gc)
     cZ.calc_contact_Z()
 
     # plots;

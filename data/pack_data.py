@@ -112,7 +112,10 @@ if __name__ == '__main__':
         bkgds = load_intercons('./random_con/*.intracon_num.txt'), # Liyang's background
         peaklens = load_peaklens('./cov_ctcf.txt'),
         randoms = load_randoms('./randoms/*.bed.gz'),
-        randoms_gc = load_randoms_gc('./randoms/*.bed.gz', os.path.expanduser('~/hg38/seq/'))
+        randoms_gc = load_randoms_gc('./randoms/*.bed.gz', os.path.expanduser('~/hg38/seq/')),
+        # Intracons generated using matched GC bacgrounds
+        #gc_reals = load_intercons('./real_con/*.intracon_num.txt'),
+        gc_bkgds = load_intercons('./gc_random_con/*.intracon_num.txt'),
     )
 
     with open('./all_data.pkl', 'wb') as oh:
