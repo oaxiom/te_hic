@@ -49,7 +49,10 @@ class contact_z_score_cov:
         # simulate background...
         self.data['reals'][f'{label} (Insert)'] = real
         self.data['peaklens'][f'{label} (Insert)'] = peaklen
-        self.data['bkgds'][f'{label} (Insert)'] = rand
+        if GC:
+            self.data['gc_bkgds'][f'{label} (Insert)'] = rand
+        else:
+            self.data['bkgds'][f'{label} (Insert)'] = rand
 
         self.GC = GC
 
@@ -61,11 +64,13 @@ class contact_z_score_cov:
         """
         self.chip_data_names = sorted(self.data['reals'].keys())
         self.peaklens = [self.data['peaklens'][chip] for chip in self.chip_data_names]
+
         ## mean of the background
         if self.GC:
             t_backgrnd = numpy.array([self.data['gc_bkgds'][chip][10:18] for chip in self.chip_data_names])
         else:
             t_backgrnd = numpy.array([self.data['bkgds'][chip][10:18] for chip in self.chip_data_names])
+
         t_contacts = numpy.array([self.data['reals'][chip][10:18] for chip in self.chip_data_names])
         #print(t_backgrnd, t_contacts)
         # normalization, (real-pseudo)/total length
@@ -77,6 +82,13 @@ class contact_z_score_cov:
         self.zscore = zscore(normed)
         self.zscore = numpy.mean(self.zscore, axis=1)
 
+    def __quartiles(self, data):
+        # Calculate quartiles
+        Q1 = numpy.quantile(data, 0.25)
+        Q3 = numpy.quantile(data, 0.75)
+
+        return Q1, Q3
+
     def plot_contact_Z_scatter(self, filename):
         """
         **Purpose**
@@ -85,35 +97,50 @@ class contact_z_score_cov:
         fig = plot.figure()
         ax = fig.add_subplot(111)
 
+        # quartiles
+        Q1, Q3 = self.__quartiles(self.zscore)
+        self.logger.info(f"First Quartile ({Q1:.2f}):")
+        self.logger.info(f"Third Quartile ({Q3:.2f}):")
+
+        formers = []
+        breakers = []
+
         spot_cols = []
         for n, x, y in zip(self.chip_data_names, self.peaklens, self.zscore):
             if '(Insert)' in n:
                 spot_cols.append('tab:red')
                 self.logger.info(f'The predicted contact Z-score for {n} is {y:.2f}')
                 ax.set_title(f'The predicted contact Z-score for {n.replace("(Insert)", "")} is {y:.2f}')
-            elif y >= 0.6: spot_cols.append('tab:green')
-            elif y <= -0.7: spot_cols.append('tab:blue')
-            else: spot_cols.append('lightgrey')
+            elif y >= Q3:
+                spot_cols.append('tab:green')
+                formers.append((n, x))
+            elif y <= Q1:
+                spot_cols.append('tab:blue')
+                breakers.append((n, x))
+            else:
+                spot_cols.append('lightgrey')
 
         ax.scatter(self.peaklens, self.zscore, alpha=0.3, color=spot_cols)
 
         # plot a few landmarks:
         lands = set(['SMARCA4', 'KDM4A', 'CTCF', 'RAD21'])
         for n, x, y in zip(self.chip_data_names, self.peaklens, self.zscore):
-            n = n.split('_')[0]
-            if n in lands:
-                ax.text(x, y, n, ha='center', va='center', fontsize=6)
+            split_name = n.split('_')[0]
+            if split_name in lands:
+                ax.text(x, y, split_name, ha='center', va='center', fontsize=6)
             elif '(Insert)' in n:
                 ax.text(x, y, n, ha='center', va='center', fontsize=6)
 
         ax.axhline(0, lw=0.5, color='grey')
-        ax.axhline(0.6, ls=':', lw=0.5, color='grey')
-        ax.axhline(-0.7, ls=':', lw=0.5, color='grey')
+        ax.axhline(Q3, ls=':', lw=0.5, color='grey')
+        ax.axhline(Q1, ls=':', lw=0.5, color='grey')
 
         ax.set_ylabel('Contact Z-score')
         ax.set_xlabel('Number of bp in peaks')
 
         fig.savefig(filename)
+
+        return formers, breakers
 
     def __load_bed(self, filename):
         # Not the same as measure_contacs.__load_bed

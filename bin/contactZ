@@ -119,7 +119,19 @@ def main():
     cZ.calc_contact_Z()
 
     # plots;
-    cZ.plot_contact_Z_scatter(f'{args.label}.pdf')
+    formers, breakers = cZ.plot_contact_Z_scatter(f'{args.label}.pdf')
+
+    with open(f'{args.label}.formers.tsv', 'wt') as oh:
+        oh.write('Factor\tcontactZ\n')
+        for item in formers:
+            oh.write(f'{item[0]}\t{item[1]}\n')
+        log.info(f'Saved {args.label}.formers.tsv')
+
+    with open(f'{args.label}.breakers.tsv', 'wt') as oh:
+        oh.write('Factor\tcontactZ\n')
+        for item in breakers:
+            oh.write(f'{item[0]}\t{item[1]}\n')
+        log.info(f'Saved {args.label}.breakers.tsv')
 
     return
 
