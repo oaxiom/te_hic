@@ -65,7 +65,7 @@ def load_randoms_gc(files, fasta):
     hg38 = genome()
     hg38.bindSequence(fasta, memorymap=True)
 
-    randoms_by_gc_percent = {0: {}, 10: {}, 20: {}, 30: {}, 40: {}, 50: {}, 60: {}, 70: {}, 80: {}, 90: {}, 100: {}}
+    randoms_by_gc_percent = {20: {}, 30: {}, 40: {}, 50: {}, 60: {}, 70: {}}
 
     loci_loaded = 0
     for file in glob.glob(files):

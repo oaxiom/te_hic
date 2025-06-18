@@ -94,7 +94,7 @@ def main():
     log.info('  window: %s' % args.window)
 
     te_hic = tehiclib.measure_contacts(logger=log)
-    contacts, peaklen, len_peaks = te_hic.bed_to_bed(
+    contacts, peaklen, len_peaks, num_reads_in_bedpe = te_hic.bed_to_bed(
         reads=args.inreadsbedpe,
         bed=args.inpeaksbed[0],
         window=args.window,
@@ -106,7 +106,7 @@ def main():
 
     # I need a few randoms here;
     log.info('Getting a shuffled background')
-    shuffled_contacts, shuffled_peak_len_in_bp, shuffled_len_peaks = te_hic.bed_to_bed(
+    shuffled_contacts, shuffled_peak_len_in_bp, shuffled_len_peaks, num_reads_in_bedpe = te_hic.bed_to_bed(
         reads=args.inreadsbedpe,
         bed=cZ.generate_matched_random(args.inpeaksbed[0], GC=args.gc),
         window=args.window,

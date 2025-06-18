@@ -1,6 +1,7 @@
 
 import gzip
 import numpy
+from . import miniglbase3
 
 class measure_contacts:
     def __init__(self, logger):
@@ -39,13 +40,14 @@ class measure_contacts:
         return peaks, peaklen, len_peaks
 
     def bed_to_bed(self,
-        reads,
-        bed,
-        window,
-        outfile,
-        threshold: int = 1, # in reads;
-        _silent:bool = False,
-        **kargs):
+                   reads,
+                   bed,
+                   window,
+                   outfile,
+                   threshold: int = 1, # in reads;
+                   num_reads_in_bedpe=False,
+                   _silent:bool = False,
+                   **kargs):
         '''
         Measure the contacts between a BED file
 
@@ -67,6 +69,9 @@ class measure_contacts:
             readsin = open(reads, 'rt')
 
         store = {}
+
+        if num_reads_in_bedpe:
+            p = miniglbase3.progressbar(num_reads_in_bedpe)
 
         for idx, read_pair in enumerate(readsin):
             read_pair = read_pair.strip().split('\t')
@@ -91,8 +96,13 @@ class measure_contacts:
             except KeyError:
                 pass # chrom is not in peaks, but is in reads
 
-            if (idx+1) % 1e6 == 0:
+            if (idx+1) % 1e7 == 0:
                 if not _silent: self.logger.info('{0:,} reads processed'.format(idx+1))
+
+            if num_reads_in_bedpe:
+                p.update(idx)
+
+        num_reads_in_bedpe = idx
 
         readsin.close()
 
@@ -147,7 +157,7 @@ class measure_contacts:
             if not _silent: self.logger.info('Saved {0}'.format(outfile))
 
         # output for contact_zscore_cov
-        return dict(zip([int(i) for i in h[1]], h[0])), peaklen, len_peaks
+        return dict(zip([int(i) for i in h[1]], h[0])), peaklen, len_peaks, num_reads_in_bedpe
 
     def bed_to_genespromoter(self,
         reads,

@@ -4,10 +4,11 @@ import gzip
 import sys
 import os
 
+# Should really fix this dependency!
 from glbase3 import genome
 
 if len(sys.argv) != 3:
-    print('ERROR: measure_gc_in_bed BEDFILE SEQPATH')
+    print('ERROR: measureGC_in_bed BEDFILE SEQPATH')
     sys.exit(1)
 
 hg38 = genome()
@@ -15,11 +16,12 @@ hg38.bindSequence(os.path.expanduser(sys.argv[2]))
 
 filename = sys.argv[1]
 
+output = gzip.open(os.path.split(filename)[1].replace('.bed', '.gc.bed'), 'wt')
+output = gzip.open(os.path.split(filename)[1].replace('.broadPeak', '.gc.broadPeak'), 'wt')
+
 if filename.endswith('.gz'):
-    output = gzip.open(os.path.split(filename)[1].replace('.bed', '.gc.bed'), 'wt')
     input = gzip.open(filename, 'rt')
 else:
-    output = open(os.path.split(filename)[1].replace('.bed', '.gc.bed'), 'wt')
     input = open(filename, 'rt')
 
 print(f"Processing {filename} to {filename.replace('.bed', '.gc.bed')}")

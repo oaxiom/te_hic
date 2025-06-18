@@ -255,7 +255,10 @@ class contact_z_score_cov:
 
             for peak in peaks[chrom]:
                 # get a peak from the background randon;
-                rand_peak = random.choice(self.data['randoms'][chrom])
+                try:
+                    rand_peak = random.choice(self.data['randoms'][chrom])
+                except KeyError: # Bad chrom;
+                    rand_peak = random.choice(self.data['randoms']['chr1'])
                 # resize to same size
                 psz = peak[1] - peak[0]
                 rand_peak = (rand_peak, rand_peak + psz)
