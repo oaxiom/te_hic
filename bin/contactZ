@@ -136,10 +136,10 @@ def main():
         threshold=1,
         )
 
-    cZ = tehiclib.contact_z_score_cov(logger=log)
+    cZ = tehiclib.contact_z_score_cov(logger=log, GC=args.gc, shuf=args.shuf)
 
     # I need a few randoms here;
-    bkgd = cZ.generate_matched_random(args.inpeaksbed[0], GC=args.gc, shuf=args.shuf)
+    bkgd = cZ.generate_matched_random(args.inpeaksbed[0])
 
     shuffled_contacts, shuffled_peak_len_in_bp, shuffled_len_peaks, num_reads_in_bedpe = te_hic.bed_to_bed(
         reads=args.inreadsbedpe,
@@ -150,7 +150,7 @@ def main():
         _silent=True,
         )
 
-    cZ.insert_contacts(contacts, len_peaks, peaklen, args.label, shuffled_contacts, GC=args.gc)
+    cZ.insert_contacts(contacts, len_peaks, peaklen, args.label, shuffled_contacts)
     cZ.calc_contact_Z()
 
     # plots;

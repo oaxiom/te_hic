@@ -53,7 +53,7 @@ def prepare_parser():
     return parser
 
 def main():
-    assert sys.version_info >= (3, 6), 'Python >=3.7 is required'
+    assert sys.version_info >= (3, 7), 'Python >=3.7 is required'
 
     script_path = os.path.dirname(os.path.realpath(__file__))
     parser = prepare_parser()

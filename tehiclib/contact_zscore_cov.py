@@ -17,9 +17,11 @@ from scipy.stats import zscore
 from matplotlib import pyplot as plot
 
 class contact_z_score_cov:
-    def __init__(self, logger):
+    def __init__(self, logger, GC, shuf):
         self.data = self.load_data()
         self.logger = logger
+        self.GC = GC
+        self.shuf = shuf
 
     def load_data(self) -> dict:
         data_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/all_data.pkl')
@@ -34,8 +36,6 @@ class contact_z_score_cov:
                         peaklen,
                         label,
                         random_background,
-                        GC=False,
-                        shuf=False,
                         ):
         """
         **Purpose**
@@ -51,15 +51,13 @@ class contact_z_score_cov:
         self.data['reals'][f'{label} (Insert)'] = real
         self.data['peaklens'][f'{label} (Insert)'] = peaklen
 
-        if GC:
+        if self.GC:
             self.data['bkgds_gc'][f'{label} (Insert)'] = rand
-        elif shuf:
+        elif self.shuf:
             self.data['bkgds_pooled'][f'{label} (Insert)'] = rand
         else:
             self.data['bkgds'][f'{label} (Insert)'] = rand
 
-        self.GC = GC
-        self.shuf = shuf
 
     def calc_contact_Z(self):
         """
@@ -287,15 +285,15 @@ class contact_z_score_cov:
 
         return dict(peaks=rand_peaks, peak_len_in_bp=new_peak_len_in_bp, len_peaks=new_len_peaks)
 
-    def generate_matched_random(self, bed_file, GC=False, shuf=False) -> dict:
+    def generate_matched_random(self, bed_file) -> dict:
         """
         **Emulate bedtools shuf, but without a genome file;
         """
-        if GC:
+        if self.GC:
             self.logger.info('Getting a random GC matched background')
             ret = self.__generate_matched_random_GC(bed_file)
 
-        elif shuf:
+        elif self.shuf:
             self.logger.info('Getting a random shuffled background from the superset of peaks')
             ret = self.__generate_random(bed_file, key='randoms_pooled')
 

@@ -79,8 +79,8 @@ def main():
     log.info('Arguments:')
     log.info('  inpeaksbed: %s' % args.inpeaksbed)
 
-    cZ = tehiclib.contact_z_score_cov(logger=log)
-    coords = cZ.generate_matched_random(args.inpeaksbed, GC=args.gc, shuf=args.shuf)
+    cZ = tehiclib.contact_z_score_cov(logger=log, GC=args.gc, shuf=args.shuf)
+    coords = cZ.generate_matched_random(args.inpeaksbed)
 
     # save out as a BED;
     with gzip.open(args.outpeaksbed, 'wt') as oh:
