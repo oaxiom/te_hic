@@ -117,9 +117,9 @@ class measure_contacts:
                 chrom_left = read_pair[0]
                 chrom_rite = read_pair[3]
 
-                cpt = (int(read_pair[1]) + int(read_pair[2])) // 2
+                cpt = (int(read_pair[1]) + int(read_pair[2])) >> 1
                 bin_left = (cpt // window) * window
-                cpt = (int(read_pair[4]) + int(read_pair[5])) // 2
+                cpt = (int(read_pair[4]) + int(read_pair[5])) >> 1
                 bin_rite = (cpt // window) * window
             else:
                 chrom_left, chrom_rite, bin_left, bin_rite = read_pair

@@ -58,14 +58,18 @@ def load_beds(files):
     return randoms
 
 def load_bed(file):
-    randoms = []
+    randoms = {}
     loci_loaded = 0
     with gzip.open(file, 'rt') as oh:
         for line in oh:
             line = line.strip().split('\t')
             chrom = line[0]
-            randoms.append((chrom, int(line[1]))) # I only need one point;
+            randoms[chrom].append(int(line[1])) # I only need one point;
             loci_loaded += 1
+
+        for chrom in randoms: # Save space;
+            randoms[chrom] = list(set(randoms[chrom]))
+
     print(f'Found {loci_loaded} random loci')
     return randoms
 
@@ -120,15 +124,21 @@ def load_randoms_gc(files, fasta):
 
 if __name__ == '__main__':
     all_data = dict(
+        peaklens=load_peaklens('./cov_ctcf.txt'),
+
+        # This is how it was first done, with bedtools shuf
         reals = load_intercons('./real_con/*.intracon_num.txt'),
         bkgds = load_intercons('./random_con/*.intracon_num.txt'), # Liyang's background
-        peaklens = load_peaklens('./cov_ctcf.txt'),
+
+        # For dynamic random generation
         randoms = load_beds('./randoms/*.bed.gz'),
         randoms_gc = load_randoms_gc('./randoms/*.bed.gz', os.path.expanduser('~/hg38/seq/')),
+        randoms_pooled = load_bed('./peaks/all_peaks.bed.gz'), # A third normalisation technique, this time using pools of all peaks;
+
         # Intracons generated using matched GC bacgrounds
-        gc_bkgds = load_intercons('./gc_random_con/*.intracon_num.txt'),
-        # A third normalisation technique, this time using pools of all peaks;
-        pooled_bkgds = load_bed('./peaks/all_peaks.bed.gz')
+        bkgds_gc = load_intercons('./gc_random_con/*.intracon_num.txt'),
+        #bkgds_pooled = load_intercons('./pooled_random_con/*.intracon_num.txt'),
+
     )
 
     with open('./all_data.pkl', 'wb') as oh:

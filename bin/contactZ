@@ -109,20 +109,23 @@ def main():
         sys.exit(1)
 
     if args.cached:
+        log.info('Caching BEDPE')
         cache_bedpe = []
         with gzip.open(args.inreadsbedpe, 'rt') as oh:
-            for line in oh:
+            for idx, line in enumerate(oh):
                 read_pair = line.strip().split('\t')
                 chrom_left = read_pair[0]
                 chrom_rite = read_pair[3]
 
-                cpt = (int(read_pair[1]) + int(read_pair[2])) // 2
+                cpt = (int(read_pair[1]) + int(read_pair[2])) >> 1
                 bin_left = (cpt // args.window) * args.window
-                cpt = (int(read_pair[4]) + int(read_pair[5])) // 2
+                cpt = (int(read_pair[4]) + int(read_pair[5])) >> 1
                 bin_rite = (cpt // args.window) * args.window
                 cache_bedpe.append((chrom_left, chrom_rite, bin_left, bin_rite))
+                if (idx + 1) % 1e7 == 0:
+                    log.info('{0:,} reads processed'.format(idx + 1))
         args.inreadsbedpe = cache_bedpe
-        log.info('Cached BEDPE')
+        log.info(f'Cached BEDPE, {len(cache_bedpe)} reads')
 
     te_hic = tehiclib.measure_contacts(logger=log)
     contacts, peaklen, len_peaks, num_reads_in_bedpe = te_hic.bed_to_bed(
