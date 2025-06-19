@@ -35,6 +35,7 @@ class contact_z_score_cov:
                         label,
                         random_background,
                         GC=False,
+                        shuf=False,
                         ):
         """
         **Purpose**
@@ -46,15 +47,19 @@ class contact_z_score_cov:
         real = [bed_contact_list[i] for i in sorted(bed_contact_list.keys())]
         rand = [random_background[i] for i in sorted(random_background.keys())]
 
-        # simulate background...
+        # Insert this novel factor
         self.data['reals'][f'{label} (Insert)'] = real
         self.data['peaklens'][f'{label} (Insert)'] = peaklen
+
         if GC:
-            self.data['gc_bkgds'][f'{label} (Insert)'] = rand
+            self.data['bkgds_gc'][f'{label} (Insert)'] = rand
+        elif shuf:
+            self.data['bkgds_pooled'][f'{label} (Insert)'] = rand
         else:
             self.data['bkgds'][f'{label} (Insert)'] = rand
 
         self.GC = GC
+        self.shuf = shuf
 
     def calc_contact_Z(self):
         """
@@ -67,7 +72,9 @@ class contact_z_score_cov:
 
         ## mean of the background
         if self.GC:
-            t_backgrnd = numpy.array([self.data['gc_bkgds'][chip][10:18] for chip in self.chip_data_names])
+            t_backgrnd = numpy.array([self.data['bkgds_gc'][chip][10:18] for chip in self.chip_data_names])
+        elif self.shuf:
+            t_backgrnd = numpy.array([self.data['bkgds_pooled'][chip][10:18] for chip in self.chip_data_names])
         else:
             t_backgrnd = numpy.array([self.data['bkgds'][chip][10:18] for chip in self.chip_data_names])
 
@@ -198,44 +205,6 @@ class contact_z_score_cov:
 
         return peaks, peaklen, len_peaks
 
-    def __generate_shuffled_random(self, bed_file) -> dict:
-        """
-        **Purpose**
-            Generate a random background using all of the shuffled peaks
-        """
-        peaks, peak_len_in_bp, len_peaks = self.__load_bed(bed_file)
-
-        rand_peaks = {}
-        for chrom in peaks:
-            rand_peaks[chrom] = []
-
-            for peak in peaks[chrom]:
-                # get a peak from the background randon;
-                try:
-                    rand_peak = random.choice(self.data['randoms'])
-                except KeyError:  # Bad chrom;
-                    continue
-                    # rand_peak = random.choice(self.data['randoms']['chr1'])
-                # resize to same size
-                psz = peak[1] - peak[0]
-                # chrom = (l, l+peak_size)
-                rand_peaks[rand_peak[0]].append((rand_peak[1], rand_peak[1] + psz))
-
-        # check the new_peak_len_in_bp
-        new_peak_len_in_bp = 0
-        new_len_peaks = 0
-        for chrom in rand_peaks:
-            for peak in rand_peaks[chrom]:
-                new_peak_len_in_bp += peak[1] - peak[0]
-
-            new_len_peaks += len(rand_peaks[chrom])
-
-        self.logger.info('Random BED, sanity check:')
-        self.logger.info(f'Number of bp in peaks: {peak_len_in_bp} = {new_peak_len_in_bp}')
-        self.logger.info(f'Number of peaks: {len_peaks} = {new_len_peaks}')
-
-        return dict(peaks=rand_peaks, peak_len_in_bp=new_peak_len_in_bp, len_peaks=new_len_peaks)
-
     def __generate_matched_random_GC(self, bed_file) -> dict:
         """
         **Emulate bedtools shuf, but without a genome file;
@@ -279,7 +248,7 @@ class contact_z_score_cov:
 
         return dict(peaks=rand_peaks, peak_len_in_bp=new_peak_len_in_bp, len_peaks=new_len_peaks)
 
-    def __generate_random(self, bed_file) -> dict:
+    def __generate_random(self, bed_file, key='randoms') -> dict:
         """
         **Purpose**
         Generate a random background using a background generated from input random peaks that
@@ -294,10 +263,10 @@ class contact_z_score_cov:
             for peak in peaks[chrom]:
                 # get a peak from the background randon;
                 try:
-                    rand_peak = random.choice(self.data['randoms'][chrom])
+                    rand_peak = random.choice(self.data[key][chrom])
                 except KeyError: # Bad chrom;
                     continue
-                    #rand_peak = random.choice(self.data['randoms']['chr1'])
+
                 # resize to same size
                 psz = peak[1] - peak[0]
                 rand_peak = (rand_peak, rand_peak + psz)
@@ -328,7 +297,7 @@ class contact_z_score_cov:
 
         elif shuf:
             self.logger.info('Getting a random shuffled background from the superset of peaks')
-            ret = self.__generate_shuffled_random(bed_file)
+            ret = self.__generate_random(bed_file, key='randoms_pooled')
 
         else:
             self.logger.info('Getting a random background from the sequenceable genome')

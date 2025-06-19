@@ -64,6 +64,8 @@ def load_bed(file):
         for line in oh:
             line = line.strip().split('\t')
             chrom = line[0]
+            if chrom not in randoms:
+                randoms[chrom] = []
             randoms[chrom].append(int(line[1])) # I only need one point;
             loci_loaded += 1
 
@@ -126,9 +128,10 @@ if __name__ == '__main__':
     all_data = dict(
         peaklens=load_peaklens('./cov_ctcf.txt'),
 
-        # This is how it was first done, with bedtools shuf
         reals = load_intercons('./real_con/*.intracon_num.txt'),
-        bkgds = load_intercons('./random_con/*.intracon_num.txt'), # Liyang's background
+
+        # This is how it was first done, with bedtools shuf
+        bkgds = load_intercons('./random_con/*.intracon_num.txt'), # Liyang used 10 backgrounds per real, but 1 is enough.
 
         # For dynamic random generation
         randoms = load_beds('./randoms/*.bed.gz'),
@@ -138,7 +141,6 @@ if __name__ == '__main__':
         # Intracons generated using matched GC bacgrounds
         bkgds_gc = load_intercons('./gc_random_con/*.intracon_num.txt'),
         #bkgds_pooled = load_intercons('./pooled_random_con/*.intracon_num.txt'),
-
     )
 
     with open('./all_data.pkl', 'wb') as oh:
