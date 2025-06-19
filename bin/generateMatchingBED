@@ -1,0 +1,99 @@
+#!/usr/bin/env python
+
+import sys
+import os
+import argparse
+import logging
+import gzip
+
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
+
+script_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(script_path, '../'))
+import tehiclib
+
+def prepare_parser():
+    defaults = {
+        '-w': 5000,
+        '-t': 1
+    }
+
+    exmp = 'Example usage: generateMatchingBED -p peaks.bed[.gz] -o peaks.gc.bed.gz'
+
+    description = '''
+    Generate a random BED peak file from either the superset of all peaks or a random GC matched background.
+    '''
+
+    parser = argparse.ArgumentParser(prog='generateMatching', description=description, epilog=exmp)
+
+    # Optional:
+    optional = parser._action_groups.pop()
+
+    optional.add_argument('--gc', action='store_true', default=False, required=False,
+                          help='Enforce GC normalisation of the background (exclusive with --shuf)')
+    optional.add_argument('--shuf', action='store_true', default=False, required=False,
+                          help='Use a normalised background by pulling from shuffled peaks (exclusive with --gc)')
+
+    required = parser.add_argument_group('required arguments')
+    required.add_argument('-p', '--inpeaksbed', nargs=1, required=True,
+                          help='A BED file contining peaks or sites to consider')
+    required.add_argument('-o', '--outpeaksbed', nargs=1, required=True,
+                          help='A BED file to save the GC-normalised random peaks to')
+
+    parser._action_groups.append(optional)
+
+    other_logs = logging.getLogger()
+    other_logs.setLevel(logging.CRITICAL)
+
+    logging.basicConfig(level=logging.INFO,
+                        format='%(levelname)-8s: %(message)s',
+                        datefmt='%m-%d %H:%M')
+
+    logger = logging.getLogger('generateMatchingGC')
+    logger.setLevel(level=logging.INFO)
+
+    parser.log = logger
+
+    return parser
+
+def main():
+    assert sys.version_info >= (3, 7), 'Python >=3.7 is required'
+
+    script_path = os.path.dirname(os.path.realpath(__file__))
+    parser = prepare_parser()
+    args = parser.parse_args()
+
+    log = parser.log
+    args.inpeaksbed = args.inpeaksbed[0] # There's an easier way to do this.. I can't remember though.
+    args.outpeaksbed = args.outpeaksbed[0]
+
+    if args.gc and args.shuf:
+        log.error('Both --gc and --shuf cannot be used at the same time')
+        sys.exit(1)
+
+    if not (args.gc or args.shuf):
+        log.error('You must have at least one of --gc and --shuf ')
+        sys.exit(1)
+
+    log.info('generateMatchingGC')
+    log.info('Arguments:')
+    log.info('  inpeaksbed: %s' % args.inpeaksbed)
+
+    cZ = tehiclib.contact_z_score_cov(logger=log)
+    coords = cZ.generate_matched_random(args.inpeaksbed, GC=args.gc, shuf=args.shuf)
+
+    # save out as a BED;
+    with gzip.open(args.outpeaksbed, 'wt') as oh:
+        for chrom in coords['peaks']:
+            for peak in coords['peaks'][chrom]:
+                oh.write(f'{chrom}\t{peak[0]}\t{peak[1]}\n')
+    return
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.stderr.write("User interrupt\n")
+        sys.exit(0)
+
