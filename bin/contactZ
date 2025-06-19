@@ -110,7 +110,7 @@ def main():
         reads=args.inreadsbedpe,
         bed=cZ.generate_matched_random(args.inpeaksbed[0], GC=args.gc),
         window=args.window,
-        outfile=None,
+        outfile=None, # Don't save the bkgc, not the intracon file
         threshold=1,
         _silent=True,
         )

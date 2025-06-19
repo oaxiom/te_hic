@@ -16,15 +16,17 @@ hg38.bindSequence(os.path.expanduser(sys.argv[2]))
 
 filename = sys.argv[1]
 
-output = gzip.open(os.path.split(filename)[1].replace('.bed', '.gc.bed'), 'wt')
-output = gzip.open(os.path.split(filename)[1].replace('.broadPeak', '.gc.broadPeak'), 'wt')
+output_filename = os.path.split(filename)[1].replace('.bed', '.gc.bed')
+output_filename = os.path.split(filename)[1].replace('.broadPeak', '.gc.broadPeak')
+
+output = gzip.open(output_filename, 'wt')
 
 if filename.endswith('.gz'):
     input = gzip.open(filename, 'rt')
 else:
     input = open(filename, 'rt')
 
-print(f"Processing {filename} to {filename.replace('.bed', '.gc.bed')}")
+print(f"Processing {filename} to {output_filename}")
 
 for line in input:
     line = line.strip().split('\t')
@@ -33,7 +35,10 @@ for line in input:
     l = int(line[1])
     r = int(line[2])
 
-    seq = hg38.getSequence(f'chr{chrom}:{l}-{r}').upper()
+    try:
+        seq = hg38.getSequence(f'chr{chrom}:{l}-{r}').upper()
+    except AttributeError:
+        continue # Probably a bad chrom, skip;
 
     perc_gc = (seq.count('G') + seq.count('C')) / (r -l)
     perc_gc = int(perc_gc * 10)
