@@ -21,6 +21,7 @@ import sys
 import os
 import argparse
 import logging
+import gzip
 
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
@@ -50,8 +51,12 @@ def prepare_parser():
     # Optional:
     optional = parser._action_groups.pop()
     optional.add_argument('-w', '--window', action='store', type=int, default=defaults['-w'], required=False, help='Window size (in base pairs) to look around the BED, default={}'.format(defaults['-w']))
-    optional.add_argument('--gc', action='store_true', default=False, required=False, help='Enforce GC normalisation of the background')
-
+    optional.add_argument('--gc', action='store_true', default=False, required=False,
+                          help='Enforce GC normalisation of the background (exclusive with --shuf)')
+    optional.add_argument('--shuf', action='store_true', default=False, required=False,
+                          help='Use a normalised background by pulling from shuffled peaks (exclusive with --gc)')
+    optional.add_argument('--cached', action='store_true', default=False, required=False,
+                          help='Cache the BEDPE for speed. Needs a lot of RAM!')
 
     required = parser.add_argument_group('required arguments')
 
@@ -92,6 +97,32 @@ def main():
     log.info('  inpeaksbed: %s' % args.inpeaksbed)
     log.info('  label: %s' % args.label)
     log.info('  window: %s' % args.window)
+    log.info('  cached BEDPE: %s' % args.cached)
+    log.info('Normalisation:')
+    if not (args.gc or args.shuf):
+        log.info('  [The default is to use a "sequencable genome" random background]')
+    log.info('  gc: %s' % args.gc)
+    log.info('  shuffled: %s' % args.shuf)
+
+    if args.gc and args.shuf:
+        log.error('Both gc and shuf cannot be used at the same time')
+        sys.exit(1)
+
+    if args.cached:
+        cache_bedpe = []
+        with gzip.open(args.inreadsbedpe, 'rt') as oh:
+            for line in oh:
+                read_pair = line.strip().split('\t')
+                chrom_left = read_pair[0]
+                chrom_rite = read_pair[3]
+
+                cpt = (int(read_pair[1]) + int(read_pair[2])) // 2
+                bin_left = (cpt // args.window) * args.window
+                cpt = (int(read_pair[4]) + int(read_pair[5])) // 2
+                bin_rite = (cpt // args.window) * args.window
+                cache_bedpe.append((chrom_left, chrom_rite, bin_left, bin_rite))
+        args.inreadsbedpe = cache_bedpe
+        log.info('Cached BEDPE')
 
     te_hic = tehiclib.measure_contacts(logger=log)
     contacts, peaklen, len_peaks, num_reads_in_bedpe = te_hic.bed_to_bed(
@@ -105,10 +136,11 @@ def main():
     cZ = tehiclib.contact_z_score_cov(logger=log)
 
     # I need a few randoms here;
-    log.info('Getting a shuffled background')
+    bkgd = cZ.generate_matched_random(args.inpeaksbed[0], GC=args.gc, shuf=args.shuf)
+
     shuffled_contacts, shuffled_peak_len_in_bp, shuffled_len_peaks, num_reads_in_bedpe = te_hic.bed_to_bed(
         reads=args.inreadsbedpe,
-        bed=cZ.generate_matched_random(args.inpeaksbed[0], GC=args.gc),
+        bed=bkgd,
         window=args.window,
         outfile=None, # Don't save the bkgc, not the intracon file
         threshold=1,

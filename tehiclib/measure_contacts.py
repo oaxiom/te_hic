@@ -15,29 +15,57 @@ class measure_contacts:
 
         # read all the BED peaks in, and set up the storage container
         peaklen = 0 # number of base pairs occupied by the peaks;
-        peaks = {}
+        new_peaks = {}
         for len_peaks, peak in enumerate(bedin):
             peak = peak.strip().split('\t')
 
             chrom = peak[0]
 
-            if chrom not in peaks:
-                peaks[chrom] = []
+            if chrom not in new_peaks:
+                new_peaks[chrom] = []
 
             # We bin the peak to the nearest window
             l = int(peak[1])
             r = int(peak[2])
             cpt = (l + r) // 2
-            bin_left = (cpt // window) * window
+            bin_mid = (cpt // window) * window
 
             peaklen += r - l
-
-            loc = bin_left
-
-            peaks[chrom].append(loc)
+            new_peaks[chrom].append(bin_mid)
         bedin.close()
 
-        return peaks, peaklen, len_peaks
+        for chrom in new_peaks:
+            new_peaks[chrom] = set(new_peaks[chrom])
+
+        return new_peaks, peaklen, len_peaks
+
+    def __bin_peaks(self, peaks, window):
+        """
+        **Purpose**
+            Bin the peaks to the window size
+        """
+        peaklen = 0  # number of base pairs occupied by the peaks;
+        new_peaks = {}
+        for chrom in peaks:
+            for peak in peaks[chrom]:
+                if chrom not in new_peaks:
+                    new_peaks[chrom] = []
+
+                # We bin the peak to the nearest window
+                l = int(peak[0])
+                r = int(peak[1])
+                cpt = (l + r) // 2
+                bin_mid = (cpt // window) * window
+
+                peaklen += r - l
+                new_peaks[chrom].append(bin_mid) # All this, but we only use the midpoint anyway;
+
+        len_peaks = 0
+        for chrom in new_peaks:
+            new_peaks[chrom] = set(new_peaks[chrom])
+            len_peaks += len(new_peaks[chrom])
+
+        return new_peaks
 
     def bed_to_bed(self,
                    reads,
@@ -54,19 +82,28 @@ class measure_contacts:
         '''
         if isinstance(bed, str):
             peaks, peaklen, len_peaks = self.__load_bed(bed, window)
+
         elif isinstance(bed, dict):
             peaks = bed['peaks']
             peaklen = bed['peak_len_in_bp']
             len_peaks = bed['len_peaks']
+            # peaks need to binned;
+            peaks = self.__bin_peaks(peaks, window)
+
         else:
             raise AssertionError('bed is not a filename or a dict')
 
         if not _silent: self.logger.info('Found {0:,} BED peaks'.format(len_peaks))
 
-        if '.gz' in reads:
-            readsin = gzip.open(reads, 'rt')
+        if isinstance(reads, str):
+            if '.gz' in reads:
+                readsin = gzip.open(reads, 'rt')
+            else:
+                readsin = open(reads, 'rt')
+            cached = False
         else:
-            readsin = open(reads, 'rt')
+            readsin = reads
+            cached = True
 
         store = {}
 
@@ -74,15 +111,18 @@ class measure_contacts:
             p = miniglbase3.progressbar(num_reads_in_bedpe)
 
         for idx, read_pair in enumerate(readsin):
-            read_pair = read_pair.strip().split('\t')
+            if not cached:
+                read_pair = read_pair.strip().split('\t')
 
-            chrom_left = read_pair[0]
-            chrom_rite = read_pair[3]
+                chrom_left = read_pair[0]
+                chrom_rite = read_pair[3]
 
-            cpt = (int(read_pair[1]) + int(read_pair[2])) // 2
-            bin_left = (cpt // window) * window
-            cpt = (int(read_pair[4]) + int(read_pair[5])) // 2
-            bin_rite = (cpt // window) * window
+                cpt = (int(read_pair[1]) + int(read_pair[2])) // 2
+                bin_left = (cpt // window) * window
+                cpt = (int(read_pair[4]) + int(read_pair[5])) // 2
+                bin_rite = (cpt // window) * window
+            else:
+                chrom_left, chrom_rite, bin_left, bin_rite = read_pair
 
             try:
                 # Found a contact between two peaks in the BED
@@ -104,7 +144,7 @@ class measure_contacts:
 
         num_reads_in_bedpe = idx
 
-        readsin.close()
+        if not cached: readsin.close()
 
         # Work out histogram;
         # And save to _intraconv.txt format;

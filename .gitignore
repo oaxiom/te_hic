@@ -1,6 +1,10 @@
 .DS_Store
 __pycache__/
 testout.tsv.gz
+.idea
+*.bed.gz
+*.out.intracon_num.txt
+*.out.tsv
 *.annotation.gtf.gz
 *_rmsk.txt.gz
 *.glb

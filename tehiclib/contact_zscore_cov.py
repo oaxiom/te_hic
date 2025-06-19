@@ -126,10 +126,11 @@ class contact_z_score_cov:
         lands = set(['SMARCA4', 'KDM4A', 'CTCF', 'RAD21'])
         for n, x, y in zip(self.chip_data_names, self.peaklens, self.zscore):
             split_name = n.split('_')[0]
-            if split_name in lands:
-                ax.text(x, y, split_name, ha='center', va='center', fontsize=6)
-            elif '(Insert)' in n:
+            if '(Insert)' in n:
                 ax.text(x, y, n, ha='center', va='center', fontsize=6)
+            elif split_name in lands:
+                ax.text(x, y, split_name, ha='center', va='center', fontsize=6)
+
 
         ax.axhline(0, lw=0.5, color='grey')
         ax.axhline(Q3, ls=':', lw=0.5, color='grey')
@@ -197,6 +198,44 @@ class contact_z_score_cov:
 
         return peaks, peaklen, len_peaks
 
+    def __generate_shuffled_random(self, bed_file) -> dict:
+        """
+        **Purpose**
+            Generate a random background using all of the shuffled peaks
+        """
+        peaks, peak_len_in_bp, len_peaks = self.__load_bed(bed_file)
+
+        rand_peaks = {}
+        for chrom in peaks:
+            rand_peaks[chrom] = []
+
+            for peak in peaks[chrom]:
+                # get a peak from the background randon;
+                try:
+                    rand_peak = random.choice(self.data['randoms'])
+                except KeyError:  # Bad chrom;
+                    continue
+                    # rand_peak = random.choice(self.data['randoms']['chr1'])
+                # resize to same size
+                psz = peak[1] - peak[0]
+                # chrom = (l, l+peak_size)
+                rand_peaks[rand_peak[0]].append((rand_peak[1], rand_peak[1] + psz))
+
+        # check the new_peak_len_in_bp
+        new_peak_len_in_bp = 0
+        new_len_peaks = 0
+        for chrom in rand_peaks:
+            for peak in rand_peaks[chrom]:
+                new_peak_len_in_bp += peak[1] - peak[0]
+
+            new_len_peaks += len(rand_peaks[chrom])
+
+        self.logger.info('Random BED, sanity check:')
+        self.logger.info(f'Number of bp in peaks: {peak_len_in_bp} = {new_peak_len_in_bp}')
+        self.logger.info(f'Number of peaks: {len_peaks} = {new_len_peaks}')
+
+        return dict(peaks=rand_peaks, peak_len_in_bp=new_peak_len_in_bp, len_peaks=new_len_peaks)
+
     def __generate_matched_random_GC(self, bed_file) -> dict:
         """
         **Emulate bedtools shuf, but without a genome file;
@@ -240,13 +279,12 @@ class contact_z_score_cov:
 
         return dict(peaks=rand_peaks, peak_len_in_bp=new_peak_len_in_bp, len_peaks=new_len_peaks)
 
-    def generate_matched_random(self, bed_file, GC=False) -> dict:
+    def __generate_random(self, bed_file) -> dict:
         """
-        **Emulate bedtools shuf, but without a genome file;
+        **Purpose**
+        Generate a random background using a background generated from input random peaks that
+        represents
         """
-        if GC:
-            return self.__generate_matched_random_GC(bed_file)
-
         peaks, peak_len_in_bp, len_peaks = self.__load_bed(bed_file)
 
         rand_peaks = {}
@@ -274,11 +312,29 @@ class contact_z_score_cov:
 
             new_len_peaks += len(rand_peaks[chrom])
 
-        self.logger.info('Shuffled BED, sanity check:')
+        self.logger.info('Random BED, sanity check:')
         self.logger.info(f'Number of bp in peaks: {peak_len_in_bp} = {new_peak_len_in_bp}')
         self.logger.info(f'Number of peaks: {len_peaks} = {new_len_peaks}')
 
         return dict(peaks=rand_peaks, peak_len_in_bp=new_peak_len_in_bp, len_peaks=new_len_peaks)
+
+    def generate_matched_random(self, bed_file, GC=False, shuf=False) -> dict:
+        """
+        **Emulate bedtools shuf, but without a genome file;
+        """
+        if GC:
+            self.logger.info('Getting a random GC matched background')
+            ret = self.__generate_matched_random_GC(bed_file)
+
+        elif shuf:
+            self.logger.info('Getting a random shuffled background from the superset of peaks')
+            ret = self.__generate_shuffled_random(bed_file)
+
+        else:
+            self.logger.info('Getting a random background from the sequenceable genome')
+            ret = self.__generate_random(bed_file)
+
+        return ret
 
 if __name__ == '__main__':
     # tester.
