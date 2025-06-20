@@ -5,6 +5,28 @@ import glob
 import pickle
 import gzip
 
+# Items with <1000 peaks that otherwise have a duplicate;
+black_list = set([
+    'SIRT6_8822',
+    'HDAC6_8811',
+    'NUP98_32946',
+    'ZNF274_45702',
+    'PRDM1_51435',
+    'ZNF57_81220',
+    'KDM5C_8815',
+    'MPHOSPH8_87625',
+    'ZFP42_51549',
+    'SALL4_51550',
+    'KDM5B_8814',
+    'THAP11_GSM1505796',
+    'KLF5_51508',
+    'TAL1_51603',
+    'WAPL_GSM2816640',
+    'BRD3_49545',
+    'TCF7L1_87387',
+    'MORC2_87624',
+])
+
 def open_intracon_file(filename):
     cons = []
     with open(filename, 'r') as oh:
@@ -20,6 +42,10 @@ def load_intercons(path):
     for f in glob.glob(path):
         # I use 1 random here, whereas Liyang used 10 randoms in the paper.
         name = os.path.split(f)[1].replace('hesc_primed_', '').replace('.intracon_num.txt', '').split('.')[0]
+
+        if name in black_list:
+            print(name)
+            continue
         dat = open_intracon_file(f)
         con[name] = dat
 
@@ -37,6 +63,9 @@ def load_peaklens(filename):
             if line.startswith('tf'):
                 continue
             line = line.strip().split(' ')
+            if line[0] in black_list:
+                print(line[0])
+                continue
             peaklens[line[0]] = int(line[2])
 
     #peaklen = dict(pd.read_csv('./cov_ctcf.txt', header=0, sep=' ')[['tf','len']].values)

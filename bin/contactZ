@@ -166,6 +166,7 @@ def main():
     save_breaker_former_neutral_tsv(formers, f'{args.label}.formers.tsv')
     save_breaker_former_neutral_tsv(breakers, f'{args.label}.breakers.tsv')
     save_breaker_former_neutral_tsv(neutral, f'{args.label}.neutral.tsv')
+    save_breaker_former_neutral_tsv(formers + neutral + breakers, f'{args.label}.all.tsv')
 
     return
 

@@ -163,7 +163,7 @@ class measure_contacts:
                 intracon_file = outfile.replace('.tsv', '.intracon_num.txt')
                 intracon_out = open(intracon_file, 'wt')
             intracon_out.write(f'# {outfile}\n')
-            intracon_out.write(f'# number of intra-chromosomal loops, threshold 3 read to 101 reads\n')
+            intracon_out.write(f'# number of intra-chromosomal pairs, threshold 3 read to 101 reads\n')
 
         for v, b, p in zip(h[0], h[1], perc):
             if int(b) >= 3 and outfile:
