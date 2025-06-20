@@ -53,8 +53,10 @@ class contact_z_score_cov:
 
         if self.GC:
             self.data['bkgds_gc'][f'{label} (Insert)'] = rand
+
         elif self.shuf:
             self.data['bkgds_pooled'][f'{label} (Insert)'] = rand
+
         else:
             self.data['bkgds'][f'{label} (Insert)'] = rand
 
@@ -68,15 +70,24 @@ class contact_z_score_cov:
         self.chip_data_names = sorted(self.data['reals'].keys())
         self.peaklens = [self.data['peaklens'][chip] for chip in self.chip_data_names]
 
+        # Depth Used in paper = 10:15
+        min_read_depth = 10
+        max_read_depth = 40
+
+        #print([self.data['bkgds_gc'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
+        #for chip in self.chip_data_names:
+        #    print(len(self.data['bkgds_gc'][chip][min_read_depth:max_read_depth]), self.data['bkgds_gc'][chip][min_read_depth:max_read_depth])
+
         ## mean of the background
         if self.GC:
-            t_backgrnd = numpy.array([self.data['bkgds_gc'][chip][10:18] for chip in self.chip_data_names])
+            t_backgrnd = numpy.array([self.data['bkgds_gc'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
         elif self.shuf:
-            t_backgrnd = numpy.array([self.data['bkgds_pooled'][chip][10:18] for chip in self.chip_data_names])
+            t_backgrnd = numpy.array([self.data['bkgds_pooled'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
         else:
-            t_backgrnd = numpy.array([self.data['bkgds'][chip][10:18] for chip in self.chip_data_names])
+            t_backgrnd = numpy.array([self.data['bkgds'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
 
-        t_contacts = numpy.array([self.data['reals'][chip][10:18] for chip in self.chip_data_names])
+
+        t_contacts = numpy.array([self.data['reals'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
         #print(t_backgrnd, t_contacts)
         # normalization, (real-pseudo)/total length
         normed = t_contacts - t_backgrnd
@@ -109,6 +120,7 @@ class contact_z_score_cov:
 
         formers = []
         breakers = []
+        neutrals = []
 
         spot_cols = []
         for n, x, y in zip(self.chip_data_names, self.peaklens, self.zscore):
@@ -118,12 +130,13 @@ class contact_z_score_cov:
                 ax.set_title(f'The predicted contact Z-score for {n.replace("(Insert)", "")} is {y:.2f}')
             elif y >= Q3:
                 spot_cols.append('tab:green')
-                formers.append((n, x))
+                formers.append((n, y))
             elif y <= Q1:
                 spot_cols.append('tab:blue')
-                breakers.append((n, x))
+                breakers.append((n, y))
             else:
                 spot_cols.append('lightgrey')
+                neutrals.append((n, y))
 
         ax.scatter(self.peaklens, self.zscore, alpha=0.3, color=spot_cols)
 
@@ -146,7 +159,7 @@ class contact_z_score_cov:
 
         fig.savefig(filename)
 
-        return formers, breakers
+        return formers, breakers, neutrals
 
     def __load_bed(self, filename):
         # Not the same as measure_contacs.__load_bed

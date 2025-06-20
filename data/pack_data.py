@@ -140,7 +140,7 @@ if __name__ == '__main__':
 
         # Intracons generated using matched GC bacgrounds
         bkgds_gc = load_intercons('./gc_random_con/*.intracon_num.txt'),
-        #bkgds_pooled = load_intercons('./pooled_random_con/*.intracon_num.txt'),
+        bkgds_pooled = load_intercons('./pooled_random_con/*.intracon_num.txt'),
     )
 
     with open('./all_data.pkl', 'wb') as oh:
