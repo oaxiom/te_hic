@@ -233,6 +233,11 @@ class contact_z_score_cov:
 
         rand_peaks = {}
         for chrom in peaks:
+            if chrom == 'chrM':
+                continue
+            elif chrom == 'chrMT':
+                continue
+
             rand_peaks[chrom] = []
             #chrom = chrom.lstrip('chr')
             #print(chrom)
@@ -247,7 +252,7 @@ class contact_z_score_cov:
                 if chrom == 'chrY': # Need to bracket further;
                     if gc < 30: gc = 30
                     if gc > 60: gc = 60
-                    
+
                 rand_peak = random.choice(self.data['randoms_gc'][gc][chrom])
                 # resize to same size
                 psz = peak[1] - peak[0]
