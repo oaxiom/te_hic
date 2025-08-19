@@ -244,7 +244,10 @@ class contact_z_score_cov:
                 # There are too few loci to get full coverage at these extreme GC contents, so bracket them.
                 if gc < 20: gc = 20
                 if gc > 70: gc = 70
-
+                if chrom == 'chrY': # Need to bracket further;
+                    if gc < 30: gc = 30
+                    if gc > 60: gc = 60
+                    
                 rand_peak = random.choice(self.data['randoms_gc'][gc][chrom])
                 # resize to same size
                 psz = peak[1] - peak[0]
