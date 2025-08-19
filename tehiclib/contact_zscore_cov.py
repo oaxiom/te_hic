@@ -28,8 +28,10 @@ class contact_z_score_cov:
     def load_data(self) -> dict:
         if self.mm:
             # Semi-documented feature;
+            self.logger.info('Loaded the mESC data')
             data_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/all_data.mm.pkl')
         else:
+            self.logger.info('Loaded the hPSC data')
             data_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/all_data.pkl')
 
         with open(data_filename, 'rb') as data_file:
