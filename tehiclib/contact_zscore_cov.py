@@ -17,14 +17,20 @@ from scipy.stats import zscore
 from matplotlib import pyplot as plot
 
 class contact_z_score_cov:
-    def __init__(self, logger, GC, shuf):
-        self.data = self.load_data()
+    def __init__(self, logger, GC, super, mm=False):
         self.logger = logger
         self.GC = GC
-        self.shuf = shuf
+        self.super = super
+        self.mm = mm
+
+        self.data = self.load_data()
 
     def load_data(self) -> dict:
-        data_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/all_data.pkl')
+        if self.mm:
+            # Semi-documented feature;
+            data_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/all_data.mm.pkl')
+        else:
+            data_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/all_data.pkl')
 
         with open(data_filename, 'rb') as data_file:
             data = pickle.load(data_file)
@@ -54,7 +60,7 @@ class contact_z_score_cov:
         if self.GC:
             self.data['bkgds_gc'][f'{label} (Insert)'] = rand
 
-        elif self.shuf:
+        elif self.super:
             self.data['bkgds_pooled'][f'{label} (Insert)'] = rand
 
         else:
@@ -81,7 +87,7 @@ class contact_z_score_cov:
         ## mean of the background
         if self.GC:
             t_backgrnd = numpy.array([self.data['bkgds_gc'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
-        elif self.shuf:
+        elif self.super:
             t_backgrnd = numpy.array([self.data['bkgds_pooled'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
         else:
             t_backgrnd = numpy.array([self.data['bkgds'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
@@ -141,7 +147,7 @@ class contact_z_score_cov:
         ax.scatter(self.peaklens, self.zscore, alpha=0.3, color=spot_cols)
 
         # plot a few landmarks:
-        lands = set(['SMARCA4', 'KDM4A', 'CTCF', 'RAD21'])
+        lands = set(['SMARCA4', 'KDM4A', 'CTCF', 'RAD21', 'TRIM28', 'SETDB1'])
         for n, x, y in zip(self.chip_data_names, self.peaklens, self.zscore):
             split_name = n.split('_')[0]
             if '(Insert)' in n:
@@ -306,8 +312,8 @@ class contact_z_score_cov:
             self.logger.info('Getting a random GC matched background')
             ret = self.__generate_matched_random_GC(bed_file)
 
-        elif self.shuf:
-            self.logger.info('Getting a random shuffled background from the superset of peaks')
+        elif self.super:
+            self.logger.info('Getting a random shuffled background from the superpool of peaks')
             ret = self.__generate_random(bed_file, key='randoms_pooled')
 
         else:
