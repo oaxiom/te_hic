@@ -69,37 +69,41 @@ class contact_z_score_cov:
             self.data['bkgds'][f'{label} (Insert)'] = rand
 
 
-    def calc_contact_Z(self):
+    def calc_contact_Z(self, data_to_use=None):
         """
         **Purpose**
         Calculate contact_Z versus peak length data, for background comparison versus your
         BED file;
         """
-        self.chip_data_names = sorted(self.data['reals'].keys())
-        self.peaklens = [self.data['peaklens'][chip] for chip in self.chip_data_names]
+        if data_to_use:
+            database = data_to_use
+        else:
+            database = self.data
+
+        self.chip_data_names = sorted(database['reals'].keys())
+        self.peaklens = [database['peaklens'][chip] for chip in self.chip_data_names]
 
         # Depth Used in paper = 10:15
-        min_read_depth = 10
-        max_read_depth = 40
+        min_read_depth = 8
+        max_read_depth = 20
 
-        #print([self.data['bkgds_gc'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
+        #print([database['bkgds_gc'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
         #for chip in self.chip_data_names:
-        #    print(len(self.data['bkgds_gc'][chip][min_read_depth:max_read_depth]), self.data['bkgds_gc'][chip][min_read_depth:max_read_depth])
+        #    print(chip, database['reals'][chip][min_read_depth:max_read_depth], database['bkgds_gc'][chip][min_read_depth:max_read_depth])
 
         ## mean of the background
         if self.GC:
-            t_backgrnd = numpy.array([self.data['bkgds_gc'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
+            t_backgrnd = numpy.array([database['bkgds_gc'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
         elif self.super:
-            t_backgrnd = numpy.array([self.data['bkgds_pooled'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
+            t_backgrnd = numpy.array([database['bkgds_pooled'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
         else:
-            t_backgrnd = numpy.array([self.data['bkgds'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
+            t_backgrnd = numpy.array([database['bkgds'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
 
-
-        t_contacts = numpy.array([self.data['reals'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
+        t_contacts = numpy.array([database['reals'][chip][min_read_depth:max_read_depth] for chip in self.chip_data_names])
         #print(t_backgrnd, t_contacts)
         # normalization, (real-pseudo)/total length
         normed = t_contacts - t_backgrnd
-        peaklens = numpy.array([self.data['peaklens'][chip] for chip in self.chip_data_names])
+        peaklens = numpy.array([database['peaklens'][chip] for chip in self.chip_data_names])
         normed = normed / peaklens[:, numpy.newaxis]
 
         ## zscore
@@ -113,7 +117,7 @@ class contact_z_score_cov:
 
         return Q1, Q3
 
-    def plot_contact_Z_scatter(self, filename):
+    def plot_contact_Z_scatter(self, filename, label_all_points=False):
         """
         **Purpose**
 
@@ -149,7 +153,11 @@ class contact_z_score_cov:
         ax.scatter(self.peaklens, self.zscore, alpha=0.3, color=spot_cols)
 
         # plot a few landmarks:
-        lands = set(['SMARCA4', 'KDM4A', 'CTCF', 'RAD21', 'TRIM28', 'SETDB1'])
+        if label_all_points:
+            lands = set([n.split('_')[0] for n in self.chip_data_names])
+        else:
+            lands = set(['SMARCA4', 'KDM4A', 'CTCF', 'RAD21', 'TRIM28', 'SETDB1'])
+
         for n, x, y in zip(self.chip_data_names, self.peaklens, self.zscore):
             split_name = n.split('_')[0]
             if '(Insert)' in n:

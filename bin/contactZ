@@ -136,7 +136,7 @@ def main():
         threshold=1,
         )
 
-    cZ = tehiclib.contact_z_score_cov(logger=log, GC=args.gc, shuf=args.shuf)
+    cZ = tehiclib.contact_z_score_cov(logger=log, GC=args.gc, super=args.shuf)
 
     # I need a few randoms here;
     bkgd = cZ.generate_matched_random(args.inpeaksbed[0])
